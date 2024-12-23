@@ -33,8 +33,6 @@ pacman::p_load(tidyverse, here, summarytools, janitor, sf, tmap,OpenStreetMap,
                reactable)
 
 
-memory.limit(size= 16000)
-
 ```
 
 ```{r, message=FALSE, include=FALSE, echo=FALSE}
@@ -79,8 +77,6 @@ district_sample2<-as.data.frame(
 )
 
 
- dim(cholera_study)
-
 ```
 
 # Study Overview
@@ -104,8 +100,6 @@ dplyr::rename(
   ) %>% 
   flextable()
  
-
-
 district_sample<-cholera_study %>%
   filter(area_of_focus=="cholera_study_questionnaire") %>% 
   select(District) %>%
@@ -116,8 +110,6 @@ district_sample<-cholera_study %>%
     )
   ) %>% 
   count(District)
-
-
 
 ```
 
@@ -145,8 +137,6 @@ district_sample<-district_sample %>%
     "Sample Collected"=n
   )
   
-  
-
 study_completeness<-merge(district_sample2, district_sample, by="District")
 
 
@@ -161,7 +151,6 @@ study_completeness<-study_completeness %>%
 study_completeness %>% 
   flextable()
 
-
 household_ta<-cholera_study %>%
   filter(area_of_focus=="cholera_study_questionnaire") %>% 
   select(District,ta) %>%
@@ -173,14 +162,7 @@ household_ta<-cholera_study %>%
     "Number of Household"=n
   )
 
-
 flextable(household_ta)
-
-
-
-
-
-
 
 ```
 # Study Site and Team movement 
@@ -223,6 +205,11 @@ study_site <- cholera_study %>%
 
 ```
 
+# Pictorial
+## Column
+```{r}
+
+```
 
 
 # overview {.sidebar}
