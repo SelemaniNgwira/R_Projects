@@ -1,0 +1,232 @@
+---
+title: "Cholera Study dashboard"
+author: "PHIM Research Data Team"
+date: "last updated `r Sys.Date()`"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      bg: "white"
+      fg: "black" 
+      primary: "skyblue"
+      base_font:
+        google: Prompt
+      code_font:
+        google: JetBrains Mono
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#the following code line will install pacman package if pacman is not install
+if(!require(pacman) ) install.packages("pacman")
+
+#the following code will install the require package if not install/ and load them, if they are already install it will only load them.  
+pacman::p_load(tidyverse, here, summarytools, janitor, sf, tmap,OpenStreetMap,
+               flextable,
+               rio, robotoolbox, 
+               inspectdf, 
+               plotly,
+               visdat,
+               esquisse, 
+               reactable)
+
+
+memory.limit(size= 16000)
+
+```
+
+```{r, message=FALSE, include=FALSE, echo=FALSE}
+# setting up the link by getting a token
+# 
+token<-kobo_token(
+  username = "selemani_ngwira",
+  password = "Ungweru@0518",
+  url= "https://kf.kobotoolbox.org")
+
+
+# setting up the link 
+
+kobo_setup(url = "https://kf.kobotoolbox.org", token = token)
+
+# listing the projects in the kobo account
+my_account_project<-kobo_asset_list()
+
+# getting UID of the interet project by number
+cholera_study_id<-my_account_project$uid[1]
+
+# getting the file of the cholera study project
+cholera_study<-kobo_asset(cholera_study_id)
+
+# getting the actual cholera data set
+cholera_study<-kobo_data(cholera_study)
+
+
+cholera_study<- as.data.frame(cholera_study)
+
+cholera_study <- as_tibble(cholera_study)
+
+
+
+district_sample2<-as.data.frame(
+ list(
+   District=c("Balaka", "Blantyre", "Dedza", "Likoma", 
+             "Lilongwe", "Mangochi", "Nkhatabay", "Salima"), 
+  expected_samlpe=c(58, 159, 107, 2, 335, 155, 36, 64)
+   
+ ) 
+)
+
+
+ dim(cholera_study)
+
+```
+
+# Study Overview
+## Column {.tabset data-width="650"}
+### Frequency of Data Collection Forms 
+
+```{r, echo=FALSE}
+
+ c_samp<-cholera_study %>% 
+  filter(area_of_focus=="cholera_study_questionnaire") %>% 
+  select(area_of_focus) %>% 
+  count(area_of_focus)
+
+
+tabyl(cholera_study, area_of_focus) %>%
+   adorn_pct_formatting(digits = 2) %>% 
+dplyr::rename(
+   `Name of data Form`="area_of_focus", 
+    Number="n", 
+    Percentage="percent"
+  ) %>% 
+  flextable()
+ 
+
+
+district_sample<-cholera_study %>%
+  filter(area_of_focus=="cholera_study_questionnaire") %>% 
+  select(District) %>%
+  mutate(
+    District=recode(
+      District, 
+      "Blantyre_City"= "Blantyre"
+    )
+  ) %>% 
+  count(District)
+
+
+
+```
+
+
+## Column {.tabset data-width="650"}
+### Study progress on Completeness
+
+Expected total samples to be collected  is 916, so far **`r sum(c_samp$n)`** samples have been collected  representing an overall completeness of **`r round((sum(c_samp$n)/916)*100, digit=2 )`**%
+
+```{r, echo=FALSE}
+district_sample<-cholera_study %>%
+  filter(area_of_focus=="cholera_study_questionnaire") %>% 
+  select(District) %>%
+  mutate(
+    District=recode(
+      District, 
+      "Blantyre_City"= "Blantyre"
+    )
+  ) %>% 
+  count(District)
+
+
+district_sample<-district_sample %>% 
+  rename(
+    "Sample Collected"=n
+  )
+  
+  
+
+study_completeness<-merge(district_sample2, district_sample, by="District")
+
+
+study_completeness<-study_completeness %>% 
+  mutate(
+    `Completeness(%)`=round(
+      `Sample Collected`/expected_samlpe, digits = 3
+    )*100
+  )
+
+
+study_completeness %>% 
+  flextable()
+
+
+household_ta<-cholera_study %>%
+  filter(area_of_focus=="cholera_study_questionnaire") %>% 
+  select(District,ta) %>%
+  group_by(District, ta) %>% 
+  count(ta) %>% 
+  arrange(-n) %>% 
+  rename(
+    "T/A"=ta, 
+    "Number of Household"=n
+  )
+
+
+flextable(household_ta)
+
+
+
+
+
+
+
+```
+# Study Site and Team movement 
+The following Map show team movement by date. it depict the spatial distribution of the household
+
+## Column
+
+### Team Movement
+ 
+```{r, echo=FALSE}
+
+
+study_site <- cholera_study %>% 
+  select(date,
+         District, 
+         geopints_latitude, 
+         geopints_longitude)
+  
+  
+  
+ study_site_sf<-study_site %>%
+     drop_na() %>% 
+  sf::st_as_sf(coords = c("geopints_longitude", 
+                             "geopints_latitude"), crs = 4326)
+ 
+ 
+ Malawishape<-st_read("data/MWI_adm1.shp")%>%
+  select(NAME_1)
+ 
+ 
+ # tm_shape(Malawishape)+
+  # tm_polygons(col = "white")+
+  # tm_text("NAME_1", size = 1)+
+  tm_shape(study_site_sf) + 
+  tm_dots(size=0.08, col='blue')+
+  tm_facets(along = "date")+
+  tmap_mode("view")
+
+ 
+
+```
+
+
+
+# overview {.sidebar}
+
+![](images/PHIM.JPG){width="199"}
+
+The Pubilc Health Institute of Malawi is conduct a Study on ASSESSING SOCIAL AND BEHAVIOURAL FACTORS INFLUENCING THE UPTAKE OF CHOLERA PREVENTIVE STRATEGIES IN EIGHT SELECTED DISTRICTS
