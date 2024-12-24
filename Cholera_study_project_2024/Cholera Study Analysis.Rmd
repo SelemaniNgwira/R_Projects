@@ -32,7 +32,6 @@ pacman::p_load(tidyverse, here, summarytools, janitor, sf, tmap,OpenStreetMap,
                esquisse, 
                reactable)
 
-
 ```
 
 ```{r, message=FALSE, include=FALSE, echo=FALSE}
@@ -75,15 +74,13 @@ district_sample2<-as.data.frame(
    
  ) 
 )
-
-
 ```
 
 # Study Overview
 ## Column {.tabset data-width="650"}
 ### Frequency of Data Collection Forms 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 
  c_samp<-cholera_study %>% 
   filter(area_of_focus=="cholera_study_questionnaire") %>% 
