@@ -24,9 +24,7 @@ pacman::p_load(
   gifski, 
   tableone, 
   visdat, 
-  flextable
-  
-)
+  flextable)
 
 
 ```
@@ -35,10 +33,10 @@ pacman::p_load(
 
 ```{r cars}
 
-tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTiW99FNEBGK9knyXFb7oWJj4gdu_aWB4lvWa1wqIabuvtFD27wh4W7Bg/pub?gid=389095188&single=true&output=csv")
+tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTiW99FNEBGK9knyXFb7oWJj4gdu_aWB4lvWa1wqIabuvtFD27wh4W7Bg/pub?gid=389095188&single=true&output=csv") %>% clean_names() # cleaning the variable names of the data set
 
-#cleaning the variable names of the data set
-tama_data<-clean_names(tama_data)
+tama_data<-tama_data %>% 
+  mutate(across(where(is.character), as.factor))
 
 
 
@@ -374,6 +372,31 @@ addition_question<- tama_data %>%
   select(c(35:40))
 
 addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19_chatbot
+
+
+
+```
+
+# Calculating the TAMA scores 
+
+
+```{r}
+
+tama2<-tama_data %>% 
+  mutate(across(
+    c(11:34), ~if_else(.=="Strongly Agree", 5, 
+                       if_else(.=="Agree", 4, 
+                               if_else(.=="Neutral", 3,
+                                       if_else(.=="Disagree", 2,
+                                               if_else(.=="Strongly disagree", 1,NA)))))
+  ))
+
+tama2 %>% 
+  mutate(
+    perceived=round(
+      
+    )
+  )
 
 
 
