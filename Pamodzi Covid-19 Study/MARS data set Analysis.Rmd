@@ -1,0 +1,995 @@
+---
+title: "National workshop Analysis Report. MARS Results"
+author: "Selemani Ngwira"
+date: "2024-11-04"
+output: html_document
+---
+
+```{r loading packages, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hold")
+
+pacman::p_load(
+  rio,           # to import data
+  here,          # to locate files
+  tidyverse,     # to clean, handle, and plot the data (includes ggplot2 package)
+  sf,            # to manage spatial data using a Simple Feature format
+  tmap,          # to produce simple maps, works for both interactive and static maps
+  janitor,       # to clean column names
+  OpenStreetMap, # to add OSM basemap in ggplot map
+  spdep, # spatial statistics
+  gganimate, # for animated maps, 
+  caTools, 
+  gifski
+  )
+
+library(summarytools)
+library(gtsummary)
+library(flextable)
+```
+
+## loading data
+
+
+```{r loading data set}
+
+Mars_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTUkGOLAkv1p80uzUz0h9uSBCGhdujx8tV1e7Fw5oTjE8NZmh2OXtTM65iuvzONGQ/pub?output=csv")
+
+# cleaning the variable names 
+
+Mars_data1 <- clean_names(Mars_data)
+
+
+# chaning all the column with character to factor.
+Mars_data1<- Mars_data1 %>% 
+  mutate(across(where(is.character), as.factor))
+
+```
+
+## Engagement Score
+
+The engagement Section had 5 five questions. The total score under this section is 25. 
+
+```{r Engagement Score, echo=FALSE}
+
+# sub setting engagement variables 
+engag_score<-Mars_data %>% 
+  select(c(8:12))
+
+
+# creating freq table
+table1<- engag_score %>% 
+  tbl_summary()
+
+# converting the gt table to flexable table 
+table1<- table1 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# save a flextable as a word document
+save_as_docx(table1, path = "table1.docx")
+  
+
+
+unique(engag_score$covid_19_whats_app_chatbot_content_visual_information_language_design)
+
+engag_score_2 <- engag_score %>% 
+  mutate(
+  covid_19_whats_app_chatbot_fun_entertaining_to_use=recode(
+    covid_19_whats_app_chatbot_fun_entertaining_to_use, 
+"4 Moderately fun and entertaining, would entertain user for some time (5-10 minutes total)"=4, 
+"5 Highly entertaining and fun, would stimulate repeat use"=5, 
+"2 Mostly boring"=2, 
+"3 OK, fun enough to entertain the user for a brief time (< 5 minutes)"=3
+  )  
+  ) %>% 
+  mutate(
+  covid_19_whats_app_chatbot_enjoyable_to_use=recode(
+    covid_19_whats_app_chatbot_enjoyable_to_use, 
+  "5 Very interesting, would engage the user in repeat use" =5, 
+  "4 Moderately interesting; would engage the user for some time (5-10 minutes total)"=4, 
+"3 OK, neither exciting nor uninteresting; would engage the user for a brief time (< 5 minutes)"=3, 
+"2 Mostly uninteresting"=2
+  )  
+  ) %>% 
+  mutate(
+covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features=recode(
+  covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features, 
+  "4.     Allows numerous options for customisation"=4, 
+ "5.     Allows complete tailoring to the individual’s characteristics/preferences retains all settings"=5, 
+ "2.     Allows insufficient customisation limiting functions"=2, 
+ "3.     Allows basic customisation to function adequately" =3, 
+ "1.     Does not allow any customisation or requires setting to be input every time"=1
+)
+  ) %>% 
+  mutate(
+    covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts=recode(
+      covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts, 
+  "4.     Offers a variety of interactive features/feedback/user input options"=4, 
+  "5.     Very high level of responsiveness through interactive features/feedback/user input options"=5, 
+  "3.     Basic interactive features to function adequately"=3, 
+  "2.     Insufficient interactivity, or feedback, or user input options, limiting functions"=2,
+  "1.     No interactive features and/or no response to user interaction"=1
+    )
+  ) %>% 
+  mutate(
+ covid_19_whats_app_chatbot_content_visual_information_language_design=recode(
+   covid_19_whats_app_chatbot_content_visual_information_language_design, 
+   "5 Perfectly targeted, no issues found"=5, 
+   "4 Well-targeted, with negligible issues"=4, 
+   "3 Acceptable but not targeted. It may be inappropriate/unclear/confusing"=3, 
+   "1 Completely inappropriate/unclear/confusing"=1
+ )   
+  )
+
+
+# replacing NA with 0
+engag_score_2[is.na(engag_score_2)]<-0
+
+# Calculating the total score of engagement. 
+
+engag_score_2<- engag_score_2 %>% 
+  mutate(
+    total_score=round(
+    covid_19_whats_app_chatbot_fun_entertaining_to_use+
+    covid_19_whats_app_chatbot_enjoyable_to_use+
+  covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features+
+ covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts+
+    covid_19_whats_app_chatbot_content_visual_information_language_design  
+    ), 
+ total_score=round(
+   total_score/5
+ )
+  )
+  
+
+
+mean(engag_score_2$total_score)
+sd(engag_score_2$total_score)
+
+
+mean(engag_score_2$total_score)
+
+max(engag_score_2)/5
+
+
+
+```
+
+
+## Performance Score
+The Performance section had 3 Questions. The total score under this section is 15. 
+```{r Performance }
+
+Performance_score<- Mars_data %>% 
+  select(c(13:15))
+
+# creating a freq table
+table3<-Performance_score %>% 
+  tbl_summary()
+
+# converting the gt object to flextable 
+table3<-table3 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the 
+
+save_as_docx(table3, path = "table_3.docx")
+
+
+unique(Performance_score$the_chatbot_is_interactive_consistent_and_intuitive_across_all_components)
+
+Performance_score_2 <- Performance_score %>% 
+  mutate(
+ accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components=recode(
+ accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components, 
+ "5.     Perfect/timely response; no technical bugs found/contains a ‘loading time left’ indicator"=5, 
+ "3.     works overall. Some technical problems need fixing/Slow at times"=3, 
+ "2.     Some functions work but lagging or contain major technical problems"=2, 
+ "4.     Mostly functional with minor/negligible problems"=4
+ )   
+  ) %>% 
+  mutate(
+    ease_of_use_of_covid_19_whats_app_chatbot=recode(ease_of_use_of_covid_19_whats_app_chatbot, 
+    "5.     Able to use the COVID-19 WhatsApp Chatbot immediately; intuitive; simple"=5,
+    "4.     Easy to learn how to use the COVID-19 WhatsApp Chatbot"=4, 
+    "3.     Useable after some time/effort"=3
+    )
+  ) %>% 
+  mutate(
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components=recode(
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components, 
+  "5.     Perfectly consistent and intuitive"=5, 
+  "4.     Mostly consistent/intuitive with negligible problems"=4, 
+  "2.     Often inconsistent/confusing"=2, 
+  "3.     OK with some inconsistencies/confusing elements"=3
+  )  
+  )
+
+
+Performance_score_2<- Performance_score_2 %>% 
+  mutate(total_score=round(
+  accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components+
+  ease_of_use_of_covid_19_whats_app_chatbot+ 
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components
+  ))
+
+
+mean(Performance_score_2$total_score)
+sd(Performance_score_2$total_score)
+
+max(perf)
+
+```
+
+
+## Graphic Score
+The Graphic section had 2 Questions. The total score under this section is 10. 
+```{r Graphic}
+
+graphic_score<- Mars_data %>% 
+  select(c(16:17))
+
+# creating a freq table 
+
+table4 <- graphic_score %>% 
+  tbl_summary()
+
+# converting gt object to flextable object
+table4<- table4 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the table to word document 
+
+save_as_docx(table4, path = "table 4.docx")
+
+
+unique(graphic_score$chatbot_content_visual_is_appeal_font_color_and_size)
+
+
+graphic_score_2 <- graphic_score %>% 
+  mutate(
+  chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content=recode(
+    chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content, 
+ "5.     Very high-quality/resolution graphics and visual design - proportionate, stylistically consistent  throughout"=5, 
+ "4.     High-quality/resolution graphics and visual design – mostly proportionate, stylistically consistent"=4, 
+ "3.     Moderate-quality graphics and visual design (generally consistent in style)"=3
+  )  
+  ) %>% 
+  mutate(
+  chatbot_content_visual_is_appeal_font_color_and_size=recode(
+    chatbot_content_visual_is_appeal_font_color_and_size, 
+  "4.     High level of visual appeal – seamless graphics – consistent and professionally designed"=4, 
+  "5.     As above + very attractive, memorable, stands out; use of colour enhances app features/menus"=5, 
+  "3.     Some visual appeal – average, neither pleasant nor unpleasant" =3, 
+  "2.     Little visual appeal – poorly designed, bad use of colour/font/Size, visually boring"=2
+  
+  )  
+  )
+
+
+graphic_score_2<- graphic_score_2 %>% 
+  mutate(
+    total_score=round(
+      chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content+ chatbot_content_visual_is_appeal_font_color_and_size
+    )
+  )
+
+
+# replace NA with Zeros
+
+graphic_score_2[is.na(graphic_score_2)] <- 0
+
+mean(graphic_score_2$total_score)
+
+sd(graphic_score_2$total_score)
+
+table4
+
+```
+
+## Information 
+
+The Information section had 3 Questions. The total score under this section is 15.
+```{r information}
+information_score<- Mars_data %>% 
+  select(c(18:20))
+
+# creating frequency table
+table2<-information_score %>% 
+  tbl_summary()
+
+# converting gt object to flextable object 
+table2<- table2 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# save the table in to word document. 
+
+save_as_docx(table2, path = "table 2.docx")
+
+
+
+names(information_score)
+unique(information_score$covid_19_whats_app_chatbot_scope_comprehensive_and_concise)
+
+
+information_score_2<-information_score %>% 
+  mutate(covid_19_whats_app_chatbot_profile_contain_its_purpose=recode(
+    covid_19_whats_app_chatbot_profile_contain_its_purpose, 
+    "5. Highly accurate description of the the COVID-19 WhatsApp Chatbot components/functions on the profile."=5, 
+    "4. Accurate. the COVID-19 WhatsApp Chatbot profile contains most of the described components/functions"=4, 
+    "2. Inaccurate. The profile contains very few of the described components/functions"=2, 
+    "3. OK. the COVID-19 WhatsApp Chatbot profile contains some of the described components/ functions"=3
+  )) %>% 
+  mutate(covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant=recode(
+    covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant, 
+    "4 Relevant/appropriate/coherent/correct"=4, 
+    "5 Highly relevant, appropriate, coherent, and correct"=5, 
+    "3 Moderately relevant/appropriate/coherent/and appears correct"=3
+  )
+    
+  ) %>% 
+  mutate(
+    covid_19_whats_app_chatbot_scope_comprehensive_and_concise=recode(
+      covid_19_whats_app_chatbot_scope_comprehensive_and_concise, 
+   "4 Offers a broad range of information, has some gaps or unnecessary detail; or has no links to more information and resources"=4, 
+   "5 Comprehensive and concise; contains links to more information and resources"=5, 
+   "3 OK but not comprehensive or concise"=3, 
+   "2 Insufficient or possibly overwhelming"=2
+    )
+  )
+
+# replacing Zero with NA
+information_score_2[is.na(information_score_2)]<-0
+
+# calculating information mean score
+
+information_score_2<- information_score_2 %>% 
+  mutate(total_socre=round(
+   covid_19_whats_app_chatbot_profile_contain_its_purpose+
+   covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant+
+   covid_19_whats_app_chatbot_scope_comprehensive_and_concise  
+  ))
+
+
+# mean score 
+mean(information_score_2$total_socre)
+sd(information_score_2$total_socre)
+
+table2
+```
+
+## Quality 
+The Quality section had 3 Questions. The total score under this section is 15
+```{r Qaulity}
+qaulity_score<- Mars_data %>% 
+  select(c(21:23))
+
+
+# creating freq table. 
+
+table5 <- qaulity_score %>% 
+  tbl_summary()
+
+# conversting the gt object to flextable object
+
+table5<- table5 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the object as word document 
+
+save_as_docx(table5, path = "table5.docx")
+
+
+unique(qaulity_score$star_rating_of_the_covid_19_whats_app_chatbot)
+
+qaulity_score2<-qaulity_score %>% 
+  mutate(
+  recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it=recode(
+recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it, 
+"5 Definitely I would recommend this app to everyone"=5, 
+"1 Not at all I would not recommend this app to anyone"=1, 
+"4 There are many people I would recommend this app to"=4, 
+"3 Maybe There are several people whom I would recommend it to"=3, 
+"2 There are very few people I would recommend this app to"=2
+  ) 
+  ) %>% 
+  mutate(
+  number_of_time_to_use_covid_19_whats_app_chatbot=recode(
+  number_of_time_to_use_covid_19_whats_app_chatbot,
+  "5 >50"=5,
+  "4 10-50"=4, 
+  "3 3-10"=3, 
+  "1 None"=1
+  )  
+  ) %>% 
+  mutate(
+  star_rating_of_the_covid_19_whats_app_chatbot=recode(
+  star_rating_of_the_covid_19_whats_app_chatbot, 
+  
+  "4 ★★★★" 
+  =4, 
+  "5 ★★★★★ One of the best apps I've used"
+  =5, 
+  "3 ★★★ Average"
+  =3, 
+  "1 ★ One of the worst apps I’ve used"=1
+  
+  )) 
+
+# calculating subjective score 
+
+
+qaulity_score2<- qaulity_score2 %>% 
+  mutate(
+    total_score=round(
+   recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it+
+    number_of_time_to_use_covid_19_whats_app_chatbot+
+    star_rating_of_the_covid_19_whats_app_chatbot 
+    )
+  )
+
+
+# replacing NA with Zeros 
+
+qaulity_score2[is.na(qaulity_score2)] <- 0
+mean(qaulity_score2$total_score)
+sd(qaulity_score2$total_score)
+
+hist(qaulity_score2$total_score)
+
+
+```
+
+
+## Knowledge, Attitude and Intentions 
+```{r Knowledge Attitude and Intentions}
+Knowledge_Atti_Inten<- Mars_data %>% 
+  select(c(24:29))
+
+
+# change the data stractures 
+
+table6 <- Knowledge_Atti_Inten %>% 
+  pivot_longer(
+    cols = c(1:6)
+  ) 
+  # group_by(name) %>% 
+  # drop_na(value) %>% 
+  # count(value) 
+  # pivot_wider(
+  #   names_from = "value", 
+  #   values_from = "n"
+  # )
+
+
+# replacing underscore with spaces
+table6$name <-gsub("_", " ", table6$name)
+
+
+table6
+table6<-table6 %>% 
+  tbl_summary(by=value, 
+              percent = "row")
+
+table6<- table6 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+
+save_as_docx(table6, path = "table6.docx")
+
+table6
+
+
+names(Knowledge_Atti_Inten)
+
+
+
+Knowledge_Atti_Inten %>% 
+  mutate(
+    chatbot_increase_awareness_of_the_importance_of_addressing_covid_19_myths=
+      recode(
+    chatbot_increase_awareness_of_the_importance_of_addressing_covid_19_myths, 
+     "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5
+      ), 
+    
+    whats_app_chatbot_is_likely_to_encourage_the_general_public_to_test_for_covid_19_vaccinated=recode(
+  whats_app_chatbot_is_likely_to_encourage_the_general_public_to_test_for_covid_19_vaccinated, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+whats_app_chatbot_is_likely_to_increase_knowledge_understanding_of_covid_19=recode(
+  whats_app_chatbot_is_likely_to_increase_knowledge_understanding_of_covid_19, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+
+
+whats_app_chatbot_is_likely_to_change_attitudes_toward_improving_covid_19_response=recode(
+whats_app_chatbot_is_likely_to_change_attitudes_toward_improving_covid_19_response, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+
+chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_test=recode(
+chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_test    , 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+whats_app_chatbot_is_likely_to_increase_covid_19_related_healthy_behaviours
+  =recode(
+whats_app_chatbot_is_likely_to_increase_covid_19_related_healthy_behaviours    , 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    )
+
+  )
+
+
+names(Knowledge_Atti_Inten)
+```
+
+# overal MARS score
+Calculating the overall mean score of the Mars on the Malawi COVID-19 chatbot
+
+```{r}
+
+
+Mars_data1<- Mars_data1 %>% mutate(
+  covid_19_whats_app_chatbot_fun_entertaining_to_use=recode(
+    covid_19_whats_app_chatbot_fun_entertaining_to_use, 
+"4 Moderately fun and entertaining, would entertain user for some time (5-10 minutes total)"=4, 
+"5 Highly entertaining and fun, would stimulate repeat use"=5, 
+"2 Mostly boring"=2, 
+"3 OK, fun enough to entertain the user for a brief time (< 5 minutes)"=3
+  )  
+  ) %>% 
+  mutate(
+  covid_19_whats_app_chatbot_enjoyable_to_use=recode(
+    covid_19_whats_app_chatbot_enjoyable_to_use, 
+  "5 Very interesting, would engage the user in repeat use" =5, 
+  "4 Moderately interesting; would engage the user for some time (5-10 minutes total)"=4, 
+"3 OK, neither exciting nor uninteresting; would engage the user for a brief time (< 5 minutes)"=3, 
+"2 Mostly uninteresting"=2
+  )  
+  ) %>% 
+  mutate(
+covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features=recode(
+  covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features, 
+  "4.     Allows numerous options for customisation"=4, 
+ "5.     Allows complete tailoring to the individual’s characteristics/preferences retains all settings"=5, 
+ "2.     Allows insufficient customisation limiting functions"=2, 
+ "3.     Allows basic customisation to function adequately" =3, 
+ "1.     Does not allow any customisation or requires setting to be input every time"=1
+)
+  ) %>% 
+  mutate(
+    covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts=recode(
+      covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts, 
+  "4.     Offers a variety of interactive features/feedback/user input options"=4, 
+  "5.     Very high level of responsiveness through interactive features/feedback/user input options"=5, 
+  "3.     Basic interactive features to function adequately"=3, 
+  "2.     Insufficient interactivity, or feedback, or user input options, limiting functions"=2,
+  "1.     No interactive features and/or no response to user interaction"=1
+    )
+  ) %>% 
+  mutate(
+ covid_19_whats_app_chatbot_content_visual_information_language_design=recode(
+   covid_19_whats_app_chatbot_content_visual_information_language_design, 
+   "5 Perfectly targeted, no issues found"=5, 
+   "4 Well-targeted, with negligible issues"=4, 
+   "3 Acceptable but not targeted. It may be inappropriate/unclear/confusing"=3, 
+   "1 Completely inappropriate/unclear/confusing"=1
+ )   
+  ) %>% 
+    mutate(
+ accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components=recode(
+ accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components, 
+ "5.     Perfect/timely response; no technical bugs found/contains a ‘loading time left’ indicator"=5, 
+ "3.     works overall. Some technical problems need fixing/Slow at times"=3, 
+ "2.     Some functions work but lagging or contain major technical problems"=2, 
+ "4.     Mostly functional with minor/negligible problems"=4
+ )   
+  ) %>% 
+  mutate(
+    ease_of_use_of_covid_19_whats_app_chatbot=recode(ease_of_use_of_covid_19_whats_app_chatbot, 
+    "5.     Able to use the COVID-19 WhatsApp Chatbot immediately; intuitive; simple"=5,
+    "4.     Easy to learn how to use the COVID-19 WhatsApp Chatbot"=4, 
+    "3.     Useable after some time/effort"=3
+    )
+  ) %>% 
+  mutate(
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components=recode(
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components, 
+  "5.     Perfectly consistent and intuitive"=5, 
+  "4.     Mostly consistent/intuitive with negligible problems"=4, 
+  "2.     Often inconsistent/confusing"=2, 
+  "3.     OK with some inconsistencies/confusing elements"=3
+  )  
+  ) %>% 
+   mutate(
+  chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content=recode(
+    chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content, 
+ "5.     Very high-quality/resolution graphics and visual design - proportionate, stylistically consistent  throughout"=5, 
+ "4.     High-quality/resolution graphics and visual design – mostly proportionate, stylistically consistent"=4, 
+ "3.     Moderate-quality graphics and visual design (generally consistent in style)"=3
+  )  
+  ) %>% 
+  mutate(
+  chatbot_content_visual_is_appeal_font_color_and_size=recode(
+    chatbot_content_visual_is_appeal_font_color_and_size, 
+  "4.     High level of visual appeal – seamless graphics – consistent and professionally designed"=4, 
+  "5.     As above + very attractive, memorable, stands out; use of colour enhances app features/menus"=5, 
+  "3.     Some visual appeal – average, neither pleasant nor unpleasant" =3, 
+  "2.     Little visual appeal – poorly designed, bad use of colour/font/Size, visually boring"=2
+  
+  )  
+  ) %>% 
+    mutate(covid_19_whats_app_chatbot_profile_contain_its_purpose=recode(
+    covid_19_whats_app_chatbot_profile_contain_its_purpose, 
+    "5. Highly accurate description of the the COVID-19 WhatsApp Chatbot components/functions on the profile."=5, 
+    "4. Accurate. the COVID-19 WhatsApp Chatbot profile contains most of the described components/functions"=4, 
+    "2. Inaccurate. The profile contains very few of the described components/functions"=2, 
+    "3. OK. the COVID-19 WhatsApp Chatbot profile contains some of the described components/ functions"=3
+  )) %>% 
+  mutate(covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant=recode(
+    covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant, 
+    "4 Relevant/appropriate/coherent/correct"=4, 
+    "5 Highly relevant, appropriate, coherent, and correct"=5, 
+    "3 Moderately relevant/appropriate/coherent/and appears correct"=3
+  )
+    
+  ) %>% 
+  mutate(
+    covid_19_whats_app_chatbot_scope_comprehensive_and_concise=recode(
+      covid_19_whats_app_chatbot_scope_comprehensive_and_concise, 
+   "4 Offers a broad range of information, has some gaps or unnecessary detail; or has no links to more information and resources"=4, 
+   "5 Comprehensive and concise; contains links to more information and resources"=5, 
+   "3 OK but not comprehensive or concise"=3, 
+   "2 Insufficient or possibly overwhelming"=2
+    )
+  ) %>% 
+    mutate(
+  recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it=recode(
+recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it, 
+"5 Definitely I would recommend this app to everyone"=5, 
+"1 Not at all I would not recommend this app to anyone"=1, 
+"4 There are many people I would recommend this app to"=4, 
+"3 Maybe There are several people whom I would recommend it to"=3, 
+"2 There are very few people I would recommend this app to"=2
+  ) 
+  ) %>% 
+  mutate(
+  number_of_time_to_use_covid_19_whats_app_chatbot=recode(
+  number_of_time_to_use_covid_19_whats_app_chatbot,
+  "5 >50"=5,
+  "4 10-50"=4, 
+  "3 3-10"=3, 
+  "1 None"=1
+  )  
+  ) %>% 
+  mutate(
+  star_rating_of_the_covid_19_whats_app_chatbot=recode(
+  star_rating_of_the_covid_19_whats_app_chatbot, 
+  
+  "4 ★★★★" 
+  =4, 
+  "5 ★★★★★ One of the best apps I've used"
+  =5, 
+  "3 ★★★ Average"
+  =3, 
+  "1 ★ One of the worst apps I’ve used"=1
+  
+  )) %>% 
+    mutate(
+    chatbot_increase_awareness_of_the_importance_of_addressing_covid_19_myths=
+      recode(
+    chatbot_increase_awareness_of_the_importance_of_addressing_covid_19_myths, 
+     "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5
+      ), 
+    
+    whats_app_chatbot_is_likely_to_encourage_the_general_public_to_test_for_covid_19_vaccinated=recode(
+  whats_app_chatbot_is_likely_to_encourage_the_general_public_to_test_for_covid_19_vaccinated, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+whats_app_chatbot_is_likely_to_increase_knowledge_understanding_of_covid_19=recode(
+  whats_app_chatbot_is_likely_to_increase_knowledge_understanding_of_covid_19, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+
+
+whats_app_chatbot_is_likely_to_change_attitudes_toward_improving_covid_19_response=recode(
+whats_app_chatbot_is_likely_to_change_attitudes_toward_improving_covid_19_response, 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+
+chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_test=recode(
+chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_test    , 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    ), 
+
+whats_app_chatbot_is_likely_to_increase_covid_19_related_healthy_behaviours
+  =recode(
+whats_app_chatbot_is_likely_to_increase_covid_19_related_healthy_behaviours    , 
+  
+  "2.     Disagree" =2, 
+    "3.     Neutral"=3, 
+    "4.     Agree"=4, 
+    "5.     Strongly Agree"=5, 
+  "1.     Strongly disagree"=1
+    )
+
+  )
+
+# deselection ID, age_group and technical aspects
+
+Mars_data1<- Mars_data1 %>% 
+  select(-c(id, age_group_all_that_apply, technical_aspects_of_the_app_all_that_apply))
+
+# replacing all NA with Zeros
+Mars_data1[is.na(Mars_data1[c(2:26,1)])]<-0
+
+
+
+Mars_data1<-Mars_data1 %>% mutate( 
+    Quality=round(
+   recommend_covid_19_whats_app_chatbot_to_people_who_might_benefit_from_it+
+    number_of_time_to_use_covid_19_whats_app_chatbot+
+    star_rating_of_the_covid_19_whats_app_chatbot 
+    ), 
+   Quality=round(
+   Quality/3  
+   )
+  ) %>% 
+  mutate(
+    Engagement=round(
+    covid_19_whats_app_chatbot_fun_entertaining_to_use+
+    covid_19_whats_app_chatbot_enjoyable_to_use+
+  covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features+
+ covid_19_whats_app_chatbot_allow_user_input_provide_feedback_and_contain_prompts+
+    covid_19_whats_app_chatbot_content_visual_information_language_design  
+    ), 
+ Engagement=round(
+   Engagement/5
+ )
+  ) %>% 
+  mutate(Functionality=round(
+  accurately_fastest_of_covid_19_whats_app_chatbot_features_functions_and_components+
+  ease_of_use_of_covid_19_whats_app_chatbot+ 
+  the_chatbot_is_interactive_consistent_and_intuitive_across_all_components
+  ), 
+  
+  
+  Functionality=round(
+    Functionality/3
+  )
+  
+  ) %>% 
+  mutate(
+    Aesthetic=round(
+      chatbot_graphics_are_of_quality_resolution_for_used_icons_menus_content+ chatbot_content_visual_is_appeal_font_color_and_size
+    ), 
+   Aesthetic=round(
+    Aesthetic/2 
+   ) 
+  ) %>% 
+   mutate(Information=round(
+   covid_19_whats_app_chatbot_profile_contain_its_purpose+
+   covid_19_whats_app_chatbot_content_is_correct_well_written_and_relevant+
+   covid_19_whats_app_chatbot_scope_comprehensive_and_concise  
+  ), 
+  
+    Information=round(
+      Information/3
+    )
+  ) %>% 
+  mutate(
+   
+    `Subjective quality`=round(
+    
+    chatbot_increase_awareness_of_the_importance_of_addressing_covid_19_myths+
+    whats_app_chatbot_is_likely_to_increase_knowledge_understanding_of_covid_19+  whats_app_chatbot_is_likely_to_change_attitudes_toward_improving_covid_19_response+
+chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_test+
+  whats_app_chatbot_is_likely_to_encourage_the_general_public_to_test_for_covid_19_vaccinated+
+  whats_app_chatbot_is_likely_to_increase_covid_19_related_healthy_behaviours
+    ), 
+
+`Subjective quality`=round(
+  `Subjective quality`/6
+)
+
+    
+  )
+
+
+```
+
+# restructuring the data for boxplot
+
+
+```{r}
+
+Mars_data_long <- Mars_data1 %>%
+  dplyr::select(Quality, 
+                Engagement,
+                Functionality, 
+                Aesthetic,
+                Information, 
+                `Subjective quality`, 
+                affiliations) %>% 
+  pivot_longer(
+         cols = c(Quality, 
+                Engagement,
+                Functionality, 
+                Aesthetic,
+                Information, 
+                `Subjective quality`),
+    names_to = "Variable",
+    values_to = "Score"
+  )
+
+
+
+# the overall mean score 
+mean(Mars_data_long$Score, na.rm = T)
+
+# the overall sd
+sd(Mars_data_long$Score, na.rm = T)
+
+
+# calculating the mean of the score among the general public and MoH
+tapply(
+   Mars_data_long$Score,
+   Mars_data_long$affiliations,
+  mean, na.rm=T)
+
+
+# calculating the sd of the score among the general public and MoH
+tapply(
+   Mars_data_long$Score,
+   Mars_data_long$affiliations,
+   sd, na.rm=T )
+
+
+```
+
+
+## ploting the boxplot 
+
+```{r}
+
+
+#Creating the boxplot with mean and median lines
+plots_score<- Mars_data_long %>%
+  ggplot(aes(x = Variable, y = Score, fill = Variable)) +
+  geom_boxplot(alpha = 0.6) + # Boxplots with variable-specific colors
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    color = "red",
+    size = 3,
+    shape = 20
+  ) + # Mean as red points
+  stat_summary(
+    fun = mean,
+    geom = "errorbar",
+    aes(ymin = ..y.., ymax = ..y..),
+    linetype = "dotted",
+    color = "red",
+    width = 0.75
+  ) + # Mean as dotted lines
+  stat_summary(
+    fun = median,
+    geom = "errorbar",
+    aes(ymin = ..y.., ymax = ..y..),
+    color = "blue",
+    size = 1,
+    width = 0.75
+  ) + # Median as solid blue lines
+  scale_fill_brewer(palette = "Set3") + # Color palette for variable-specific colors
+  theme_minimal() +
+  labs(
+    title = "Malawi COVID-19 Chatbot scores",
+    x = "MARS Dimension ",
+    y = "Mean Scores", 
+    caption = "Mean(Red dotted line), Median(Blue solid line)"
+  )+
+   guides(fill = "none")+
+  theme(
+    axis.text.x = element_text(
+      angle = 35, colour = "black", size = 12
+    ), 
+    axis.text.y = element_text( colour = "black", size = 12
+    )
+  )
+
+
+
+ggsave(plot = plots_score, "Plot_sscores.png", bg = "white", dpi = 300)
+
+plots_score
+
+
+
+```
+
+# t.test 
+The t.test is run to test the  difference in mean score between MoH and General Public
+
+```{r}
+
+t_test<-Mars_data_long %>%
+  group_by(affiliations, Variable) %>% 
+  summarise(Score=mean(Score)) %>% 
+    pivot_wider(
+         names_from = affiliations,
+         values_from= Score
+    )
+
+# checking difference in variance 
+var.test( t_test$Moh , t_test$`general public` )
+ 
+# runing the t.test 
+t.test( t_test$Moh , t_test$`general public`)
+
+
+```
+
+

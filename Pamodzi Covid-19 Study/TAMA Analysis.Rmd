@@ -1,0 +1,382 @@
+---
+title: "TAMA analysis"
+author: "Selemani Ngwira"
+date: "2024-12-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(
+  
+  rio,           # to import data
+  here,          # to locate files
+  tidyverse,     # to clean, handle, and plot the data (includes ggplot2 package)
+  sf,            # to manage spatial data using a Simple Feature format
+  tmap,          # to produce simple maps, works for both interactive and static maps
+  janitor,       # to clean column names
+  OpenStreetMap, # to add OSM basemap in ggplot map
+  spdep, # spatial statistics
+  gganimate, # for animated maps, 
+  caTools, 
+  gifski, 
+  tableone, 
+  visdat, 
+  flextable
+  
+)
+
+
+```
+
+## loading TAMA data 
+
+```{r cars}
+
+tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTiW99FNEBGK9knyXFb7oWJj4gdu_aWB4lvWa1wqIabuvtFD27wh4W7Bg/pub?gid=389095188&single=true&output=csv")
+
+#cleaning the variable names of the data set
+tama_data<-clean_names(tama_data)
+
+
+
+```
+
+## Analysis 
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+# removing row number 47.
+tama_data<- tama_data[-47, ]
+
+# the freq of the MoH and Genenral Public 
+
+table(tama_data$is_it_pre_or_post_survey)
+tama_data %>% 
+  tabyl(is_it_pre_or_post_survey)
+
+
+tapply(
+  tama_data$age, 
+  tama_data$is_it_pre_or_post_survey, median, na.rm=T
+)
+
+```
+
+
+## Demographic analysis 
+
+```{r}
+
+# for TAMA will using the pre survey 
+demo_data<-tama_data %>% 
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
+  select(c(2:10))
+
+
+# calculating the frequency sex 
+demo_data %>% 
+  tabyl(sex)
+
+# calculating the frequency institution  
+demo_data %>% 
+  tabyl(general_public_or_mo_h)
+
+# calculating frequency of participants per district
+demo_data %>% 
+  tabyl(district) %>% 
+  arrange(desc(percent))
+  
+
+# Checking what class of variable
+class(demo_data$number_of_years_of_experience_in_covid_19_response)
+
+
+# checking if the data is normally distributed by plotting histogram 
+demo_data %>% 
+  ggplot(aes(x=number_of_years_of_experience_in_covid_19_response))+
+  geom_histogram(aes(y = ..density..), bins = 10)+
+  geom_density()
+
+# testing if the p-value is > 0.05, if the p-value is > 0.05 it suggest the data is normally distributed.  
+shapiro.test(demo_data$number_of_years_of_experience_in_covid_19_response)
+
+# since the number of experience is not normal distributed we report the median than mean 
+
+# calculating the median, mean of number of years in experience in COVID-19 response 
+
+summary(demo_data$number_of_years_of_experience_in_covid_19_response, na.rm=T)
+
+
+names(demo_data)
+
+# calculation the frequency of COVID-19 pillar response 
+demo_data %>% 
+  filter(general_public_or_mo_h=="MoH") %>% 
+  mutate(which_pillar_did_you_belong_to_when_supporting_the_covid_19_response=
+           recode(
+             which_pillar_did_you_belong_to_when_supporting_the_covid_19_response, 
+  "Infection Prevention and Disease Control."="Surveillance"
+           )) %>% 
+  tabyl(which_pillar_did_you_belong_to_when_supporting_the_covid_19_response)
+
+
+
+demo_data %>% 
+  tabyl(occupation_designation)
+
+# calculating the frequency of occupation 
+demo_data %>% 
+   mutate(occupation_designation=
+           recode(
+              occupation_designation, 
+   "Business seller Trader"="Business",
+   "Business seller trader"="Business", 
+   "Data Officer"="Health worker", 
+   "Fish preparation/Fish seller"="Fisherman", 
+   "Lab Technician"="Health worker", 
+   "Medical Doctor"="Health worker", 
+   "Nursing Officer"="Health worker", 
+   "Surveillance Officer"="Health worker", 
+   "farmer"="Farmer")) %>% 
+  tabyl(occupation_designation)
+
+# creating frequency table of demographic variables 
+demo_table<-demo_data %>%
+   # filter(general_public_or_mo_h=="MoH") %>% 
+  select(-please_specify) %>% 
+   mutate(occupation_designation=
+   recode(occupation_designation, 
+   "Business seller Trader"="Business",
+   "Business seller trader"="Business", 
+   "Data Officer"="Health worker", 
+   "Fish preparation/Fish seller"="Fisherman", 
+   "Lab Technician"="Health worker", 
+   "Medical Doctor"="Health worker", 
+   "Nursing Officer"="Health worker", 
+   "Surveillance Officer"="Health worker", 
+   "farmer"="Farmer")) %>%
+   mutate(which_pillar_did_you_belong_to_when_supporting_the_covid_19_response=
+           recode(
+             which_pillar_did_you_belong_to_when_supporting_the_covid_19_response, 
+  "Infection Prevention and Disease Control."="Surveillance"
+           )) %>%  
+  tbl_summary()
+
+
+
+# converting the demo table to flextable table.
+demo_table<-demo_table %>% 
+   as_flex_table()
+
+# saving the demographic table as a word document
+save_as_docx(demo_table, path = "demo_table_20250104.docx")
+
+demo_table
+
+tama_data %>% 
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
+  tabyl(general_public_or_mo_h)
+
+tapply(
+  tama_data$number_of_years_of_experience_in_covid_19_response
+)
+
+```
+
+# Perceived Usefulness of the COVID-19 Chatbot
+
+```{r}
+# sub setting data-set
+Usefulness_chatbot<-tama_data %>%
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>%
+  select(c(11:17))
+
+
+# change the data strictures 
+
+table1 <- Usefulness_chatbot %>% 
+  pivot_longer(
+    cols = c(1:7)
+  ) 
+
+# replacing underscore with spaces
+table1$name <-gsub("_", " ", table1$name)
+
+# calculating frequency of the table 
+table1<-table1 %>% 
+  rename(
+    "Perceived Usefulness of the COVID-19 Chatbot"=name
+  ) %>% 
+  tbl_summary(by=value, 
+              percent = "row")
+
+# converting the table to flextabl object 
+table1<- table1 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the table as word document 
+save_as_docx(table1, path = "table1.docx")
+
+# viewing the table
+print(table1)
+
+```
+
+# Perceived Ease of use of the COVID-19 Chatbot
+
+```{r}
+names(tama_data)
+
+# sub setting data-set
+Ease_Use_chatbot<-tama_data %>%
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>%
+  select(c(18:24))
+
+dim(Ease_Use_chatbot)
+
+# change the data strictures 
+
+table8<- Ease_Use_chatbot%>% 
+  pivot_longer(
+    cols = c(1:7)
+  ) 
+
+# replacing underscore with spaces
+table8$name <-gsub("_", " ", table8$name)
+
+# calculating frequency of the table 
+table8<-table8 %>% 
+  rename(
+    "Perceived Ease of use of COVID-19 chatbot"=name
+  ) %>% 
+  tbl_summary(by=value, 
+              percent = "row")
+
+# converting the table to flextabl object 
+table8<- table8 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the table as word document 
+save_as_docx(table8, path = "table8.docx")
+
+# viewing the table
+print(table8)
+
+
+```
+
+
+# Attitude towards the COVID-19 chatbot
+
+
+```{r}
+names(tama_data)
+
+# sub setting data-set
+Attitude_chatbot<-tama_data %>%
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>%
+  select(c(25:30))
+
+dim(Attitude_chatbot)
+
+# change the data strictures 
+
+table9<- Attitude_chatbot%>% 
+  pivot_longer(
+    cols = c(1:6)
+  ) 
+
+# replacing underscore with spaces
+table9$name <-gsub("_", " ", table9$name)
+
+# calculating frequency of the table 
+table9<-table9 %>% 
+  rename(
+    "Attitude of COVID-19 chatbot"=name
+  ) %>% 
+  tbl_summary(by=value, 
+              percent = "row")
+
+# converting the table to flextabl object 
+table9<- table9 %>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the table as word document 
+save_as_docx(table9, path = "table9.docx")
+
+# viewing the table
+print(table9)
+
+
+
+```
+
+
+# Behaviour Internation to use the chatbot Technology for any pandemic and epidemic
+```{r}
+
+names(tama_data)
+
+# sub setting data-set
+Behaviour_chatbot<-tama_data %>%
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>%
+  select(c(31:34))
+
+dim(Behaviour_chatbot)
+
+# change the data strictures 
+
+table10<- Behaviour_chatbot%>% 
+  pivot_longer(
+    cols = c(1:4)
+  ) 
+
+# replacing underscore with spaces
+table10$name <-gsub("_", " ", table10$name)
+
+# calculating frequency of the table 
+table10<-table10 %>% 
+  rename(
+    " Behaviour Internation to use the chatbot"=name
+  ) %>% 
+  tbl_summary(by=value, 
+              percent = "row")
+
+# converting the table to flextabl object 
+table10<- table10%>% 
+  as_flex_table() %>% 
+  autofit()
+
+# saving the table as word document 
+save_as_docx(table10, path = "table10.docx")
+
+# viewing the table
+print(table10)
+
+```
+
+
+# addition Questions 
+
+```{r}
+names(tama_data)
+
+
+addition_question<- tama_data %>% 
+  select(c(35:40))
+
+addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19_chatbot
+
+
+
+```
+
+

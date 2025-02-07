@@ -1,0 +1,325 @@
+---
+title: "Sampling"
+author: "Selemani Ngwira"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading packages 
+
+library(rio)
+library(tidyverse)
+library(janitor)
+
+```
+
+## Loading Data
+
+
+```{r cars}
+
+MHFR_facility<-import("MHFR_Facilities.xlsx")
+
+# cleaning the variable names
+
+MHFR_facility<-clean_names(MHFR_facility)
+
+attributes(MHFR_facility)$names
+
+unique(MHFR_facility$status)
+
+
+```
+
+## Sampling 
+
+10 districts of Blantyre, Likoma, Mzimba-South, Mzimba North, Lilongwe, Neno, Zomba, Mwanza, Ntchisi, and Rumphi were stratified using the mean AR of 4.12 per 1000 population 
+
+
+```{r pressure, echo=FALSE}
+
+# check the name of the district values 
+
+unique(MHFR_facility$district)
+
+sampled_districts<-MHFR_facility %>% 
+  filter(district=="Blantyre"|district=="Likoma"|district=="Lilongwe"| district=="Mzimba"|
+           district=="Neno"| district=="Zomba"| district=="Mwanza"| district=="Ntchisi"|
+           district=="Rumphi"| district=="Mzuzu Central") %>% 
+  filter(status=="Functional")
+
+# checking the names of the district in the sampled district data set
+unique(sampled_districts$district)
+
+unique(sampled_districts$ownership)
+
+
+sampled_districts %>% 
+  count(common_name) %>% 
+  summarise(n=sum(n))
+
+sampled_districts %>% 
+  filter(ownership=="Government") %>% 
+  count(common_name) %>% 
+  summarise(n=sum(n))
+
+
+#  Blantyre sampling 
+
+Blantyre_hf<-sampled_districts %>% 
+  filter(district=="Blantyre") %>% 
+   filter(ownership=="Government")
+
+ ## sample health facilities for Blantyre District. the code will be run once 
+
+ sample(Blantyre_hf$name, 15, replace = F)
+ 
+ # using the code above Mpemba Health facility was picked. 
+ 
+# Likoma Sampling 
+ 
+Likoma_hf<-sampled_districts %>% 
+  filter(district=="Likoma") %>% 
+   filter(ownership=="Government")
+
+  ## sampling hf for likoma district. the code is run once. 
+
+sample(Likoma_hf$common_name, 1, replace = T)
+ 
+## using the code above St.Marys was picked. 
+
+# Lilongwe Sampling 
+
+Lilongwe_hf<-sampled_districts %>% 
+  filter(district=="Lilongwe") %>% 
+   filter(ownership=="Government")
+
+## Sampling a hf in lilongwe district . the code is run once. 
+
+sample(Lilongwe_hf$name, 6, replace = F)
+
+## using the code above Chinsapo Clinic was picked.
+
+
+# Mzimba South
+
+Mzimba_S_hf<-sampled_districts %>% 
+    filter(district=="Mzimba") %>% 
+   filter(ownership=="Government")
+
+## Sampling hfs for Mzimba North and South. this code was run 4 times. 
+
+sample(Mzimba_S_hf$name, 8, replace = F)
+## Zolozolo and Madede were pick for Mzimba North and Mzimba South respectively
+
+
+# Neno Sampling 
+
+Neno_hf<-sampled_districts %>% 
+   filter(district=="Neno") %>% 
+   filter(ownership=="Government")
+
+## sampling hf for Neno district. the Code is run once. 
+
+sample(Neno_hf$name, 5, replace = F) 
+## using the code above Ligowe was picked. 
+
+
+
+# Zomba Sampling 
+
+Zomba_hf<-sampled_districts %>% 
+   filter(district=="Zomba") %>% 
+   filter(ownership=="Government")
+
+## Sampling hf for Zomba district. the code is run once
+
+sample(Zomba_hf$name, 3, replace = F)
+
+## using the code above Likangala was picked. 
+
+
+# Mwanza Sampling. 
+
+Mwanza_hf<-sampled_districts %>% 
+   filter(district=="Mwanza") %>% 
+   filter(ownership=="Government")
+
+## Sampling hf for Mwanza district. the code is run once. 
+
+sample(Mwanza_hf$name, 3, replace = F)
+
+## using the code above Mwanza Border post was picked 
+
+
+# Ntchisi Sampling 
+
+Ntchisi_hf<-sampled_districts %>% 
+   filter(district=="Ntchisi") %>% 
+   filter(ownership=="Government")
+
+
+## sampling hf for Ntchisi district. code is run once 
+
+sample(Ntchisi_hf$name, 3, replace = F)
+
+## using the code above Khuwi Health Centre was picked. 
+
+
+# Rumphi Sampling 
+Rumphi_hf<-sampled_districts %>% 
+   filter(district=="Rumphi") %>% 
+   filter(ownership=="Government")
+
+## sampling hf for Rumphi District. the code is run once. 
+
+sample(Rumphi_hf$name, 3, replace = T)
+
+## using the code above Luviri Health Post was picked. 
+
+
+
+```
+
+
+The CBO's came from the same district that were stratified. 
+
+# Sampling of CBOs
+## Loading Data for CBO
+In this sampling process, the study is using the CBO database obtain from Mzuni
+the list of CBOs is from the ten districts that were selected. 
+```{r}
+# importing data set of CBOs
+CBO_datebase<-import("List_of_CBOs.xlsx")
+
+# Cleaning the varibale of CBOs
+CBO_datebase<-clean_names(CBO_datebase)
+
+
+unique(CBO_datebase$district)
+
+```
+
+
+## Sampling of CBOs
+
+```{r}
+
+# Blantyre sampling CBO
+Blantyre_cbo<-CBO_datebase %>% 
+  filter(district=="Blantyre")
+
+
+sample(Blantyre_cbo$name_of_cbo, 2, replace = T)
+# using the code above  "THANDIWE ORPHAN CARE" "JAF FOUNDATION" were picked
+ 
+
+# Sampling for Likoma
+
+Likoma_cbo<-CBO_datebase %>% 
+  filter(district=="Likoma")
+
+sample(Likoma_cbo$name_of_cbo, 2, replace = T)
+
+# using the code above CHITEKO CBO"     "TIGWILIZANE CBO" were picked
+
+# sampling for Mzimba North
+Mzuzu_cbo<-CBO_datebase %>% 
+  filter(district=="Mzuzu City")
+
+sample(Mzuzu_cbo$name_of_cbo, 2, replace = T)
+
+# using the code above VITUMBIKO CBO" "CHIDESO CBO" were picked. 
+
+
+View(Mzuzu_cbo)
+
+# Lilongwe 
+
+Lilongwe_cbo<-CBO_datebase %>% 
+  filter(district=="Lilongwe")
+
+sample(Lilongwe_cbo$name_of_cbo, 2, replace = T)
+
+# using the above code "ST PETERS YOUTH" and RESTORED HOPE FOR BETTER COMMUNITY
+
+
+
+# sampling for Mzimba South
+Mzimba_s_cbo<-CBO_datebase %>% 
+  filter(district=="Mzimba South")
+
+sample(Mzimba_s_cbo$name_of_cbo, 2, replace = T)
+
+# using the code above CHIHADO CBO"  "LIZIWAZI CBO" were picked. 
+
+# Sampling for Neno 
+
+Neno_cbo<-CBO_datebase %>% 
+  filter(district=="Neno")
+
+sample(Neno_cbo$name_of_cbo, 2, replace = T)
+
+# using the code above "MIRACLE CBO" "LIGOWE CBO" were picked. 
+
+
+# Sampling for Zomba
+
+Zomba_cbo<-CBO_datebase %>% 
+  filter(district=="Zomba")
+
+sample(Zomba_cbo$name_of_cbo, 2, replace = T)
+
+# using the above code "AIYDO CBO" and "ADAMS ISLAMIC CENTRE" were picked
+
+
+# Sampling Mwanza 
+
+Mwanza_cbo<-CBO_datebase %>% 
+  filter(district=="Mwanza")
+
+sample(Mwanza_cbo$name_of_cbo, 2, replace = T)
+
+# using the above code  MANKHWALA CBO" "KADAZI CBO" were picked. 
+
+# Sampling for Rumphi 
+
+Rumphi_cbo<-CBO_datebase %>% 
+  filter(district=="Rumphi")
+
+sample(Rumphi_cbo$name_of_cbo, 2, replace = T) # this code was run twince because the first produce the one CBO 
+
+# using the code above LUSEHAPE" and "MKOBEKA WOMEN CIRCLE were picked
+
+# sampling for Ntchisi
+
+Ntchisi_cbo<-CBO_datebase %>% 
+  filter(district=="Ntchisi")
+
+# in there were two CBO registed in Mzuni CBO database hence we picke all of them
+
+
+```
+
+
+# checking for Mzimba North
+
+
+```{r}
+
+Mzimba_North<-import("Mzimba North_list.xls")
+
+sample(Mzimba_North$name, 4, replace = F)
+  
+```
+
+# calculating the power of the study 
+
+```{r}
+pwr
+
+```
+

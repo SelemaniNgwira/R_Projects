@@ -1,0 +1,80 @@
+---
+title: "National Survey Map"
+author: "Selemani Ngwira"
+date: "2024-09-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+pacman::p_load(
+  rio,           # to import data
+  here,          # to locate files
+  tidyverse,     # to clean, handle, and plot the data (includes ggplot2 package)
+  sf,            # to manage spatial data using a Simple Feature format
+  tmap,          # to produce simple maps, works for both interactive and static maps
+  janitor,       # to clean column names
+  OpenStreetMap, # to add OSM basemap in ggplot map
+  spdep, # spatial statistics
+  gganimate, # for animated maps, 
+  caTools, 
+  gifski
+  )
+
+library(magick)
+
+```
+
+## loading data set
+
+
+```{r cars}
+health_facility_coord<-import("health_facility_coord.xlsx")
+
+
+# loading Malawi shape file 
+
+Malawi_shapefile<-st_read("gadm36_MWI_1.shp") %>% 
+  select(NAME_1)
+
+# checking the names of shape file
+names(Malawi_shapefile)
+
+# checking the names of variables. 
+names(health_facility_coord)
+
+# standarding the variables names to low cases
+health_facility_coord<-clean_names(health_facility_coord)
+
+names(health)
+
+
+```
+
+## Changing Lon and Atti col into geometry
+```{r pressure, echo=FALSE}
+
+# changing the coords system of lon and lat col
+health_facility_sf<- health_facility_coord%>%
+     sf::st_as_sf(coords = c("longitude", 
+                             "latitude"), crs = 4326) 
+
+```
+
+
+# Ploting Map
+
+```{r}
+
+tm_shape(Malawi_shapefile)+
+  tm_borders(col = "black")+
+  tm_shape(health_facility_sf)+
+  tm_dots(size=0.2, col='red', alpha = 0.4)+
+  tm_text("name", size = 1, col = "black")+
+  tmap_mode("view")
+
+
+```
+
