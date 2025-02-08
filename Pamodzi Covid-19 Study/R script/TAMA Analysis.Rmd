@@ -379,7 +379,7 @@ addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19
 
 ```
 
-# Calculating the TAMA scores 
+# TAMA scores 
 
 ```{r}
 
@@ -429,7 +429,7 @@ tama2<-tama2 %>%
 
 
 
-# Calculation TAM overall Score 
+# TAM overall Score 
 
 ```{r}
 
@@ -691,4 +691,69 @@ wilcoxon_result
 
 
 ```
+
+
+# calculation the difference on TAM scores among the Moh and general public. 
+
+
+```{r}
+
+
+set.seed(282025)
+# sub setting post survey
+moh_survey<- tama2 %>%
+    filter(is_it_pre_or_post_survey=="MoH") %>% 
+    select(7:11)
+
+# sub setting pre survey
+gen_public_survey <- tama2 %>%
+    filter(is_it_pre_or_post_survey=="General Public") %>% 
+    select(7:11)
+
+
+min_size<-min(nrow(pre_survey), nrow(post_survey))
+
+# Randomly sample to match pairs
+pre_sample <- pre_survey %>% sample_n(min_size)
+post_sample <- post_survey %>% sample_n(min_size)
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  pre_score = pre_sample$total_score,
+  post_score = post_sample$total_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
+
+
+
+
+
+
+
+```
+
+
 
