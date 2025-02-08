@@ -24,7 +24,9 @@ pacman::p_load(
   gifski, 
   tableone, 
   visdat, 
-  flextable)
+  flextable, 
+  gtsummary, 
+  purrr)
 
 
 ```
@@ -379,7 +381,6 @@ addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19
 
 # Calculating the TAMA scores 
 
-
 ```{r}
 
 tama2<-tama_data %>% 
@@ -391,15 +392,303 @@ tama2<-tama_data %>%
                                                if_else(.=="Strongly disagree", 1,NA)))))
   ))
 
-tama2 %>% 
-  mutate(
-    perceived=round(
-      
-    )
-  )
+## replacing NA with Zeros
+tama2<-tama2 %>%
+  mutate(across(12:34, ~ replace_na(.x, 0)))
+
+# calculating the sum scores 
+
+tama2<- tama2 %>%
+  rowwise() %>%
+  mutate(perceived_usefulness_score = ceiling(sum(c_across(11:17), na.rm = TRUE)/7), 
+  perceived_ease_of_use_score = ceiling(sum(c_across(18:24), na.rm = TRUE)/7), 
+  Attitude_toward_chatbot_score = ceiling(sum(c_across(25:30), na.rm =TRUE)/6), 
+  Behavior_Intention_use_chatbot_score = ceiling(sum(c_across(31:34), na.rm =TRUE)/4)) %>%
+  ungroup() %>% 
+  select(c(1:6), 
+         perceived_usefulness_score, 
+         perceived_ease_of_use_score, 
+         Attitude_toward_chatbot_score, 
+         Behavior_Intention_use_chatbot_score)
+
+
+tapply(
+       tama2$perceived_usefulness_score, 
+       tama2$general_public_or_mo_h,
+        mean)
+
+
+tama2<-tama2 %>% 
+  rowwise() %>% 
+  mutate(total_score= ceiling(sum(c_across(7:10), na.rm = T)/4))%>% 
+  ungroup()
+  
+
+
+```
+
+
+
+# Calculation TAM overall Score 
+
+```{r}
+
+# computing mean and sd total score 
+mean(tama2$total_score)
+
+sd(tama2$total_score)
+
+
+# computing mean and sd for perceived usefulness 
+
+
+mean(tama2$perceived_usefulness_score)
+
+sd(tama2$perceived_usefulness_score)
+
+# computing mean and sd for perceived ease of use 
+
+
+mean(tama2$perceived_ease_of_use_score)
+
+sd(tama2$perceived_ease_of_use_score)
+
+# computing mean and sd for perceived attitudes towards chatbot
+
+
+mean(tama2$Attitude_toward_chatbot_score)
+
+sd(tama2$Attitude_toward_chatbot_score)
+
+
+
+# computing mean and sd for perceived attitudes towards chatbot
+
+
+mean(tama2$Behavior_Intention_use_chatbot_score)
+
+sd(tama2$Behavior_Intention_use_chatbot_score)
+
+```
+
+
+## Calculation the difference of the tam pre and post total score
+
+```{r}
+set.seed(282025)
+# sub setting post survey
+post_survey<- tama2 %>%
+    filter(is_it_pre_or_post_survey=="Post Survey") %>% 
+    select(7:11)
+
+# sub setting pre survey
+pre_survey <- tama2 %>%
+    filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
+    select(7:11)
+
+
+min_size<-min(nrow(pre_survey), nrow(post_survey))
+
+# Randomly sample to match pairs
+pre_sample <- pre_survey %>% sample_n(min_size)
+post_sample <- post_survey %>% sample_n(min_size)
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  pre_score = pre_sample$total_score,
+  post_score = post_sample$total_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
 
 
 
 ```
 
+## Calculation the difference of the tam pre and post perceived usefullness
+
+
+```{r}
+
+set.seed(282025)
+# # sub setting post survey
+# post_survey<- tama2 %>%
+#     filter(is_it_pre_or_post_survey=="Post Survey") %>% 
+#     select(7:11)
+# 
+# # sub setting pre survey
+# pre_survey <- tama2 %>%
+#     filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
+#     select(7:11)
+# 
+# 
+# min_size<-min(nrow(pre_survey), nrow(post_survey))
+# 
+# # Randomly sample to match pairs
+# pre_sample <- pre_survey %>% sample_n(min_size)
+# post_sample <- post_survey %>% sample_n(min_size)
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  pre_score = pre_sample$perceived_usefulness_score,
+  post_score = post_sample$perceived_usefulness_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
+
+
+
+
+
+```
+
+## Calculation the difference of the tam pre and post perceived Ease of Use
+
+```{r}
+
+
+df_paired <- data.frame(
+  pre_score = pre_sample$perceived_ease_of_use_score,
+  post_score = post_sample$perceived_ease_of_use_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
+
+```
+
+## Calculation the difference of the tam pre and post Attitudes score
+
+```{r}
+
+
+df_paired <- data.frame(
+  pre_score = pre_sample$Attitude_toward_chatbot_score,
+  post_score = post_sample$Attitude_toward_chatbot_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
+```
+
+
+
+## Calculation the difference of the tam pre and post Behavior and Intention
+
+
+```{r}
+
+df_paired <- data.frame(
+  pre_score = pre_sample$Behavior_Intention_use_chatbot_score,
+  post_score = post_sample$Behavior_Intention_use_chatbot_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$post_score - df_paired$pre_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# removing values with Zero difference 
+
+df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+
+# running the test to difference 
+
+wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
+                               paired = TRUE, conf.int = TRUE, 
+                               exact = FALSE)
+
+wilcoxon_result
+
+
+```
 
