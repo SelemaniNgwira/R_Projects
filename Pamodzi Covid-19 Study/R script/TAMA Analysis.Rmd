@@ -33,22 +33,19 @@ pacman::p_load(
 
 ## loading TAMA data 
 
-```{r cars}
+```{r loading data}
 
-tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTiW99FNEBGK9knyXFb7oWJj4gdu_aWB4lvWa1wqIabuvtFD27wh4W7Bg/pub?gid=389095188&single=true&output=csv") %>% clean_names() # cleaning the variable names of the data set
-
-tama_data<-tama_data %>% 
-  mutate(across(where(is.character), as.factor))
-
+tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTiW99FNEBGK9knyXFb7oWJj4gdu_aWB4lvWa1wqIabuvtFD27wh4W7Bg/pub?gid=389095188&single=true&output=csv") %>% clean_names()%>%  # cleaning the variable names of the data set
+                     mutate(across(where(is.character), as.factor))
 
 
 ```
 
 ## Analysis 
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
+
+```{r analysis, echo=FALSE}
 
 # removing row number 47.
 tama_data<- tama_data[-47, ]
@@ -690,6 +687,8 @@ wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score,
 wilcoxon_result
 
 
+
+
 ```
 
 
@@ -698,8 +697,7 @@ wilcoxon_result
 
 ```{r}
 
-
-set.seed(282025)
+set.seed(292025)
 # sub setting post survey
 moh_survey<- tama2 %>%
     filter(general_public_or_mo_h=="MoH") %>% 
@@ -724,24 +722,9 @@ df_paired <- data.frame(
   moh_score = moh_sample$total_score
 )
 
-# Check normality of differences
-##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
-
-differences <- df_paired$gen_score - df_paired$moh_score
-shapiro_test <- shapiro.test(differences)
-
-# printing  Shapiro test
-shapiro_test
-
-
-# will run the paired t.test on the scores 
-
-t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
-                      paired = T)
-
-t.test_result
-
-
+my_fun(data = df_paired, 
+       "moh_score", 
+       "gen_score")
 
 
 
@@ -752,29 +735,15 @@ t.test_result
 ```{r}
 
 
-
 # Combine into a single data frame
 df_paired <- data.frame(
   gen_score = gen_sample$perceived_usefulness_score,
   moh_score = moh_sample$perceived_usefulness_score
 )
 
-# Check normality of differences
-##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
-
-differences <- df_paired$gen_score - df_paired$moh_score
-shapiro_test <- shapiro.test(differences)
-
-# printing  Shapiro test
-shapiro_test
-
-
-# will run the paired t.test on the scores 
-
-t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
-                      paired = T)
-
-t.test_result
+my_fun(data = df_paired, 
+       "moh_score", 
+       "gen_score")
 
 
 
@@ -788,29 +757,15 @@ t.test_result
 ```{r}
 
 
-
 # Combine into a single data frame
 df_paired <- data.frame(
   gen_score = gen_sample$perceived_ease_of_use_score,
   moh_score = moh_sample$perceived_ease_of_use_score
 )
 
-# Check normality of differences
-##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
-
-differences <- df_paired$gen_score - df_paired$moh_score
-shapiro_test <- shapiro.test(differences)
-
-# printing  Shapiro test
-shapiro_test
-
-
-# will run the paired t.test on the scores 
-
-t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
-                      paired = T)
-
-t.test_result
+my_fun(data = df_paired, 
+       "moh_score", 
+       "gen_score")
 
 
 
@@ -822,33 +777,35 @@ t.test_result
 
 ```{r}
 
-
-
 # Combine into a single data frame
 df_paired <- data.frame(
   gen_score = gen_sample$Attitude_toward_chatbot_score,
   moh_score = moh_sample$Attitude_toward_chatbot_score
 )
 
-# Check normality of differences
-##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
-
-differences <- df_paired$gen_score - df_paired$moh_score
-shapiro_test <- shapiro.test(differences)
-
-# printing  Shapiro test
-shapiro_test
-
-
-# will run the paired t.test on the scores 
-
-t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
-                      paired = T)
-
-t.test_result
-
+my_fun(data = df_paired, 
+       "moh_score", 
+       "gen_score")
 
 
 ```
 
+
+
+# behavior and intentions TAM scores among the Moh and general public. 
+
+```{r}
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  gen_score = gen_sample$Behavior_Intention_use_chatbot_score,
+  moh_score = moh_sample$Behavior_Intention_use_chatbot_score
+)
+
+my_fun(data = df_paired, 
+       "moh_score", 
+       "gen_score")
+
+
+```
 
