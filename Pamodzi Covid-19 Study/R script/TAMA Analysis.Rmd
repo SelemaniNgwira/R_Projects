@@ -693,7 +693,7 @@ wilcoxon_result
 ```
 
 
-# calculation the difference on TAM scores among the Moh and general public. 
+# total score difference on TAM scores among the Moh and general public. 
 
 
 ```{r}
@@ -702,52 +702,44 @@ wilcoxon_result
 set.seed(282025)
 # sub setting post survey
 moh_survey<- tama2 %>%
-    filter(is_it_pre_or_post_survey=="MoH") %>% 
+    filter(general_public_or_mo_h=="MoH") %>% 
     select(7:11)
 
 # sub setting pre survey
 gen_public_survey <- tama2 %>%
-    filter(is_it_pre_or_post_survey=="General Public") %>% 
+    filter(general_public_or_mo_h=="General Public") %>% 
     select(7:11)
 
 
-min_size<-min(nrow(pre_survey), nrow(post_survey))
+min_size<-min(nrow(gen_public_survey), nrow(moh_survey))
 
 # Randomly sample to match pairs
-pre_sample <- pre_survey %>% sample_n(min_size)
-post_sample <- post_survey %>% sample_n(min_size)
+gen_sample <- gen_public_survey %>% sample_n(min_size)
+moh_sample <- moh_survey %>% sample_n(min_size)
 
 
 # Combine into a single data frame
 df_paired <- data.frame(
-  pre_score = pre_sample$total_score,
-  post_score = post_sample$total_score
+  gen_score = gen_sample$total_score,
+  moh_score = moh_sample$total_score
 )
 
 # Check normality of differences
 ##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
 
-differences <- df_paired$post_score - df_paired$pre_score
+differences <- df_paired$gen_score - df_paired$moh_score
 shapiro_test <- shapiro.test(differences)
 
 # printing  Shapiro test
 shapiro_test
 
 
-# removing values with Zero difference 
+# will run the paired t.test on the scores 
 
-df_paired <- df_paired[df_paired$pre_score != df_paired$post_score, ]
+t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
+                      paired = T)
 
-# running the test to difference 
-
-wilcoxon_result <- wilcox.test(df_paired$pre_score, df_paired$post_score, 
-                               paired = TRUE, conf.int = TRUE, 
-                               exact = FALSE)
-
-wilcoxon_result
-
-
-
+t.test_result
 
 
 
@@ -755,5 +747,108 @@ wilcoxon_result
 
 ```
 
+# Perceived usefulness difference on TAM scores among the Moh and general public. 
+
+```{r}
+
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  gen_score = gen_sample$perceived_usefulness_score,
+  moh_score = moh_sample$perceived_usefulness_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$gen_score - df_paired$moh_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# will run the paired t.test on the scores 
+
+t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
+                      paired = T)
+
+t.test_result
+
+
+
+```
+
+
+
+
+# Perceived ease of use TAM scores among the Moh and general public. 
+
+```{r}
+
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  gen_score = gen_sample$perceived_ease_of_use_score,
+  moh_score = moh_sample$perceived_ease_of_use_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$gen_score - df_paired$moh_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# will run the paired t.test on the scores 
+
+t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
+                      paired = T)
+
+t.test_result
+
+
+
+```
+
+
+
+# Attitudes TAM scores among the Moh and general public. 
+
+```{r}
+
+
+
+# Combine into a single data frame
+df_paired <- data.frame(
+  gen_score = gen_sample$Attitude_toward_chatbot_score,
+  moh_score = moh_sample$Attitude_toward_chatbot_score
+)
+
+# Check normality of differences
+##since we have reduce the pre-survey (n<30), we need to check if the data is still normality distributed 
+
+differences <- df_paired$gen_score - df_paired$moh_score
+shapiro_test <- shapiro.test(differences)
+
+# printing  Shapiro test
+shapiro_test
+
+
+# will run the paired t.test on the scores 
+
+t.test_result<-t.test(df_paired$moh_score, df_paired$gen_score, 
+                      paired = T)
+
+t.test_result
+
+
+
+```
 
 
