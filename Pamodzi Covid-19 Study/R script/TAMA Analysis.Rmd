@@ -726,7 +726,7 @@ my_fun(data = df_paired,
        "moh_score", 
        "gen_score")
 
-
+summary(df_paired)
 
 ```
 
@@ -787,6 +787,7 @@ my_fun(data = df_paired,
        "moh_score", 
        "gen_score")
 
+summary(df_paired)
 
 ```
 
