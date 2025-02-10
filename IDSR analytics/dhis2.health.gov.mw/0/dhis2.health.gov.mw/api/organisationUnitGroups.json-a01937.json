@@ -1,0 +1,202 @@
+{
+    "organisationUnitGroups": [
+        {
+            "name": "All facilities"
+        },
+        {
+            "name": "Balaka District Council"
+        },
+        {
+            "name": "Blantyre City Council"
+        },
+        {
+            "name": "Blantyre District Council"
+        },
+        {
+            "name": "CHAM"
+        },
+        {
+            "name": "CHAM EU SRH "
+        },
+        {
+            "name": "Central East + KCH"
+        },
+        {
+            "name": "Central Hospital"
+        },
+        {
+            "name": "Chikwawa District Council"
+        },
+        {
+            "name": "Chiradzulu District Council"
+        },
+        {
+            "name": "Chitipa District Council"
+        },
+        {
+            "name": "Clinics"
+        },
+        {
+            "name": "Company"
+        },
+        {
+            "name": "Dedza District Council"
+        },
+        {
+            "name": "Dispensaries"
+        },
+        {
+            "name": "District Hospitals"
+        },
+        {
+            "name": "Dowa District Council"
+        },
+        {
+            "name": "EPOS"
+        },
+        {
+            "name": "Elisabeth Glaser Pediatric AIDS Foundation"
+        },
+        {
+            "name": "Health Centers"
+        },
+        {
+            "name": "Health Post"
+        },
+        {
+            "name": "Karonga District Council"
+        },
+        {
+            "name": "Kasungu District Council"
+        },
+        {
+            "name": "Likoma District Council"
+        },
+        {
+            "name": "Lilongwe City Council"
+        },
+        {
+            "name": "Lilongwe District Council"
+        },
+        {
+            "name": "Machinga District Council"
+        },
+        {
+            "name": "Malaria Bulletin DHOs"
+        },
+        {
+            "name": "Mangochi District Council"
+        },
+        {
+            "name": "Maternity"
+        },
+        {
+            "name": "Mbelwa District Council"
+        },
+        {
+            "name": "Mchinji District Council"
+        },
+        {
+            "name": "Ministry of Health"
+        },
+        {
+            "name": "Mulanje District Council"
+        },
+        {
+            "name": "Mwanza District Council"
+        },
+        {
+            "name": "Mzuzu City Council"
+        },
+        {
+            "name": "NGO"
+        },
+        {
+            "name": "NRU SLA"
+        },
+        {
+            "name": "Neno District Council"
+        },
+        {
+            "name": "Nkhata Bay District Council"
+        },
+        {
+            "name": "Nkhotakota District Council"
+        },
+        {
+            "name": "No supporting partner"
+        },
+        {
+            "name": "North + MZCH"
+        },
+        {
+            "name": "Nsanje District Council"
+        },
+        {
+            "name": "Ntcheu District Council"
+        },
+        {
+            "name": "Ntchisi District Council"
+        },
+        {
+            "name": "Other Hospitals"
+        },
+        {
+            "name": "Outreach Clinic"
+        },
+        {
+            "name": "Phalombe District Council"
+        },
+        {
+            "name": "Phalombe District Office"
+        },
+        {
+            "name": "Primary Impact"
+        },
+        {
+            "name": "Primary Impact Village Clinics"
+        },
+        {
+            "name": "Private for Profit"
+        },
+        {
+            "name": "QoC Learning Sites"
+        },
+        {
+            "name": "Rumphi District Council"
+        },
+        {
+            "name": "Rural Hospitals"
+        },
+        {
+            "name": "SE Zone + CH"
+        },
+        {
+            "name": "SSDI"
+        },
+        {
+            "name": "SW zone + QECH"
+        },
+        {
+            "name": "Salima District Council"
+        },
+        {
+            "name": "Thyolo District Council"
+        },
+        {
+            "name": "UNFPA"
+        },
+        {
+            "name": "Village Clinic"
+        },
+        {
+            "name": "Zomba City Council"
+        },
+        {
+            "name": "Zomba District Council"
+        },
+        {
+            "name": "selected district hospitals"
+        }
+    ]
+}

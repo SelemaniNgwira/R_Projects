@@ -1,0 +1,248 @@
+{
+    "id": "MhhYPWkxjz2",
+    "username": "angellakamera",
+    "surname": "Kamera",
+    "firstName": "Angella",
+    "created": "2022-06-16T08:58:36.583",
+    "lastUpdated": "2024-03-22T10:37:01.280",
+    "dataViewOrganisationUnits": [
+        {
+            "id": "lZsCb6y0KDX"
+        }
+    ],
+    "favorites": [
+
+    ],
+    "sharing": {
+        "external": false,
+        "users": {
+
+        },
+        "userGroups": {
+
+        }
+    },
+    "userGroupAccesses": [
+
+    ],
+    "userAccesses": [
+
+    ],
+    "userGroups": [
+        {
+            "id": "uGACvihogtk"
+        },
+        {
+            "id": "z3kQ0rcCaIK"
+        }
+    ],
+    "translations": [
+
+    ],
+    "teiSearchOrganisationUnits": [
+        {
+            "id": "lZsCb6y0KDX"
+        }
+    ],
+    "organisationUnits": [
+        {
+            "id": "lZsCb6y0KDX"
+        }
+    ],
+    "externalAccess": false,
+    "displayName": "Angella Kamera",
+    "access": {
+        "manage": false,
+        "externalize": false,
+        "write": false,
+        "read": false,
+        "update": false,
+        "delete": false
+    },
+    "name": "Angella Kamera",
+    "email": "angellakamera@gmail.com",
+    "phoneNumber": "0888779907",
+    "userRoles": [
+        {
+            "id": "F6UNMAmkPMH"
+        }
+    ],
+    "settings": {
+        "keyMessageSmsNotification": true,
+        "keyStyle": "light_blue/light_blue.css",
+        "keyUiLocale": "en",
+        "keyAnalysisDisplayProperty": "name",
+        "keyMessageEmailNotification": true
+    },
+    "programs": [
+
+    ],
+    "authorities": [
+        "M_dhis-web-interpretation",
+        "M_dhis-web-cache-cleaner",
+        "M_dhis-web-data-quality",
+        "M_dhis-web-menu-management",
+        "M_dhis-web-app-management",
+        "M_dhis-web-messaging",
+        "M_dhis-web-data-visualizer",
+        "M_dhis-web-dashboard",
+        "M_dhis-web-reports",
+        "M_WHO_Data_Quality_Tool",
+        "M_dhis-web-maps"
+    ],
+    "dataSets": [
+        "U31O0OHvtuS",
+        "T4L7KkiSg6b",
+        "RfViflOH1I0",
+        "JwuQJ3ctI4W",
+        "zhGkS89Ju5r",
+        "lv4tvPCq3X7",
+        "xKmkoAZLEGU",
+        "SibrDizn3Ha",
+        "S9lDQ7lntLW",
+        "B0UtGNECmZW",
+        "a7bx6nhebxi",
+        "clFAnObeT24",
+        "oL9hCglkQ9j",
+        "I6cB2WrHnNF",
+        "VEqRXwmqhM1",
+        "IhVEF2U4zhn",
+        "D7a6ccEjeYE",
+        "ZABjSFibfGV",
+        "GzO4xPVk8pl",
+        "NX1lpqsalRy",
+        "wou2dlIVF6E",
+        "auYj4kD3zyM",
+        "dT3HhA0e1lU",
+        "kKSFCv9coGc",
+        "HGdtEMMmyCL",
+        "rkyO2EAX45C",
+        "XvJWI4nNFA6",
+        "dJZ2bYKAPsy",
+        "M9pt7gAxfUy",
+        "XoREBfhgQlL",
+        "dt1gptvVyqd",
+        "lzvuSDyNy8d",
+        "F3huhA5NCMc",
+        "XnxkYtXcCgj",
+        "Yt7Yk8DKI0o",
+        "oWJSmtdNgNz",
+        "LLj4lfwjbeE",
+        "gqLXfNgDIs1",
+        "ZFCpjgORvGl",
+        "ensHdPmqS5l",
+        "BBb8SpcppLj",
+        "D3tEmVIxXr1",
+        "cCsbOg15aNB",
+        "HpGgtFaxmDg",
+        "C2fhNKeRDLU",
+        "VHRAY8ZtxNn",
+        "mkD9UHGim8B",
+        "KsbPjKdIXXU",
+        "nkMiQGbIs9D",
+        "EzqGB7LV5SO",
+        "HGDZxfmEzjd",
+        "uk3Vkwy5cIe",
+        "zLuC38d1M10",
+        "iTo9FkAJTSl",
+        "xQUOwRouoUc",
+        "u9AK7vEFLCa",
+        "yHRlJtNK0pF",
+        "WumH0XCnHT7",
+        "Be7nI6zU6fM",
+        "aAYL6m8Jqt4",
+        "u6Hzce4ljhO",
+        "wLQlOnKX6yN",
+        "gPAyiHYXHBI",
+        "Fdn3C7gKoju",
+        "oal7z5wCpNV",
+        "Hv9UtOIfl44",
+        "lowwwiYm40q",
+        "I93JjJkJfhB",
+        "wwGgJj9F4E8",
+        "P4oPxnYmYHY",
+        "TUxQ1BJAiKU",
+        "ugvSAcnFoAy",
+        "GiUCKrRLbM5",
+        "h4POFOPbISK",
+        "KUyvw6Y4DqE",
+        "VOljrHlMuqt",
+        "bTisWJF0Wbj",
+        "nRP3puQafEp",
+        "oexBILEHIxb",
+        "b7BOK5krhxK",
+        "Yz1PMQk1QlF",
+        "cRbz1fzUKwG",
+        "OJ0zUeHsmuV",
+        "q1Es3k3sZem",
+        "WcYZwAnOCbg",
+        "JPOW1m0J9F2",
+        "wc8SAtiv5UT",
+        "Ypkc56U3ecs",
+        "AtTb95TRx2Y",
+        "ACmZFToDqxh",
+        "UlKBdMOOtgm",
+        "Xpl0GuQyi1j",
+        "ft7wAzSPfw5",
+        "MhMK3vsF22J",
+        "ZvtQXSOtpQj",
+        "bx25idVxi1S",
+        "YwYJS8uRj0m",
+        "djKXx2Rqx3T",
+        "waoQ016uOz1",
+        "ekDOvq3vV7j",
+        "mtJhJkR6gzf",
+        "j1eHsAbi8KY",
+        "TZwgYAeQXxL",
+        "OiOMthNx0Tu",
+        "fOiOJU7Vt2n",
+        "JyCRZ1d9TLr",
+        "kKEJrMRNLR7",
+        "hWDsGIjs16g",
+        "suFv4rXfKdu",
+        "BvdXer8Vm6y",
+        "aYZsjFwm4P9"
+    ],
+    "userCredentials": {
+        "id": "MhhYPWkxjz2",
+        "username": "angellakamera",
+        "externalAuth": false,
+        "twoFA": false,
+        "passwordLastUpdated": "2023-05-03T09:05:06.040",
+        "cogsDimensionConstraints": [
+
+        ],
+        "catDimensionConstraints": [
+
+        ],
+        "previousPasswords": [
+
+        ],
+        "lastLogin": "2024-03-22T10:37:01.280",
+        "selfRegistered": false,
+        "invitation": false,
+        "disabled": false,
+        "access": {
+            "manage": false,
+            "externalize": false,
+            "write": false,
+            "read": false,
+            "update": false,
+            "delete": false
+        },
+        "sharing": {
+            "external": false,
+            "users": {
+
+            },
+            "userGroups": {
+
+            }
+        },
+        "userRoles": [
+            {
+                "id": "F6UNMAmkPMH"
+            }
+        ]
+    }
+}

@@ -1,0 +1,654 @@
+{
+    "dataElementGroups": [
+        {
+            "name": "ANC",
+            "shortName": "ANC",
+            "id": "z1xZdKntTSZ"
+        },
+        {
+            "name": "ART 1",
+            "shortName": "ART 1",
+            "id": "y2qGh2JY6Ef"
+        },
+        {
+            "name": "ART2",
+            "shortName": "ART2",
+            "id": "CKGXMGz4uyu"
+        },
+        {
+            "name": "Blood Safety",
+            "shortName": "Blood Safety",
+            "id": "ooAQqmPzG0d"
+        },
+        {
+            "name": "CAC",
+            "shortName": "CAC",
+            "id": "U6FFFeibVDt"
+        },
+        {
+            "name": "CBD",
+            "shortName": "CBD",
+            "id": "JxrpkaJMTm8"
+        },
+        {
+            "name": "CBMNC",
+            "shortName": "CBMNC",
+            "id": "U6QzaTiVHRN"
+        },
+        {
+            "name": "CBMNH",
+            "shortName": "CBMNH",
+            "id": "bo5fpwrrSYZ"
+        },
+        {
+            "name": "CC Diagnosis and Testing",
+            "shortName": "CC Diagnosis and Testing",
+            "id": "zGMRaYh72gm"
+        },
+        {
+            "name": "CH Adult Emergency Trauma  OPD",
+            "shortName": "CH Adult Emergency Trauma OPD",
+            "id": "l2cbutKQU9K"
+        },
+        {
+            "name": "CH Aesthitics",
+            "shortName": "CH Aesthitics",
+            "id": "k1YPx6ILdOg"
+        },
+        {
+            "name": "CH Albanism",
+            "shortName": "CH Albanism",
+            "id": "pAPmCZNttvF"
+        },
+        {
+            "name": "CH Antenatal ward",
+            "shortName": "CH Antenatal ward",
+            "id": "FnOzKaLnGy1"
+        },
+        {
+            "name": "CH Dental ",
+            "shortName": "CH Dental",
+            "id": "TS8f72zkqMf"
+        },
+        {
+            "name": "CH Dermatology Leprosy",
+            "shortName": "CH Dermatology Leprosy",
+            "id": "KvouAX7aYYJ"
+        },
+        {
+            "name": "CH Dermatology OPD",
+            "shortName": "CH Dermatology OPD",
+            "id": "Ej4UbKFfbOz"
+        },
+        {
+            "name": "CH Dialysis ",
+            "shortName": "CH Dialysis ",
+            "id": "l8zUC4jaea3"
+        },
+        {
+            "name": "CH Endoscope",
+            "shortName": "CH Endoscope",
+            "id": "x1OC6NcDpei"
+        },
+        {
+            "name": "CH GYNA Fertility",
+            "shortName": "CH GYNA Fertility",
+            "id": "o6npZiiwNvn"
+        },
+        {
+            "name": "CH Internal  Medicine OPD",
+            "shortName": "CH Internal Medicine OPD",
+            "id": "JNV6BXpBe8a"
+        },
+        {
+            "name": "CH Internal Medicine IPD",
+            "shortName": "CH Internal Medicine IPD",
+            "id": "pLcRk1XUyEp"
+        },
+        {
+            "name": "CH KMC IPD",
+            "shortName": "CH KMC IPD",
+            "id": "ROdYGj7thJK"
+        },
+        {
+            "name": "CH MATERNITY HDU",
+            "shortName": "CH MATERNITY HDU",
+            "id": "SLDYafSzSrj"
+        },
+        {
+            "name": "CH Maternity Theatre",
+            "shortName": "CH Martenity Theatre",
+            "id": "TJ7XX2vEtyd"
+        },
+        {
+            "name": "CH Neonatal Nursery",
+            "shortName": "CH Neonatal Nursery",
+            "id": "y9otuwgWRew"
+        },
+        {
+            "name": "CH Neurology IPD",
+            "shortName": "CH Neurology IPD",
+            "id": "pOKy3T9XGUS"
+        },
+        {
+            "name": "CH Neurology OPD",
+            "shortName": "CH Neurology OPD",
+            "id": "RGRc779GATn"
+        },
+        {
+            "name": "CH Oncology IPD ",
+            "shortName": "CH Oncology IPD ",
+            "id": "hbXtuOFIrUf"
+        },
+        {
+            "name": "CH Oncology OPD",
+            "shortName": "CH Oncology OPD",
+            "id": "t2csxoqvnyO"
+        },
+        {
+            "name": "CH Ophthamology IPD",
+            "shortName": "CH Ophthamology IPD",
+            "id": "zwwz9rZODFH"
+        },
+        {
+            "name": "CH Orthopaedic OPD",
+            "shortName": "CH Orthopaedic OPD",
+            "id": "T1k38N3iK22"
+        },
+        {
+            "name": "CH Orthopedic OPD",
+            "shortName": "CH Orthopedic OPD",
+            "id": "EEmgSV7DsHQ"
+        },
+        {
+            "name": "CH PC Palliative care",
+            "shortName": "CH PC Palliative care",
+            "id": "sLIpynAsyLL"
+        },
+        {
+            "name": "CH Peadiatric Theatre",
+            "shortName": "CH Peadiatric Threatre",
+            "id": "XLxVkrbBVee"
+        },
+        {
+            "name": "CH Peads IPD",
+            "shortName": "CH Peads IPD",
+            "id": "xiMFKdTWRFp"
+        },
+        {
+            "name": "CH Peads Nursery IPD",
+            "shortName": "CH Peads Nursery IPD",
+            "id": "bELsheCQsEr"
+        },
+        {
+            "name": "CH Peads OPD ",
+            "shortName": "CH Peads OPD ",
+            "id": "tsefi6doleb"
+        },
+        {
+            "name": "CH Peads surgery IPD ",
+            "shortName": "CH Peads surgery IPD ",
+            "id": "dhYLstBbEMx"
+        },
+        {
+            "name": "CH Postnatal",
+            "shortName": "CH Postnatal",
+            "id": "AnGLAlOrzpN"
+        },
+        {
+            "name": "CH Renal Ward ",
+            "shortName": "CH Renal Ward ",
+            "id": "rzKyjPxHFSV"
+        },
+        {
+            "name": "CH SURGERY ENT",
+            "shortName": "CH SURGERY ENT",
+            "id": "Y7EO5OoqysX"
+        },
+        {
+            "name": "CH SURGICAL OPD",
+            "shortName": "CH SURGICAL OPD",
+            "id": "yYBV7y8TgSR"
+        },
+        {
+            "name": "CH Short Stay Ward",
+            "shortName": "CH Short Stay Ward",
+            "id": "kSif7tU1RSG"
+        },
+        {
+            "name": "CH Surgical IPD",
+            "shortName": "CH Surgical IPD",
+            "id": "VZ4bjtJM5gn"
+        },
+        {
+            "name": "CH Urology",
+            "shortName": "CH Urology",
+            "id": "Lmdr84yl4xX"
+        },
+        {
+            "name": "CMAM",
+            "shortName": "CMAM",
+            "id": "C5obJf47vKo"
+        },
+        {
+            "name": "Community Health",
+            "shortName": "CH",
+            "id": "OPpS7l4VEuN"
+        },
+        {
+            "name": "Covid 19 Monthly Form",
+            "shortName": "Covid 19 Monthly Form",
+            "id": "iZJbZIBsBKD"
+        },
+        {
+            "name": "Covid-19 Import",
+            "shortName": "Covid-19 Import",
+            "id": "anWCp0eY4S4"
+        },
+        {
+            "name": "D4H",
+            "shortName": "D4H",
+            "id": "n9wMIBdpufr"
+        },
+        {
+            "name": "DQA",
+            "shortName": "DQA",
+            "id": "vJxPpUXNNci"
+        },
+        {
+            "name": "DT",
+            "shortName": "DT",
+            "id": "s9ruXcGTZyT"
+        },
+        {
+            "name": "Dental",
+            "shortName": "Dental",
+            "id": "MO3wiYofrBc"
+        },
+        {
+            "name": "EC",
+            "shortName": "EC",
+            "id": "VtmodPG1DCn"
+        },
+        {
+            "name": "ECSA",
+            "shortName": "ECSA",
+            "id": "UyMR3AAdEX6"
+        },
+        {
+            "name": "EH",
+            "shortName": "EH",
+            "id": "UA6mwc5dvoo"
+        },
+        {
+            "name": "EPI",
+            "shortName": "EPI",
+            "id": "eeWCk7FjSKE"
+        },
+        {
+            "name": "EPI - New Data elements (All)",
+            "shortName": "EPI - New Data elements (All)",
+            "id": "sl3HwATctcg"
+        },
+        {
+            "name": "ES",
+            "shortName": "ES",
+            "id": "AEugI34LfKf"
+        },
+        {
+            "name": "ETAT AC",
+            "shortName": "ETAT AC",
+            "id": "FEEe37mXgPU"
+        },
+        {
+            "name": "ETAT CD",
+            "shortName": "ETAT CD",
+            "id": "vwvegRf10ZD"
+        },
+        {
+            "name": "EY",
+            "shortName": "EY",
+            "id": "KVjdKr21K12"
+        },
+        {
+            "name": "FP",
+            "shortName": "FP",
+            "id": "Zzl2LHOzuDZ"
+        },
+        {
+            "name": "HBB",
+            "shortName": "HBB",
+            "id": "IGEQm1wP1dJ"
+        },
+        {
+            "name": "HH",
+            "shortName": "HH",
+            "id": "ARcjsbXY7vE"
+        },
+        {
+            "name": "HIV-ST",
+            "shortName": "HIV-ST",
+            "id": "yekosT1uoRQ"
+        },
+        {
+            "name": "HMIS 15",
+            "shortName": "HMIS 15",
+            "id": "HRWNG10u4OR"
+        },
+        {
+            "name": "HMIS 17",
+            "shortName": "HMIS 17",
+            "id": "FrXg1nHZxL2"
+        },
+        {
+            "name": "HTC",
+            "shortName": "HTC",
+            "id": "gfz8oeJZlQv"
+        },
+        {
+            "name": "HTS",
+            "shortName": "HTS",
+            "id": "xoXb2e44Aql"
+        },
+        {
+            "name": "IDSR Monthly",
+            "shortName": "IDSRM",
+            "id": "kkHokihKMp2"
+        },
+        {
+            "name": "IDSR Monthly Old",
+            "shortName": "IDSRO",
+            "id": "t2MyS9B4IoV"
+        },
+        {
+            "name": "IDSR Quarterly",
+            "shortName": "IDSRQ",
+            "id": "hjdpPKHw7TB"
+        },
+        {
+            "name": "IDSR Weekly",
+            "shortName": "IDSRW",
+            "id": "MP7RanZkuvE"
+        },
+        {
+            "name": "IMCI",
+            "shortName": "IMCI",
+            "id": "FXA7FbbKvZ1"
+        },
+        {
+            "name": "KMC",
+            "shortName": "KMC",
+            "id": "TpCpUErVBLq"
+        },
+        {
+            "name": "LMIS MRDT",
+            "shortName": "LMIS MRDT",
+            "id": "w1ZbIWZH4KP"
+        },
+        {
+            "name": "MAT",
+            "shortName": "MAT",
+            "id": "RHgqynGGPy1"
+        },
+        {
+            "name": "MLW Data",
+            "shortName": "MLW Data",
+            "id": "EfJFrHVbikc"
+        },
+        {
+            "name": "MND",
+            "shortName": "Maternal and Neonatal Death",
+            "id": "mQ9GjwjE9wM"
+        },
+        {
+            "name": "NCD",
+            "shortName": "NCD",
+            "id": "CKwFr19u8DO"
+        },
+        {
+            "name": "NCD CC",
+            "shortName": "NCD CC",
+            "id": "mAhtGNjtWwO"
+        },
+        {
+            "name": "NCD CC Monthly",
+            "shortName": "NCD CC Monthly",
+            "id": "xXA7Zl1lQK6"
+        },
+        {
+            "name": "NCD CC OLD",
+            "shortName": "NCD CC OLD",
+            "id": "aI2Mcw0nRtQ"
+        },
+        {
+            "name": "NCD MT",
+            "shortName": "NCD MT",
+            "id": "R7yO3zXEjUk"
+        },
+        {
+            "name": "NCD Q",
+            "shortName": "NCD Q",
+            "id": "Ybz5MNGK1li"
+        },
+        {
+            "name": "NCST",
+            "shortName": "NCST",
+            "id": "EDrq9lEjt8S"
+        },
+        {
+            "name": "NMCP",
+            "shortName": "NMCP",
+            "id": "T1bdLeR1CFw"
+        },
+        {
+            "name": "NRU",
+            "shortName": "NRU",
+            "id": "zdlaeDEqzo9"
+        },
+        {
+            "name": "NUT BF",
+            "shortName": "NUT BF",
+            "id": "sZ5sAhHdIIM"
+        },
+        {
+            "name": "OBG",
+            "shortName": "Obstetrics/Gynaecology",
+            "id": "qn7sn3PCgqt"
+        },
+        {
+            "name": "ONC",
+            "shortName": "ONC",
+            "id": "hM3TfcVx9qm"
+        },
+        {
+            "name": "OR",
+            "shortName": "OR",
+            "id": "sUxom5VVPOu"
+        },
+        {
+            "name": "ORC",
+            "shortName": "ORC",
+            "id": "jnwyedLLaq3"
+        },
+        {
+            "name": "OTP",
+            "shortName": "OTP",
+            "id": "L8NIQ4iOfA7"
+        },
+        {
+            "name": "Ombudsman",
+            "shortName": "Ombudsman",
+            "id": "UPCbOBK76PP"
+        },
+        {
+            "name": "OpenLMIS",
+            "shortName": "OpenLMIS",
+            "id": "t08OjiLLOEl"
+        },
+        {
+            "name": "OpenLMIS AMC",
+            "shortName": "OpenLMIS AMC",
+            "id": "mjmzLqEhv6i"
+        },
+        {
+            "name": "OpenLMIS Months of Stock",
+            "shortName": "OpenLMIS Months of Stock",
+            "id": "QkDN6jD6Oia"
+        },
+        {
+            "name": "OpenLMIS Predictors",
+            "shortName": "OpenLMIS Predictors",
+            "id": "NIIoA8IDIQo"
+        },
+        {
+            "name": "OpenLMIS Quantity Used",
+            "shortName": "OpenLMIS Quantity Used",
+            "id": "srboKGS7Fxg"
+        },
+        {
+            "name": "OpenLMIS Stock on hand",
+            "shortName": "OpenLMIS Stock on hand",
+            "id": "DZdLSymGeTX"
+        },
+        {
+            "name": "OpenLMIS Stock out days",
+            "shortName": "OpenLMIS Stock out days",
+            "id": "bhdjEz7uwIi"
+        },
+        {
+            "name": "PLC",
+            "shortName": "PLC",
+            "id": "d7mhMy8Rsyv"
+        },
+        {
+            "name": "PLC New",
+            "shortName": "PLC New",
+            "id": "BJEXaFEs6pH"
+        },
+        {
+            "name": "PMTCT",
+            "shortName": "PMTCT",
+            "id": "uKyobnaTeLD"
+        },
+        {
+            "name": "PNC",
+            "shortName": "PNC",
+            "id": "m6VDlcFYkmB"
+        },
+        {
+            "name": "POPULATION",
+            "shortName": "POPULATION",
+            "id": "NFF08FM42eU"
+        },
+        {
+            "name": "PT",
+            "shortName": "PT",
+            "id": "udfU2i2iw16"
+        },
+        {
+            "name": "QoC",
+            "shortName": "QoC",
+            "id": "A5xW5sIeoRV"
+        },
+        {
+            "name": "SBCC",
+            "shortName": "SBCC",
+            "id": "ya0JA5eLsBU"
+        },
+        {
+            "name": "SCP",
+            "shortName": "SCP",
+            "id": "qPjQzc3uF6a"
+        },
+        {
+            "name": "SFP",
+            "shortName": "SFP",
+            "id": "BeLgkYfZ6xr"
+        },
+        {
+            "name": "SHNS",
+            "shortName": "SHNS",
+            "id": "TAPYP1wnGHU"
+        },
+        {
+            "name": "SK",
+            "shortName": "SK",
+            "id": "kfvTqa87N9S"
+        },
+        {
+            "name": "STI",
+            "shortName": "STI",
+            "id": "Ygf8xKTuhCX"
+        },
+        {
+            "name": "TB CDE",
+            "shortName": "TB CDE",
+            "id": "QDwgiYJZy9y"
+        },
+        {
+            "name": "TB CF",
+            "shortName": "TB CF",
+            "id": "FYqELFD9bY7"
+        },
+        {
+            "name": "TB CF New",
+            "shortName": "TB CF New",
+            "id": "yIGzbfpmf9x"
+        },
+        {
+            "name": "TB Lab",
+            "shortName": "TB Lab",
+            "id": "NUchwZPRKfO"
+        },
+        {
+            "name": "TB MDR",
+            "shortName": "TB MDR",
+            "id": "OD3iqrcBwUL"
+        },
+        {
+            "name": "TB TO",
+            "shortName": "TB TO",
+            "id": "cf0quHidPRj"
+        },
+        {
+            "name": "TB TO New",
+            "shortName": "TB TO New",
+            "id": "yFrkAQyUnBe"
+        },
+        {
+            "name": "TB-HIV",
+            "shortName": "TB-HIV",
+            "id": "dUhfAzsTtdm"
+        },
+        {
+            "name": "TB-HIV New",
+            "shortName": "TB-HIV New",
+            "id": "In0j68u8lpW"
+        },
+        {
+            "name": "TB-MDR",
+            "shortName": "TB-MDR",
+            "id": "kk5WQTwirR5"
+        },
+        {
+            "name": "Trachoma Trichiasis",
+            "shortName": "Trachoma Trichiasis",
+            "id": "QrTW3h0R6yO"
+        },
+        {
+            "name": "VMMC",
+            "shortName": "VMMC",
+            "id": "aEVXvrLYsOY"
+        },
+        {
+            "name": "YFHS",
+            "shortName": "YFHS",
+            "id": "GWkgFwevyqO"
+        },
+        {
+            "name": "sc scorecard test data elements",
+            "shortName": "sc scorecard test data elements",
+            "id": "ZPOIdoXRqUr"
+        }
+    ]
+}

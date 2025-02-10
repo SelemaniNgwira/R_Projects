@@ -1,0 +1,134 @@
+---
+title: "DHIS2_project"
+author: "Selemani Ngwira"
+date: "2024-03-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup}
+
+library(datimutils)
+library(httptest)
+library(magrittr)
+
+
+R.Version()
+```
+
+
+```{r}
+httptest::start_vignette("dhis2.health.gov.mw")
+```
+
+
+
+
+```{r}
+
+loginToDATIM(username = "angellakamera",
+             password = "Angella@11",
+             base_url = "https://dhis2.health.gov.mw/")
+
+
+data<-datimutils::getMetadata("dataElementGroups", fields = "id,name,shortName")
+
+
+
+
+raw_data <- getDataSets(
+  data_element = "z1xZdKntTSZ",
+  period = "202101",
+  org_unit = "MDkBXGJ5CyR"
+)
+print(data)
+
+
+          
+getd
+```
+
+
+
+
+```{r, echo=FALSE}
+
+
+data3<-data <- getMetadata(
+  end_point = "organisationUnitGroups",
+  fields = "name"
+)
+
+
+print(data3)
+# getting list attribute of Lilongwe.
+
+View(data4)
+
+data4 <- getMetadata(
+  end_point = "organisationUnits",
+  "name:like:Lilongwe",
+  "level:eq:3",
+  fields = ":all"
+) 
+# get a list of attribute of Blantyre
+
+data5<-getMetadata(organisationUnits,
+                    "name:like:Blantyre",
+                    "level:eq:3",
+                    fields = ":all")
+
+
+View(data3)
+
+str(data4$translations) 
+
+url <- paste0("https://dhis2.health.gov.mw/dataElements.csv?",
+"filter=id:in:CKGXMGz4uyu",
+"&fields=name")
+
+httr::GET(url,
+          httr::authenticate("angellakamera",
+                             "Angella@11")) %>%
+  httr::content() %>%
+  readr::read_csv() %>%
+  print()
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+```{r}
+
+base.url<-"https://dhis2.health.gov.mw/"
+url<-paste0(base.url,"api/me")
+username<-"angellakamera"
+password<-"Angella@11"
+login<-GET(url, authenticate(username,password))
+#If we cannot login, stop with an error
+if(login$status == 200L) { print("Logged in successfully!")} else {stop("Could not login")}
+
+
+
+getDataElements<-function(base.url) {
+url<-paste0(base.url,"api/dataElements?fields=id,name,shortName")
+r<-content(GET(url,authenticate(username,password)),as="parsed")
+do.call(rbind.data.frame,r$dataElements)
+}
+
+
+data_elements<-getDataElements(base.url)
+head(data_elements)
+
+View(data_elements)
+
+
+
+```
+
