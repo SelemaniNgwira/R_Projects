@@ -1,0 +1,2104 @@
+---
+title: "regression and spatial analysis"
+author: "Selemani Ngwira"
+date: "2025-01-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+if(!require(pacman)) install.packages("pacman")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit
+)
+
+
+
+```
+
+## loading data
+
+
+```{r cars}
+
+
+# importing the data 
+cholera_data<- import( here("data/cholera_data.csv"))
+
+# changing the data.frame into tibble object for easy handling 
+cholera_data<- tibble(cholera_data)
+
+
+
+# filtering out those less than 18 years 
+cholera_data<-cholera_data %>% 
+  filter(age_group!="<18")
+
+
+ta_shapefile<-st_read(
+  here("data/Admin3-TA.shp")
+) %>% 
+  select(
+   NAME_1,
+    NAME_2, 
+    ID_0,
+    ID_1) %>% 
+  dplyr::rename(
+    "District"= NAME_1, 
+    "ta"=NAME_2
+  )
+
+
+```
+
+## regression of factors influencing receiving OCV.: demographic variables.  
+
+
+```{r pressure, echo=FALSE}
+
+# frequency of treating drinking water 
+table(cholera_data$treat_drinking_water)
+
+
+
+
+# social and behavioral factors that influence current water treatment practices from column 19 to 89
+
+treatment_practices <- cholera_data %>% 
+  select(c(17:89, 179))
+
+# freq of variables associated with water treatment
+treatment_practices_2<-treatment_practices |>
+  select(
+    age_group, 
+    sex, 
+    marital_status, 
+    level_education, 
+    ethnicity, 
+    religion, 
+    knowledge_on_cholera_season,
+    main_source_of_drinking_water_dry_season, 
+    main_source_of_drinking_water_wet_season, 
+    health_risk_associated_with_drinking_untreated_water, 
+    treat_drinking_water, 
+    difficulties_accessing_water_treatment_products, 
+    # knowledge_on_cholera_season_in_summer, 
+    # knowledge_on_cholera_season_in_rainy_season, 
+    # knowledge_on_cholera_season_in_winter, 
+    potential_causes_of_cholera_lack_of_safe_drinking_water, 
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system,
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse, 
+    potential_causes_of_cholera_density_population, 
+    potential_causes_of_cholera_hot_humid_climate, 
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education, 
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination, 
+    potential_causes_of_cholera_touching_food_without_clean_hands, 
+    potential_causes_of_cholera_not_wash_hands, 
+    potential_causes_of_cholera_unhygiene_living_environment, 
+    potential_causes_of_cholera_not_taking_vaccine, 
+    cholera_preventation_measures_use_safe_water, 
+    cholera_preventation_measures_provision_of_safe_drinking_water, 
+    cholera_preventation_measures_use_sanitary_latrines, 
+    cholera_preventation_measures_satifactory_sewage_system, 
+    cholera_preventation_measures_washing_hands_with_soap, 
+    cholera_preventation_measures_washing_hand_after_toilet, 
+    cholera_preventation_measures_protection_of_foods, 
+    cholera_preventation_measures_housefly_control, 
+    cholera_preventation_measures_early_case_finding, 
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles, 
+    cholera_preventation_measures_good_hygiene_practice, 
+    cholera_preventation_measures_health_education_advises, 
+    cholera_preventation_measures_taking_cholera_vaccine, 
+    difficulties_accessing_water_treatment_products, 
+    aware_of_cholera_campaigns, 
+    local_measures_to_prevent_cholera
+  ) %>% 
+  mutate(
+    # knowledge_on_cholera_season_in_summer=recode(
+    # knowledge_on_cholera_season_in_summer, 
+    # "0"="no", 
+    # "1"="yes"
+    #  
+    # ), 
+    # knowledge_on_cholera_season_in_rainy_season=recode(
+    # knowledge_on_cholera_season_in_rainy_season, 
+    # "0"="no", 
+    # "1"="yes"
+    #  
+    # ), 
+    # knowledge_on_cholera_season_in_winter=recode(
+    # knowledge_on_cholera_season_in_winter, 
+    # "0"="no", 
+    # "1"="yes"
+    #  ),
+    potential_causes_of_cholera_lack_of_safe_drinking_water=recode(
+    potential_causes_of_cholera_lack_of_safe_drinking_water, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system=recode(
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse=recode(
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_density_population=recode(
+    potential_causes_of_cholera_density_population, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_hot_humid_climate=recode(
+    potential_causes_of_cholera_hot_humid_climate, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education=recode(
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination=recode(
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_touching_food_without_clean_hands=recode(
+    potential_causes_of_cholera_touching_food_without_clean_hands, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_not_wash_hands=recode(
+    potential_causes_of_cholera_not_wash_hands, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_unhygiene_living_environment=recode(
+    potential_causes_of_cholera_unhygiene_living_environment, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    potential_causes_of_cholera_not_taking_vaccine=recode(
+    potential_causes_of_cholera_not_taking_vaccine, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_use_safe_water=recode(
+    cholera_preventation_measures_use_safe_water, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_provision_of_safe_drinking_water=recode(
+    cholera_preventation_measures_provision_of_safe_drinking_water, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_use_sanitary_latrines=recode(
+    cholera_preventation_measures_use_sanitary_latrines, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_satifactory_sewage_system=recode(
+    cholera_preventation_measures_satifactory_sewage_system, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_washing_hands_with_soap=recode(
+    cholera_preventation_measures_washing_hands_with_soap, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_washing_hand_after_toilet=recode(
+    cholera_preventation_measures_washing_hand_after_toilet, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_protection_of_foods=recode(
+    cholera_preventation_measures_protection_of_foods, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_housefly_control=recode(
+    cholera_preventation_measures_housefly_control, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_early_case_finding=recode(
+    cholera_preventation_measures_early_case_finding, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles=recode(
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_good_hygiene_practice=recode(
+    cholera_preventation_measures_good_hygiene_practice, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_health_education_advises=recode(
+    cholera_preventation_measures_health_education_advises, 
+    "0"="no", 
+    "1"="yes"
+     ),
+    cholera_preventation_measures_taking_cholera_vaccine=recode(
+    cholera_preventation_measures_taking_cholera_vaccine, 
+    "0"="no", 
+    "1"="yes"
+     )
+  )
+
+# creating a table on the freq of Knowledge on the potential cause of cholera
+Potential_causes_cholera_table<-treatment_practices_2 %>% 
+  select(
+    potential_causes_of_cholera_lack_of_safe_drinking_water, 
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system,
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse, 
+    potential_causes_of_cholera_density_population, 
+    potential_causes_of_cholera_hot_humid_climate, 
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education, 
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination, 
+    potential_causes_of_cholera_touching_food_without_clean_hands, 
+    potential_causes_of_cholera_not_wash_hands, 
+    potential_causes_of_cholera_unhygiene_living_environment, 
+    potential_causes_of_cholera_not_taking_vaccine
+  ) %>% 
+  pivot_longer(
+    cols = c(1:11) ) %>% 
+  group_by(name, value) %>% 
+  count(value) %>% 
+  summarise(n=sum(n)) %>% 
+  pivot_wider(
+    names_from = "value", 
+    values_from = "n"
+  ) %>% 
+ adorn_percentages(denominator = "row") %>% 
+  adorn_pct_formatting(digits = 2) 
+
+
+## replacing underscore with space in values of the column name
+Potential_causes_cholera_table$name <-gsub("_", " ", Potential_causes_cholera_table$name)
+
+## define the border lines 
+border_style = officer::fp_border(color="black", width=1)
+
+# defining the body of the table
+Potential_causes_cholera_table<- Potential_causes_cholera_table %>% 
+  dplyr::rename("Knowledge on the Potenial Risk factors causing Cholera"=name) %>% 
+  dplyr::rename("Yes"=yes) %>%
+  dplyr::rename("No"=no)%>%
+   flextable() %>% 
+  width(j=1, width = 3) %>% 
+  align(align = "center", j = c(2:3), part = "all") %>% 
+  vline(part = "all", j = 1, border = border_style) %>% 
+  vline(part = "all", j = 3, border = border_style) %>% 
+  bg(bg="white", part="all")
+
+
+# saving the table 
+
+save_as_docx(Potential_causes_cholera_table, path = here("output/Table1.docx"))
+
+
+# creating a table on the Knowledge on the Prevention factors on cholera 
+
+prevenation_measures_table <- treatment_practices_2 %>% 
+  select(
+    cholera_preventation_measures_use_safe_water, 
+    cholera_preventation_measures_provision_of_safe_drinking_water, 
+    cholera_preventation_measures_use_sanitary_latrines, 
+    cholera_preventation_measures_satifactory_sewage_system, 
+    cholera_preventation_measures_washing_hands_with_soap, 
+    cholera_preventation_measures_washing_hand_after_toilet, 
+    cholera_preventation_measures_protection_of_foods, 
+    cholera_preventation_measures_housefly_control, 
+    cholera_preventation_measures_early_case_finding, 
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles, 
+    cholera_preventation_measures_good_hygiene_practice, 
+    cholera_preventation_measures_health_education_advises, 
+    cholera_preventation_measures_taking_cholera_vaccine
+  ) %>% 
+
+ pivot_longer(
+    cols = c(1:13) ) %>% 
+  group_by(name, value) %>% 
+  count(value) %>% 
+  summarise(n=sum(n)) %>% 
+  pivot_wider(
+    names_from = "value", 
+    values_from = "n"
+  ) %>% 
+ adorn_percentages(denominator = "row") %>% 
+  adorn_pct_formatting(digits = 2) 
+
+
+## replacing underscore with space in values of the column name
+prevenation_measures_table$name <-gsub("_", " ", prevenation_measures_table$name)
+
+## define the border lines 
+border_style = officer::fp_border(color="black", width=1)
+
+# defining the body of the table
+prevenation_measures_table<-prevenation_measures_table %>% 
+  dplyr::rename("Knowledge on Prevention Measures of  Cholera"=name) %>% 
+  dplyr::rename("Yes"=yes) %>%
+  dplyr::rename("No"=no)%>%
+   flextable() %>% 
+  width(j=1, width = 3) %>% 
+  align(align = "center", j = c(2:3), part = "all") %>% 
+  vline(part = "all", j = 1, border = border_style) %>% 
+  vline(part = "all", j = 3, border = border_style) %>% 
+  bg(bg="white", part="all")
+
+
+# saving the table
+save_as_docx(prevenation_measures_table, path = here("output/Table2.docx"))
+
+
+# running the regression model to calculation ORs
+
+regression_table1<-treatment_practices_2 %>% 
+  mutate(treat_drinking_water=recode(
+    treat_drinking_water, 
+    "yes"=1, 
+    "no"=0
+  )) %>% 
+  gtsummary::tbl_uvregression(method = glm,
+                               y = treat_drinking_water,
+                    method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+# changing the regression table into flextable objective
+
+regression_table1<- regression_table1 %>% 
+  as_flex_table()
+
+# saving the regression table 
+save_as_docx(regression_table1, path =here("output/regression_table1.docx"))
+
+
+# printing the regression table
+print(regression_table1)
+
+
+
+# calculating scores 
+treatment_practices_3<-treatment_practices |>
+  select(
+    age_group, 
+    sex, 
+    marital_status, 
+    level_education, 
+    ethnicity, 
+    religion, 
+    main_source_of_drinking_water_dry_season, 
+    main_source_of_drinking_water_wet_season, 
+    health_risk_associated_with_drinking_untreated_water, 
+    treat_drinking_water, 
+    difficulties_accessing_water_treatment_products, 
+    knowledge_on_cholera_season_in_summer, 
+    knowledge_on_cholera_season_in_rainy_season, 
+    knowledge_on_cholera_season_in_winter, 
+    potential_causes_of_cholera_lack_of_safe_drinking_water, 
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system,
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse, 
+    potential_causes_of_cholera_density_population, 
+    potential_causes_of_cholera_hot_humid_climate, 
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education, 
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination, 
+    potential_causes_of_cholera_touching_food_without_clean_hands, 
+    potential_causes_of_cholera_not_wash_hands, 
+    potential_causes_of_cholera_unhygiene_living_environment, 
+    potential_causes_of_cholera_not_taking_vaccine, 
+    cholera_preventation_measures_use_safe_water, 
+    cholera_preventation_measures_provision_of_safe_drinking_water, 
+    cholera_preventation_measures_use_sanitary_latrines, 
+    cholera_preventation_measures_satifactory_sewage_system, 
+    cholera_preventation_measures_washing_hands_with_soap, 
+    cholera_preventation_measures_washing_hand_after_toilet, 
+    cholera_preventation_measures_protection_of_foods, 
+    cholera_preventation_measures_housefly_control, 
+    cholera_preventation_measures_early_case_finding, 
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles, 
+    cholera_preventation_measures_good_hygiene_practice, 
+    cholera_preventation_measures_health_education_advises, 
+    cholera_preventation_measures_taking_cholera_vaccine, 
+    difficulties_accessing_water_treatment_products, 
+    aware_of_cholera_campaigns, 
+    local_measures_to_prevent_cholera
+  ) %>%
+  mutate(
+    Knowledge_potential_causes_of_cholera=round(
+      
+   (potential_causes_of_cholera_lack_of_safe_drinking_water+
+    potential_causes_of_cholera_inadeguate_safe_water_supply_system+
+    potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse+ 
+    potential_causes_of_cholera_density_population+ 
+    potential_causes_of_cholera_hot_humid_climate+ 
+    potential_causes_of_cholera_illiteracy_ignorance_on_health_education+ 
+    potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination+ 
+    potential_causes_of_cholera_touching_food_without_clean_hands+ 
+    potential_causes_of_cholera_not_wash_hands+ 
+    potential_causes_of_cholera_unhygiene_living_environment+ 
+    potential_causes_of_cholera_not_taking_vaccine)/11, digits = 3
+    )*100, 
+   
+   
+   knowledge_prevention_measure= round(
+     
+     (
+    cholera_preventation_measures_use_safe_water+ 
+    cholera_preventation_measures_provision_of_safe_drinking_water+ 
+    cholera_preventation_measures_use_sanitary_latrines+ 
+    cholera_preventation_measures_satifactory_sewage_system+ 
+    cholera_preventation_measures_washing_hands_with_soap+ 
+    cholera_preventation_measures_washing_hand_after_toilet+ 
+    cholera_preventation_measures_protection_of_foods+ 
+    cholera_preventation_measures_housefly_control+ 
+    cholera_preventation_measures_early_case_finding+ 
+    cholera_preventation_measures_disinfection_of_all_contaminated_articles+ 
+    cholera_preventation_measures_good_hygiene_practice+ 
+    cholera_preventation_measures_health_education_advises+ 
+    cholera_preventation_measures_taking_cholera_vaccine
+     )/13, digits = 3
+   )*100
+  )
+
+ # selecting the variables of interest of demo and scores 
+treatment_practices_3<-treatment_practices_3 %>% 
+  select(
+    age_group, 
+    sex, 
+    marital_status, 
+    level_education, 
+    ethnicity, 
+    religion, 
+    main_source_of_drinking_water_dry_season, 
+    main_source_of_drinking_water_wet_season, 
+    health_risk_associated_with_drinking_untreated_water, 
+    treat_drinking_water, 
+    difficulties_accessing_water_treatment_products, 
+    Knowledge_potential_causes_of_cholera,
+    knowledge_prevention_measure
+  )
+
+# categories the knowledge score 
+treatment_practices_3<-within(
+   treatment_practices_3, {
+   Knowledge_potential_causes_of_cholera<-as.character(
+    ifelse(Knowledge_potential_causes_of_cholera<50, "Poor Knowledge", 
+    ifelse(Knowledge_potential_causes_of_cholera>=50, "Good Knowledge", NA)) 
+   )
+   } 
+ )
+
+
+
+# categories the knowledge score 
+treatment_practices_3<-within(
+   treatment_practices_3, {
+   knowledge_prevention_measure<-as.character(
+    ifelse(knowledge_prevention_measure<50, "Poor Knowledge", 
+    ifelse(knowledge_prevention_measure>=50, "Good Knowledge", NA)) 
+   )
+   } 
+ )
+# calculating of the scores 
+mean(treatment_practices_3$Knowledge_potential_causes_of_cholera)
+
+table(treatment_practices_3$Knowledge_potential_causes_of_cholera)
+
+# calculating the scores of prevention measures 
+table(treatment_practices_3$knowledge_prevention_measure)
+
+# freq on Knowledge on Cause and Prevention Measures of Cholera
+treatment_practices_3 %>% 
+  tabyl(knowledge_prevention_measure)
+
+treatment_practices_3 %>% 
+  tabyl(Knowledge_potential_causes_of_cholera)
+
+regression_table2<-treatment_practices_3 %>% 
+  mutate(treat_drinking_water=recode(
+    treat_drinking_water, 
+    "yes"=1, 
+    "no"=0
+  )) %>%
+ gtsummary::tbl_uvregression(method = glm,
+                               y = treat_drinking_water,
+                    method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+regression_table2 <- regression_table2 %>% 
+  as_flex_table()
+
+
+save_as_docx(regression_table2, path = here("output/regression_Table2.docx"))
+
+
+
+
+```
+
+
+## adjust regression
+
+```{r}
+
+model3_data<-treatment_practices_3 %>% 
+  mutate(treat_drinking_water=recode(
+    treat_drinking_water, 
+    "yes"=1, 
+    "no"=0
+  )) 
+
+model3<-glm( 
+  treat_drinking_water~
+  age_group+ 
+  sex+ 
+  level_education+
+  religion+
+    marital_status +
+      ethnicity+ 
+
+     main_source_of_drinking_water_dry_season+
+     main_source_of_drinking_water_wet_season+
+     health_risk_associated_with_drinking_untreated_water+
+     # difficulties_accessing_water_treatment_products,
+     Knowledge_potential_causes_of_cholera+
+     knowledge_prevention_measure,
+  
+  data = model3_data,
+  family = binomial(link = "logit")
+  
+)
+
+
+adjusted_table <- model3 %>%
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+adjusted_table
+
+
+```
+
+
+
+
+
+#spatial analysis
+
+#data cleaning for spatial
+
+```{r}
+
+checklist_data<-import(  here("data/checklist.csv") )
+
+
+checklist_data$Household_ID<-str_to_lower(checklist_data$Household_ID)
+
+cholera_data$Household_ID<-str_to_lower(cholera_data$Household_ID)
+
+
+ta_data<-cholera_data %>% 
+  select(
+    Household_ID, 
+    District,
+    ta
+  )
+
+merge_data_set<-merge(ta_data, checklist_data, by="Household_ID")
+
+
+names(merge_data_set)
+
+
+
+
+checklist_sf <- merge_data_set %>% 
+     drop_na() %>% 
+  sf::st_as_sf(coords = c("Click_to_start_Collecting_Geopoints_longitude", 
+                          "Click_to_start_Collecting_Geopoints_latitude"),
+               crs = 4326)
+
+
+
+```
+
+## Handwashing Facility Coverage
+```{r}
+# availability of hand washing facility
+Coverage_handwashing<-merge_data_set %>%
+  mutate(
+    ta=recode(
+      ta, 
+      "TA_Msosa"="TA_Karonga", 
+     "TA_Amidu"= "TA_Kalembo",
+      "TA_Chanthunya"="TA_Nsamala",
+     "TA_Nkaya"="TA_Nsamala",
+     "TA_Msamala"="TA_Nsamala", 
+     "TA_Phalula"="TA_Nsamala", 
+     "Limbe_Central_ward"="Blantyre_City", 
+     "Blantyre_City_Centre_ward"="Blantyre_City", 
+     "SC_Kambwiri"="TA_Kambwiri", 
+     "SC_Mwanza"="TA_Mwanza", 
+     "SC_Kambalame"="TA_Kambalame", 
+     "TA_Lundu_blantye"="TA_Lundu", 
+     "SC_Tsabango"="TA_Tsabango",
+      "SC_Njewa"= "TA_Njewa", 
+     "SC_Kamenya_Gwaza"="TA_Kamenya_gwaza", 
+     "SC_Namabvi"="TA_Namabvi",
+      "SC_Chowe"="TA_Chowe", 
+      "SC_Zilakoma"="TA_Zilakoma",
+      "SC_Fukamalaza"="TA_Fukamalaza"
+        )  ) %>% 
+  select(
+    District,
+    ta, 
+    household_handwashing_facility
+  ) %>% 
+  group_by(District, ta, household_handwashing_facility) %>% 
+  count(household_handwashing_facility) %>% 
+ pivot_wider(
+    names_from = "household_handwashing_facility", 
+    values_from = "n"
+  )
+
+# replace NA with Zero
+Coverage_handwashing[is.na(Coverage_handwashing)]<-0
+  
+
+Coverage_handwashing<-Coverage_handwashing %>% 
+  mutate(
+    
+    total=round(
+        not_available+available
+      ), 
+    
+    `coverage %`= round(
+      available/total, digits = 3
+    )*100
+  ) %>% 
+  select(
+    District, 
+    ta, 
+  `coverage %`
+  )
+
+
+Coverage_handwashing$ta <-gsub("_", " ", Coverage_handwashing$ta)
+
+
+
+```
+
+
+### Salima
+
+```{r}
+salima_shapefile<-ta_shapefile %>% 
+      filter(District=="Salima") 
+  # mutate(
+  #   ta=recode(
+  #     ta, 
+  #    "SC Kambwiri"="TA Kambwiri", 
+  #    "SC Mwanza"="TA Mwanza", 
+  #    "SC Kambalame"="TA Kambalame"
+  #   )
+  #   
+  # )
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(salima_shapefile)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+salima_data1<-Coverage_handwashing %>% 
+  filter(District=="Salima")
+
+salima_fs <- checklist_sf %>%
+  filter(District=="Salima")
+
+salima_merged<-merge(
+  salima_shapefile, 
+  salima_data1, 
+  by="ta"
+)
+
+
+# Apply the stretched bounding box to the map
+sa_map <- tm_shape(salima_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(salima_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(salima_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+  
+
+
+tmap_save(sa_map, filename = here("output/salima_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+```
+
+
+### Blantyre
+
+```{r, fig.height=7, fig.width=14}
+
+blantyre_shapefile<-ta_shapefile %>% 
+      filter(District=="Blantyre")
+
+   # ta_shapefile[ta_shapefile$ID_1==6, ]
+
+blantyre_data1<-Coverage_handwashing %>% 
+  filter(District=="Blantyre"|District=="Blantyre_City") 
+  # mutate(
+  #    ta=recode(
+  #      ta, 
+  #     "TA Lundu blantye"="TA Lundu", 
+  #    )   )
+
+
+unique(blantyre_shapefile$ta)
+unique(blantyre_data1$ta)
+
+Blantyre_fs <- checklist_sf %>%
+   filter(District=="Blantyre")
+
+
+
+Blantyre_merged<-merge(
+  blantyre_shapefile, 
+  blantyre_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Blantyre_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Blantyre_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Blantyre_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(blantyre_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Blantyre_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+
+ 
+
+
+```
+
+### Lilongwe
+
+
+```{r}
+Lilongwe_shapefile<-ta_shapefile %>% 
+      filter(District=="Lilongwe") 
+  # mutate(
+  #    ta=recode(
+  #      ta,
+  #     "SC Tsabango"="TA Tsabango",
+  #     "SC Njewa"= "TA Njewa"
+  #    )   )
+
+   
+
+Lilongwe_data1<-Coverage_handwashing %>% 
+  filter(District=="Lilongwe") 
+  
+
+
+unique(Lilongwe_data1$ta)
+unique(Lilongwe_shapefile$ta)
+
+Lilongwe_fs <- checklist_sf %>%
+   filter(District=="Lilongwe")
+
+
+
+Lilongwe_merged<-merge(
+  Lilongwe_shapefile, 
+  Lilongwe_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Lilongwe_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Lilongwe_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Lilongwe_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Lilongwe_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Lilongwe_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+
+
+
+```
+
+### Dedza
+
+```{r}
+
+Dedza_shapefile<-ta_shapefile %>% 
+      filter(District=="Dedza") %>% 
+      filter(ta!="Lake Malawi")  
+   # mutate(
+   #   ta=recode(
+   #     ta,
+   #    "SC Kamenya Gwaza"="TA Kamenya gwaza",
+   #     )   )
+
+   
+
+Dedza_data1<-Coverage_handwashing %>% 
+  filter(District=="Dedza") 
+  
+
+
+unique(Dedza_data1$ta)
+unique(Dedza_shapefile$ta)
+
+Dedza_fs <- checklist_sf %>%
+   filter(District=="Dedza")
+
+
+
+Dedza_merged<-merge(
+  Dedza_shapefile, 
+  Dedza_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Dedza_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Dedza_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Dedza_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Dedza_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Dedza_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+```
+
+### Mangochi
+
+```{r}
+
+Mangochi_shapefile<-ta_shapefile %>% 
+      filter(District=="Mangochi") %>% 
+   #    filter(ta!="Lake Malawi") %>% 
+   mutate(
+     ta=recode(
+       ta,
+      "SC Namabvi"="TA Namabvi",
+      "SC Chowe"="TA Chowe"
+       )   )
+
+   
+
+Mangochi_data1<-Coverage_handwashing %>% 
+  filter(District=="Mangochi") 
+  
+
+
+unique(Mangochi_data1$ta)
+unique(Mangochi_shapefile$ta)
+
+Mangochi_fs <- checklist_sf %>%
+   filter(District=="Mangochi")
+
+
+
+Mangochi_merged<-merge(
+  Mangochi_shapefile, 
+  Mangochi_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Mangochi_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.4, -0.09, 0.4, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Mangochi_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Mangochi_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Mangochi_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Mangochi_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+
+```
+
+### Nkhata Bay
+
+```{r}
+
+
+nkhata_shapefile<-ta_shapefile %>% 
+      filter(District=="Nkhata Bay")%>% 
+   # #    filter(ta!="Lake Malawi") %>% 
+   mutate(
+     ta=recode(
+       ta,
+      "SC Zilakoma"="TA Zilakoma",
+      "SC Fukamalaza"="TA Fukamalaza"
+       )   )
+
+   
+
+Nkhata_data1<-Coverage_handwashing %>% 
+  filter(District=="Nkhatabay") 
+  
+
+
+unique(Nkhata_data1$ta)
+unique(nkhata_shapefile$ta)
+
+Nkhata_fs <- checklist_sf %>%
+   filter(District=="Nkhatabay")
+
+
+
+nkhata_merged<-merge(
+  nkhata_shapefile, 
+  Nkhata_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(nkhata_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(nkhata_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Nkhata_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(nkhata_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Nkhata_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+```
+
+
+### Balaka
+
+```{r}
+
+Balaka_shapefile<-ta_shapefile %>% 
+      filter(District=="Balaka") 
+   
+
+Balaka_data1<-Coverage_handwashing %>% 
+  filter(District=="Balaka") 
+  
+
+
+unique(Balaka_data1$ta)
+unique(Balaka_shapefile$ta)
+
+Balaka_fs <- checklist_sf %>%
+   filter(District=="Balaka")
+
+
+
+Balaka_merged<-merge(
+  Balaka_shapefile, 
+  Balaka_data1, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Balaka_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Balaka_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              title = "Handwash_f coverage %") +
+  tm_shape(Balaka_fs) +
+  tm_dots(size = 0.8, col = 'household_handwashing_facility',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Balaka_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Balaka_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+ 
+```
+
+# Availability of Toilet Facility. 
+Under this section I will sub set the data set of Availability of toilet facility. 
+
+```{r}
+
+
+toilet_facility<-merge_data_set %>%
+  mutate(
+    ta=recode(
+      ta, 
+      "TA_Msosa"="TA_Karonga", 
+     "TA_Amidu"= "TA_Kalembo",
+      "TA_Chanthunya"="TA_Nsamala",
+     "TA_Nkaya"="TA_Nsamala",
+     "TA_Msamala"="TA_Nsamala", 
+     "TA_Phalula"="TA_Nsamala", 
+     "Limbe_Central_ward"="Blantyre_City", 
+     "Blantyre_City_Centre_ward"="Blantyre_City", 
+     "SC_Kambwiri"="TA_Kambwiri", 
+     "SC_Mwanza"="TA_Mwanza", 
+     "SC_Kambalame"="TA_Kambalame", 
+     "TA_Lundu_blantye"="TA_Lundu", 
+     "SC_Tsabango"="TA_Tsabango",
+      "SC_Njewa"= "TA_Njewa", 
+     "SC_Kamenya_Gwaza"="TA_Kamenya_gwaza", 
+     "SC_Namabvi"="TA_Namabvi",
+      "SC_Chowe"="TA_Chowe", 
+      "SC_Zilakoma"="TA_Zilakoma",
+      "SC_Fukamalaza"="TA_Fukamalaza"
+        )  ) %>% 
+  select(
+    District,
+    ta, 
+    toilet_facility_avaiable
+  ) %>% 
+  group_by(District, ta, toilet_facility_avaiable) %>% 
+  count(toilet_facility_avaiable) %>% 
+ pivot_wider(
+    names_from = "toilet_facility_avaiable", 
+    values_from = "n"
+  )
+
+# replace NA with Zero
+toilet_facility[is.na(toilet_facility)]<-0
+  
+
+toilet_facility<-toilet_facility %>% 
+  mutate(
+    
+    total=round(
+        not_available+available
+      ), 
+    
+    `coverage %`= round(
+      available/total, digits = 3
+    )*100
+  ) %>% 
+  select(
+    District, 
+    ta, 
+  `coverage %`
+  )
+
+
+toilet_facility$ta <-gsub("_", " ", toilet_facility$ta)
+
+
+
+```
+
+### Salima
+```{r}
+
+salima_shapefile<-ta_shapefile %>% 
+      filter(District=="Salima") %>% 
+   mutate(
+    ta=recode(
+      ta,
+     "SC Kambwiri"="TA Kambwiri",
+     "SC Mwanza"="TA Mwanza",
+     "SC Kambalame"="TA Kambalame"
+    )
+
+  )
+
+
+   
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(salima_shapefile)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+salima_toilet<-toilet_facility %>% 
+  filter(District=="Salima")
+
+salima_fs <- checklist_sf %>%
+  filter(District=="Salima")
+
+salima_merged<-merge(
+  salima_shapefile, 
+  salima_toilet, 
+  by="ta"
+)
+
+
+# Apply the stretched bounding box to the map
+sa_map <- tm_shape(salima_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              palette = "YlGn",
+              title = "Toilet Coverage %") +
+  tm_shape(salima_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(salima_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+  
+
+
+tmap_save(sa_map, filename = here("output/salima_toilet_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+sa_map
+
+```
+
+
+### Blantyre
+```{r}
+
+
+blantyre_shapefile<-ta_shapefile %>% 
+      filter(District=="Blantyre")
+
+   # ta_shapefile[ta_shapefile$ID_1==6, ]
+
+blantyre_toilet<-toilet_facility %>% 
+  filter(District=="Blantyre"|District=="Blantyre_City") %>% 
+  mutate(
+     ta=recode(
+       ta,
+      "TA Lundu blantye"="TA Lundu",
+     )   )
+
+
+Blantyre_fs <- checklist_sf %>%
+   filter(District=="Blantyre")
+
+
+
+Blantyre_merged<-merge(
+  blantyre_shapefile, 
+  blantyre_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Blantyre_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Blantyre_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont", 
+             palette = "YlGn",
+              title = "Toilet coverage %") +
+  tm_shape(Blantyre_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(blantyre_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Blantyre_toilet_map.png"), 
+          width = 16, height = 8, dpi = 300)
+
+map
+```
+### Lilongwe
+
+
+```{r}
+
+
+Lilongwe_shapefile<-ta_shapefile %>% 
+      filter(District=="Lilongwe") %>% 
+  mutate(
+     ta=recode(
+       ta,
+      "SC Tsabango"="TA Tsabango",
+      "SC Njewa"= "TA Njewa"
+     )   )
+
+   
+
+Lilongwe_toilet<-toilet_facility %>% 
+  filter(District=="Lilongwe") 
+  
+
+
+Lilongwe_fs <- checklist_sf %>%
+   filter(District=="Lilongwe")
+
+
+
+Lilongwe_merged<-merge(
+  Lilongwe_shapefile, 
+  Lilongwe_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Lilongwe_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Lilongwe_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+               palette = "YlGn", 
+              title = "Toilet coverage %") +
+  tm_shape(Lilongwe_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Lilongwe_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Lilongwe_toilet.png"), 
+          width = 16, height = 8, dpi = 300)
+
+
+map
+```
+
+### Dedza
+
+```{r}
+
+
+Dedza_shapefile<-ta_shapefile %>% 
+      filter(District=="Dedza") %>% 
+      filter(ta!="Lake Malawi") %>%   
+   mutate(
+     ta=recode(
+       ta,
+      "SC Kamenya Gwaza"="TA Kamenya gwaza",
+       )   )
+
+   
+
+Dedza_toilet<-toilet_facility %>% 
+  filter(District=="Dedza") 
+  
+
+
+Dedza_fs <- checklist_sf %>%
+   filter(District=="Dedza")
+
+
+
+Dedza_merged<-merge(
+  Dedza_shapefile, 
+  Dedza_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Dedza_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Dedza_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              palette = "YlGn",
+              title = "Toilet coverage %") +
+  tm_shape(Dedza_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Dedza_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Dedza_toilet.png"), 
+          width = 16, height = 8, dpi = 300)
+
+map
+```
+
+### Mangochi. 
+
+```{r}
+
+
+Mangochi_shapefile<-ta_shapefile %>% 
+      filter(District=="Mangochi") %>% 
+   #    filter(ta!="Lake Malawi") %>% 
+   mutate(
+     ta=recode(
+       ta,
+      "SC Namabvi"="TA Namabvi",
+      "SC Chowe"="TA Chowe"
+       )   )
+
+   
+
+Mangochi_toilet<-toilet_facility %>% 
+  filter(District=="Mangochi") 
+  
+
+
+Mangochi_fs <- checklist_sf %>%
+   filter(District=="Mangochi")
+
+
+
+Mangochi_merged<-merge(
+  Mangochi_shapefile, 
+  Mangochi_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Mangochi_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.4, -0.09, 0.4, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Mangochi_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+               palette = "YlGn",
+              title = "Handwash_f coverage %") +
+  tm_shape(Mangochi_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Mangochi_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Mangochi_toilet.png"), 
+          width = 16, height = 8, dpi = 300)
+
+map
+
+
+```
+
+### Nkhata Bay 
+
+```{r}
+
+nkhata_shapefile<-ta_shapefile %>% 
+      filter(District=="Nkhata Bay")%>% 
+   # #    filter(ta!="Lake Malawi") %>% 
+   mutate(
+     ta=recode(
+       ta,
+      "SC Zilakoma"="TA Zilakoma",
+      "SC Fukamalaza"="TA Fukamalaza"
+       )   )
+
+   
+
+Nkhata_toilet<-toilet_facility %>% 
+  filter(District=="Nkhatabay") 
+  
+
+
+Nkhata_fs <- checklist_sf %>%
+   filter(District=="Nkhatabay")
+
+
+
+nkhata_merged<-merge(
+  nkhata_shapefile, 
+  Nkhata_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(nkhata_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(nkhata_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              palette = "YlGn",
+              title = "Toilet coverage %") +
+  tm_shape(Nkhata_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(nkhata_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Nkhata_toilet.png"), 
+          width = 16, height = 8, dpi = 300)
+
+map
+
+
+```
+
+
+
+### Balaka
+
+```{r}
+
+
+Balaka_shapefile<-ta_shapefile %>% 
+      filter(District=="Balaka") 
+   
+
+Balaka_toilet<-toilet_facility %>% 
+  filter(District=="Balaka") 
+  
+
+
+Balaka_fs <- checklist_sf %>%
+   filter(District=="Balaka")
+
+
+
+Balaka_merged<-merge(
+  Balaka_shapefile, 
+  Balaka_toilet, 
+  by="ta"
+)
+
+
+# Adjust the bounding box by stretching its limits
+original_bbox <- st_bbox(Balaka_merged)  # Get the original bounding box
+stretched_bbox <- original_bbox + c(-0.2, -0.09, 0.2, 0.09)  # Adjust boundaries (xmin, ymin, xmax, ymax)
+
+# Apply the stretched bounding box to the map
+map <- tm_shape(Balaka_merged, bbox = stretched_bbox) +
+  tm_borders(col = "black", lwd = 1) +
+  tm_polygons(col = "coverage %", style = "cont",
+              palette = "YlGn",
+              title = "Toilet coverage %") +
+  tm_shape(Balaka_fs) +
+  tm_dots(size = 0.8, col = 'toilet_facility_avaiable',
+          palette = c("available" = "green", "not_available" = "red"),
+          title = "HH sampled") +
+  tm_shape(Balaka_shapefile) +
+  tm_borders(col = "grey") +
+  tm_text("ta", size = 0.8) +
+  tm_layout(frame = TRUE,
+            legend.position = c("left", "top"),
+            bg.color = "white",
+            legend.text.size = 0.9,
+            legend.title.size = 0.9)
+
+
+
+
+tmap_save(map, filename = here("output/Balaka_toilet.png"), 
+          width = 16, height = 8, dpi = 300)
+map
+
+```
+
+
+
+# regression on OCV 
+
+```{r}
+
+ocv_data <- cholera_data %>% 
+  select(c(17:25, 99:151, 179 ))
+
+
+names(ocv_data)
+ 
+table(ocv_data$vaccined_with_ocv)
+
+ocv_data %>% 
+  freq(vaccined_with_ocv)
+
+
+
+ocv_data1<- ocv_data %>% 
+  mutate(
+    received_ocv=recode(
+      received_ocv, 
+      "no"=0, 
+      "yes"=1
+    ), 
+    information_about_ocv_healthcare_providers=recode(
+    information_about_ocv_healthcare_providers, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_social_media=recode(
+    information_about_ocv_social_media, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_friends_family=recode(
+    information_about_ocv_friends_family, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_radio=recode(
+    information_about_ocv_radio, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_tv=recode(
+    information_about_ocv_tv, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_print_media=recode(
+    information_about_ocv_print_media, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_Internet=recode(
+    information_about_ocv_Internet, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_religious_leaders=recode(
+    information_about_ocv_religious_leaders, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_community_leaders=recode(
+    information_about_ocv_community_leaders, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_communication_campaign=recode(
+    information_about_ocv_communication_campaign, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    information_about_ocv_government=recode(
+    information_about_ocv_government, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    decision_about_getting_vaccinated_cultural_traditional=recode(
+    decision_about_getting_vaccinated_cultural_traditional, 
+    "0"="no", 
+    "1"="yes"
+    ) , 
+    decision_about_getting_vaccinated_religious=recode(
+    decision_about_getting_vaccinated_religious, 
+    "0"="no", 
+    "1"="yes"
+    ) , 
+    decision_about_getting_vaccinated_family_pressure=recode(
+    decision_about_getting_vaccinated_family_pressure, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    ocv_information_healthcare_providers=recode(
+    ocv_information_healthcare_providers, 
+    "0"="no", 
+    "1"="yes"
+    ) , 
+    ocv_information_social_media=recode(
+    ocv_information_social_media, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    ocv_information_friends_family=recode(
+    ocv_information_friends_family, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    ocv_information_radio=recode(
+    ocv_information_radio, 
+    "0"="no", 
+    "1"="yes"
+    ), 
+    ocv_information_tv=recode(
+    ocv_information_tv, 
+    "0"="no", 
+    "1"="yes"
+    ) , 
+    ocv_information_print_media=recode(
+    ocv_information_print_media, 
+    "0"="no", 
+    "1"="yes"
+    )   , 
+    ocv_information_Internet=recode(
+    ocv_information_Internet, 
+    "0"="no", 
+    "1"="yes"
+    )   , 
+    ocv_information_religious_leaders=recode(
+    ocv_information_religious_leaders, 
+    "0"="no", 
+    "1"="yes"
+    ) , 
+    ocv_information_community_leaders=recode(
+    ocv_information_community_leaders, 
+    "0"="no", 
+    "1"="yes"
+    )  , 
+    ocv_information_government=recode(
+    ocv_information_government, 
+    "0"="no", 
+    "1"="yes"
+    )   , 
+    ocv_information_communication_campaign=recode(
+    ocv_information_communication_campaign, 
+    "0"="no", 
+    "1"="yes"
+    )
+  ) %>% 
+  select(
+    received_ocv, 
+    sex,
+    age_group,
+    marital_status, 
+    level_education, 
+    occupation, 
+    ethnicity, 
+    religion, 
+    vaccined_with_ocv, 
+    ocv_prevent_cholera, 
+    information_about_ocv_healthcare_providers,            
+    information_about_ocv_social_media,                   
+    information_about_ocv_friends_family,                  
+    information_about_ocv_radio,                           
+    information_about_ocv_tv ,                              
+    information_about_ocv_print_media ,                    
+    information_about_ocv_Internet ,                       
+    information_about_ocv_religious_leaders,             
+    information_about_ocv_community_leaders ,              
+    information_about_ocv_government,                     
+    information_about_ocv_communication_campaign, 
+    safe_vaccine, 
+    decision_about_getting_vaccinated_cultural_traditional, 
+    decision_about_getting_vaccinated_religious, 
+    decision_about_getting_vaccinated_family_pressure, 
+    ocv_access, 
+    family_members_vaccinated, 
+    recommend_ocv_to_family, 
+    think_family_member_get_vaccinated, 
+    think_most_people_get_vaccinated, 
+    ocv_information_healthcare_providers, 
+    ocv_information_social_media, 
+    ocv_information_friends_family, 
+    ocv_information_radio, 
+    ocv_information_tv, 
+    ocv_information_print_media, 
+    ocv_information_Internet, 
+    ocv_information_religious_leaders, 
+    ocv_information_community_leaders, 
+    ocv_information_government, 
+    ocv_information_communication_campaign, 
+    ocv_prevent_cholera
+  ) %>% 
+  filter(occupation!="fishsellar") %>% 
+  filter(marital_status!="widower") %>% 
+  filter(ethnicity!="ngonde")
+
+
+
+
+```
+
+
+## crude OR 
+
+```{r}
+
+regression_table2<-ocv_data1 %>% 
+  gtsummary::tbl_uvregression(method = glm,
+                               y = received_ocv,
+                    method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+regression_table2<- regression_table2 %>% 
+  as_flex_table()
+
+
+save_as_docx(regression_table2,
+             path = here("output/OCV_Crude_OR_table3.docx"))
+
+regression_table2
+
+
+```
+
+## Adjusted ORs
+
+```{r}
+
+
+model4<-glm(
+  
+   received_ocv~ 
+    sex+
+    age_group+
+    marital_status+ 
+    level_education+ 
+    occupation+ 
+    ethnicity+ 
+    religion+ 
+    vaccined_with_ocv+ 
+    #ocv_prevent_cholera+ 
+    information_about_ocv_healthcare_providers+            
+    information_about_ocv_social_media+                   
+    information_about_ocv_friends_family+                  
+    information_about_ocv_radio+                           
+    information_about_ocv_tv+                              
+    information_about_ocv_print_media+                    
+    information_about_ocv_Internet+                       
+    information_about_ocv_religious_leaders+             
+    information_about_ocv_community_leaders+              
+    information_about_ocv_government+                     
+    information_about_ocv_communication_campaign+ 
+    safe_vaccine+ 
+    decision_about_getting_vaccinated_cultural_traditional+ 
+    decision_about_getting_vaccinated_religious+ 
+    decision_about_getting_vaccinated_family_pressure+ 
+    ocv_access+
+    family_members_vaccinated+ 
+    recommend_ocv_to_family+
+    # think_family_member_get_vaccinated+ 
+    # think_most_people_get_vaccinated+ 
+    ocv_information_healthcare_providers+ 
+    ocv_information_social_media+ 
+    ocv_information_friends_family+ 
+    ocv_information_radio+ 
+    ocv_information_tv+ 
+    ocv_information_print_media+ 
+    # ocv_information_Internet+ 
+    ocv_information_religious_leaders+ 
+    ocv_information_community_leaders+ 
+    # ocv_information_government+ 
+    ocv_information_communication_campaign,
+    # ocv_prevent_cholera, 
+  
+  data = ocv_data1,
+  family = binomial(link = "logit")
+  
+)
+
+
+ocv_adjusted_OR_table <- model4 %>%
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+ocv_adjusted_OR_table<- ocv_adjusted_OR_table %>% 
+  as_flex_table()
+
+
+save_as_docx(ocv_adjusted_OR_table,
+             path = here("output/Ocv_adjusted_table.docx"))
+
+
+
+
+
+```
+
+
+
+# Regression on Water treatment partices 
+
+```{r}
+
+names(cholera_data)
+
+model5_data<-cholera_data %>% 
+  select(
+    water_treatment_category, 
+    sex,
+    age_group, 
+    marital_status, 
+    level_education, 
+    occupation, 
+    ethnicity, 
+    religion, 
+    zone
+    
+  ) %>% 
+  mutate(
+    ethnicity=recode(
+      ethnicity, 
+      "sena"="other_enthni"
+    )
+  )
+
+
+
+model5<-model5_data %>% 
+  mutate(water_treatment_category=recode(
+    water_treatment_category, 
+    "Practices"=1, 
+    "Does Not Practice"=0
+  )) %>% 
+  gtsummary::tbl_uvregression(method = glm,
+                               y =water_treatment_category,
+                    method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+model5<- model5 %>% 
+  as_flex_table()
+
+
+
+save_as_docx(model5, path = here("output/model5_table.docx"))
+
+
+
+print(model5)
+
+
+```
+
+
+## Adjusted OR ( regression on water practices)
+
+
+```{r}
+
+model6 <- model5_data %>% 
+  mutate(water_treatment_category=recode(
+    water_treatment_category, 
+    "Practices"=1, 
+    "Does Not Practice"=0
+  ))  
+  
+model6<- glm(
+  
+  water_treatment_category~
+    sex+
+    age_group+
+    marital_status+ 
+    level_education+ 
+    occupation+ 
+    ethnicity+
+    religion+
+    zone, 
+  
+    data = model6,
+    family = binomial(link = "logit")
+     )
+
+
+model6 <- model6 %>%
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+
+model6 %>% 
+  as_flex_table()
+
+
+```
+
+
+
+
+
+
+
+
+
+

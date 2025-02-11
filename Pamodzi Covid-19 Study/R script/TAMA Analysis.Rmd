@@ -52,7 +52,11 @@ tama_data<- tama_data[-47, ]
 
 # the freq of the MoH and Genenral Public 
 
-table(tama_data$is_it_pre_or_post_survey)
+tama_data %>% 
+  filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
+  tabyl(general_public_or_mo_h)
+
+
 tama_data %>% 
   tabyl(is_it_pre_or_post_survey)
 
@@ -61,6 +65,8 @@ tapply(
   tama_data$age, 
   tama_data$is_it_pre_or_post_survey, median, na.rm=T
 )
+
+
 
 ```
 

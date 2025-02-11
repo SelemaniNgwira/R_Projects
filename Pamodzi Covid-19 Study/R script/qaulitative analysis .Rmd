@@ -1,0 +1,132 @@
+---
+title: "qaulitative analysis "
+output: html_document
+---
+
+```{r}
+if(!require(pacman))install.packages("pacman")
+
+pacman::p_load(tm, readtext, here, wordcloud, topicmodels)
+
+
+```
+
+```{r loading the text doc}
+
+# loading the text docx data
+text_data <- readtext( here("data/pamodzi.docx"))$text
+
+
+full_text <- paste(text_data, collapse = " ")
+
+
+
+corpus <- Corpus(VectorSource(full_text))
+
+
+```
+
+
+
+```{r}
+
+
+corpus <- tm_map(corpus, content_transformer(tolower))   # Convert to lowercase
+corpus <- tm_map(corpus, removePunctuation)              # Remove punctuation
+corpus <- tm_map(corpus, removeNumbers)                 # Remove numbers
+corpus <- tm_map(corpus, removeWords, stopwords("en"))  # Remove common words
+corpus <- tm_map(corpus, stripWhitespace)               # Remove extra spaces
+
+```
+
+
+
+```{r}
+
+
+tdm <- TermDocumentMatrix(corpus)
+dtm <- DocumentTermMatrix(corpus)
+
+```
+
+
+```{r}
+
+tdm_matrix <- as.matrix(tdm)
+dtm_matrix <- as.matrix(dtm)
+
+
+```
+
+
+```{r}
+
+findFreqTerms(dtm, lowfreq = 2)
+
+
+```
+
+
+```{r}
+
+
+findAssocs(dtm, terms = "health", corlimit = 0.2)  # Change "health" to a key
+
+```
+
+
+
+```{r}
+
+
+wordcloud(words = names(rowSums(dtm_matrix)), 
+          freq = rowSums(dtm_matrix), 
+          min.freq = 2, 
+          random.order = FALSE, 
+          colors = brewer.pal(8, "Dark2"))
+
+```
+
+
+
+
+```{r}
+lda_model <- LDA(dtm, k = 3, control = list(seed = 1234))  # k = number of topics
+
+
+
+
+```
+
+
+```{r}
+terms(lda_model, 10)  # Show top 10 terms for each topic
+
+
+```
+
+
+
+```{r}
+
+tdm_matrix <- as.matrix(tdm)
+
+
+
+
+```
+
+
+```{r}
+dist_matrix <- dist(tdm_matrix)
+hc <- hclust(dist_matrix, method = "ward.D")
+
+```
+
+
+```{r}
+
+plot(hc, hang = -1, main = "Hierarchical Clustering of Terms")
+
+```
+
