@@ -2,7 +2,9 @@
 title: "old code"
 author: "Selemani Ngwira"
 date: "2024-12-16"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE, message=FALSE}
@@ -19,12 +21,7 @@ pacman:: p_load(
 
 ```
 
----
-title: "Cholera Study Analysis"
-author: "Selemani Ngwira"
-date: "2025-01-08"
-output: html_document
----
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -35,7 +32,7 @@ if(!require(pacman)) install.packages("pacman")
 p_load(
   tidyverse,
   here,
-  #summarytools,
+  summarytools,
   janitor,
   sf, 
   terra,
@@ -44,14 +41,10 @@ p_load(
   flextable,
   rio, 
   gtsummary, 
-<<<<<<< Updated upstream
+
   epikit, 
-  pwr
-=======
-  epikit
-  
->>>>>>> Stashed changes
-)
+  pwr, 
+  webshot2)
 
 conflicted::conflict_prefer("select", "dplyr")
 
@@ -835,8 +828,95 @@ table17<- table17 %>%
   
 
 
+table17<- table17 %>% 
+  rename_with(~ str_replace_all(., "knowledge_on_cholera_season_", ""))
 
 
+table17<- table17 %>% 
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+
+table17<- table17 %>% 
+  as_flextable()
+
+save_as_docx(table17, path = here("output/table17.docx"))
+
+
+# Knowledge of cholera calendar year by district
+
+
+
+
+knowledge_on_cholera_calender_district<-cholera_data %>% 
+                       select(
+                         district, 
+                         residence, 
+                         zone,
+                         c(48:51)
+                       )
+
+
+
+
+
+
+
+
+district_table<- process_data(knowledge_on_cholera_calender_district,
+                              "district")
+
+zone_table<- process_data(knowledge_on_cholera_calender_district,
+                              "zone")
+
+residence_table<- process_data(knowledge_on_cholera_calender_district,
+                              "residence")
+
+
+
+district_table<- district_table %>% 
+  rename("variable" =district)
+
+zone_table<- zone_table %>% 
+  rename("variable" =zone)
+residence_table<- residence_table %>% 
+  rename("variable" =residence)
+
+
+table18<- bind_rows(
+  district_table,
+zone_table,
+  residence_table
+)
+
+
+table18<- table18 %>% 
+  mutate(
+    knowledge_on_cholera_season_in_winter=round(
+    knowledge_on_cholera_season_in_winter/total*100, 2), 
+    knowledge_on_cholera_season_in_summer=round(knowledge_on_cholera_season_in_summer/total*100, 2),
+   knowledge_on_cholera_season_in_rainy_season =round(knowledge_on_cholera_season_in_rainy_season/total*100, 2),
+    knowledge_on_cholera_season_do_not_know=round(knowledge_on_cholera_season_do_not_know/total*100, 2)
+    )
+
+
+
+
+table18<- table18 %>%
+  rename_with(~ str_replace_all(., "knowledge_on_cholera_season_", ""))
+
+table18<- table18 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+
+table18<- table18 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit")
+
+
+save_as_docx(table18, path = here("output/table18.docx"))
 
 
 ```
@@ -846,7 +926,93 @@ table17<- table17 %>%
 
 ```{r}
 
+knowledge_on_cholera_cause<-cholera_data %>% 
+                       select(sex, 
+                              age_group, 
+                              level_education, 
+                              religion, 
+                            contains("potential_causes_of_cholera_"),
+                            -contains("potential_causes_of_cholera_other_causes")
+                              )
 
+
+
+sex_table<- process_data(knowledge_on_cholera_cause,"sex")
+age_table<- process_data(knowledge_on_cholera_cause,"age_group")
+education_table<- process_data(knowledge_on_cholera_cause,"level_education")
+religion_table<- process_data(knowledge_on_cholera_cause,"religion")
+
+
+
+sex_table<- sex_table %>% 
+  rename("variable"=sex)
+
+age_table<- age_table %>%
+  rename("variable"=age_group)
+
+education_table<- education_table %>%
+  rename("variable"=level_education)
+
+
+religion_table<- religion_table %>%
+  rename("variable"=religion)
+
+
+table19<- bind_rows( sex_table, 
+                     age_table, 
+                     education_table,
+                     religion_table) 
+
+table19 %>% 
+  mutate(
+  potential_causes_of_cholera_affected_by_cholera_germ= round(potential_causes_of_cholera_affected_by_cholera_germ/total*100, 2),                                    
+ potential_causes_of_cholera_affected_by_rota_virus =round(
+ potential_causes_of_cholera_affected_by_rota_virus/total*100, 2),
+                                      
+potential_causes_of_cholera_density_population =round(potential_causes_of_cholera_density_population/total*100, 2),                                         
+potential_causes_of_cholera_donot_know_1=round( potential_causes_of_cholera_donot_know_1/total*100, 2),                                                 
+potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination= round(potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination/total*100, 2),
+ 
+ potential_causes_of_cholera_hot_humid_climate=round( potential_causes_of_cholera_hot_humid_climate/total*100, 2),                                          
+ potential_causes_of_cholera_illiteracy_ignorance_on_health_education=round(
+ potential_causes_of_cholera_illiteracy_ignorance_on_health_education/total*100, 2),
+                     
+ potential_causes_of_cholera_inadeguate_safe_water_supply_system=round(
+   potential_causes_of_cholera_inadeguate_safe_water_supply_system/total*100, 2),
+                           
+potential_causes_of_cholera_lack_of_safe_drinking_water=round(
+  potential_causes_of_cholera_lack_of_safe_drinking_water/total*100, 2),
+                                 
+potential_causes_of_cholera_not_taking_vaccine=round(
+  potential_causes_of_cholera_not_taking_vaccine/total*100, 2),
+                                          
+potential_causes_of_cholera_not_wash_hands=round(
+  potential_causes_of_cholera_not_wash_hands/total*100, 2),
+                                              
+potential_causes_of_cholera_touching_food_without_clean_hands=round(
+  potential_causes_of_cholera_touching_food_without_clean_hands/total*100, 2),
+                            
+potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse =round(
+  potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse/total*100, 2),
+                     
+potential_causes_of_cholera_unhygiene_living_environment=round(
+  potential_causes_of_cholera_unhygiene_living_environment/total*100, 2)
+    )
+
+table19<- table19 %>%
+  rename_with(~ str_replace_all(., "potential_causes_of_cholera_", ""))
+
+table19<- table19 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+table19<- table19 %>%
+  as_flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit")
+
+
+save_as_docx(table19, path = here("output/table19.docx"))
+  
 
 
 
@@ -857,7 +1023,6 @@ table17<- table17 %>%
 
 
 ```{r}
-
 
 
 
