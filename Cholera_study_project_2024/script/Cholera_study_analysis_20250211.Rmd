@@ -796,6 +796,48 @@ knowledge_on_cholera_calender<-cholera_data %>%
 
 knowledge_on_cholera_calender
 
+sex_table<- process_data(knowledge_on_cholera_calender, "sex")
+age_group_table <- process_data(knowledge_on_cholera_calender,
+                                "age_group")
+education_table <- process_data(knowledge_on_cholera_calender,
+                                "level_education")
+religion_table <- process_data(knowledge_on_cholera_calender, "religion")
+
+sex_table<- sex_table %>% 
+  rename("variable" =sex)
+
+
+age_group_table<- age_group_table %>%
+  rename("variable" = age_group)
+
+education_table<- education_group %>%
+  rename("variable" = level_education)
+
+religion_table<- religion_group %>%
+  rename("variable" = religion)
+
+table17<- bind_rows(
+  sex_table, 
+  age_group_table,
+  education_table,
+  religion_table
+)
+
+
+table17<- table17 %>% 
+  mutate(
+    knowledge_on_cholera_season_in_winter=round(
+    knowledge_on_cholera_season_in_winter/total*100, 2), 
+    knowledge_on_cholera_season_in_summer=round(knowledge_on_cholera_season_in_summer/total*100, 2),
+   knowledge_on_cholera_season_in_rainy_season =round(knowledge_on_cholera_season_in_rainy_season/total*100, 2),
+    knowledge_on_cholera_season_do_not_know=round(knowledge_on_cholera_season_do_not_know/total*100, 2)
+    )
+  
+
+
+
+
+
 
 ```
 
