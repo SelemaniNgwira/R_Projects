@@ -32,7 +32,7 @@ p_load(
 # loading data
 
 
-```{r cars}
+```{r}
 
 
 # importing the data 
@@ -284,8 +284,43 @@ save_as_docx(table3, path = here("output/table3.docx"))
 
 ```{r}
 
+table3.1.0 <- cholera_data |> 
+            select(ocv_prevent_cholera,age_group,sex,level_education) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              sex ~ c(0, 2),
+              age_group ~ c(0, 2),
+              level_education ~ c(0, 2)
+            ))
+
 
  
+table3.1.0 <-  table3.1.0 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.1.0, path = here("output/table3_1_0.docx"))
+
+
+table3.1.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district,zone) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
+
+
+ 
+table3.1.1 <-  table3.1.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.1.1, path = here("output/table3_1_1.docx"))
+
+
 ```
 
 ## 3.2.0  Believe Cholera Vaccine Prevent Cholera by Sex, Level of Education 
