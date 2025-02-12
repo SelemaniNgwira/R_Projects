@@ -40,18 +40,18 @@ p_load(
   OpenStreetMap,
   flextable,
   rio, 
+<<<<<<< HEAD
   gtsummary, 
 
   epikit, 
   pwr, 
   webshot2)
+=======
+  gtsummary) 
+>>>>>>> a305aa9af5c8ef665cf6333a3034c57790e4d2ee
 
 conflicted::conflict_prefer("select", "dplyr")
 
-pwr.p.test(h = ES.h(0.3764, 0.5),
-                           n = 797,
-                           sig.level = 0.05,
-                           alternative = "two.sided")
 
 ```
 
@@ -79,10 +79,10 @@ cholera_data<- tibble(cholera_data)
 
 # filtering out those less than 18 years 
 cholera_data<-cholera_data %>% 
-  filter(age_group!="<18")
+  dplyr::filter(age_group!="<18")
 
 
-ta_shapefile<-st_read(
+ta_shapefile<-sf:: st_read(
   here("data/MWI_adm1.shp")
 ) %>% 
   select(
@@ -1056,7 +1056,6 @@ save_as_docx(table19, path = here("output/table19.docx"))
 
 
 ```{r}
-
 table3.1.0 <- cholera_data |> 
             select(vaccined_with_ocv,age_group,sex,level_education) %>% 
             tbl_summary(vaccined_with_ocv,,
@@ -1071,6 +1070,10 @@ table3.1.0 <- cholera_data |>
  
 table3.1.0 <-  table3.1.0 %>% 
          as_flex_table()
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
 
 
 save_as_docx( table3.1.0, path = here("output/table3_1_0.docx"))
@@ -1089,16 +1092,17 @@ table3.1.1 <- cholera_data |>
  
 table3.1.1 <-  table3.1.1 %>% 
          as_flex_table()
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
 
 
 save_as_docx( table3.1.1, path = here("output/table3_1_1.docx"))
 
 
 ```
-```{r}
-table3.1.1
-table3.1.0
-```
+
 
 ## 3.2.0  Believe Cholera Vaccine Prevent Cholera by Sex, Level of Education 
 
@@ -1117,6 +1121,10 @@ table3.2.0 <- cholera_data |>
  
 table3.2.0 <-  table3.2.0 %>% 
          as_flex_table()
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
 
 
 save_as_docx( table3.2.0, path = here("output/table3_2_0.docx"))
@@ -1141,30 +1149,35 @@ table3.2.1 <- cholera_data |>
  
 table3.2.1 <-  table3.2.1 %>% 
          as_flex_table()
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
 
 
 save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 ```
 
-##3.3. 0 Information about Cholera Vaccine  by Sex, Age Group,  Education, Religion 
+##3.3. 0 Information about Cholera Vaccine  by Sex, Age Group,  Education, Religion, Residence
 
 ```{r}
-methods_water <- cholera_data %>% 
+ocv_info <- cholera_data %>% 
                select(
                  sex,
                   age_group, 
                   level_education, 
-                  religion, 
-                 c(34:41)
+                  religion,
+                 c(139:151)
                )
 
  
 
-sex_table<- process_data(methods_water,"sex")
-age_group_table<- process_data(methods_water,"age_group")
-education_table<- process_data(methods_water,"level_education")
-religion_table<- process_data(methods_water,"religion")
+sex_table<- process_data(ocv_info,"sex")
+age_group_table<- process_data(ocv_info,"age_group")
+education_table<- process_data(ocv_info,"level_education")
+religion_table<- process_data(ocv_info,"religion")
+
 
 sex_table <- sex_table %>% 
   rename(
@@ -1190,68 +1203,143 @@ religion_table<- religion_table %>%
 
 
 # Combine all tables into one
-table10 <- bind_rows(sex_table,
+table3.3.0 <- bind_rows(sex_table,
                      age_group_table,
                      education_table,
                      religion_table)
 
 
 
-table10<- table10 %>% 
+table3.3.0 <- table3.3.0 %>% 
   mutate(
- method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
- method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
- method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
- method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
- method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
- method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
- method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
- method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
+ ocv_information_social_media= round(ocv_information_social_media/total*100, 2) ,         
+ocv_information_radio= round(ocv_information_radio/total*100, 2),   
+
+ ocv_information_print_media= round(ocv_information_print_media/total*100, 2),
+
+ ocv_information_religious_leaders=round(ocv_information_religious_leaders/total*100, 2),    
+ ocv_information_government=round(ocv_information_government/total*100, 2), 
+
+ ocv_information_other_information = round(ocv_information_other_information/total*100, 2),     
+
+ ocv_information_healthcare_providers= round(ocv_information_healthcare_providers/total*100, 2),
+
+ ocv_information_friends_family  = round(ocv_information_friends_family/total*100, 2),
+
+ocv_information_internet=round(ocv_information_internet/total*100, 2),
+
+ocv_information_community_leaders = round(ocv_information_community_leaders/total*100, 2),
+ocv_information_communication_campaign = round(ocv_information_communication_campaign/total*100, 2)#,
+#other_source_of_ocv =round(other_source_of_ocv/total*100, 2)
     )
 
 
-table10<- table10 %>%
-  rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
 
 
-table10<- table10 %>%
+table3.3.0 <- table3.3.0 %>%
+  rename_with(~ str_replace_all(., "ocv_information_", " "))
+
+table3.3.0 <- table3.3.0 %>%
   rename_with(~ str_replace_all(., "_", " "))
 
 
-table10<- table10 %>% 
-  as_flextable()
+table3.3.0 <- table3.3.0 %>% 
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
 
+table3.3.0
 
-save_as_docx(table10, path = here("output/table10.docx"))
-
-table10
-
+save_as_docx(table3.3.0, path = here("output/table3_3_0.docx"))
 
 
 
 ```
 
+```{r}
+residence_table
+```
 
 
 ## 3.3. 1 Information about Cholera Vaccine  by  District and Zone 
 
 ```{r}
-table3.2.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district,zone) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
+ocv_info <- cholera_data %>% 
+               select(
+                 district,
+                 zone,
+                 residence,
+                 c(139:151)
+               )
+
+district_table<- process_data(ocv_info,"district")
+age_group_table<- process_data(ocv_info,"zone")
+residence_table<- process_data(ocv_info,"residence")
+
+district_table <- district_table %>% 
+  rename(
+    "variable" = district
+  )
+
+zone_table<- age_group_table %>% 
+  rename(
+    "variable"= zone
+  )
 
 
- 
-table3.2.1 <-  table3.2.1 %>% 
-         as_flex_table()
+residence_table <- residence_table %>% 
+  rename(
+    "variable"=residence
+  )
+
+# Combine all tables into one
+table3.3.1 <- bind_rows(district_table,
+                     zone_table,
+                     residence_table)
 
 
-save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
+
+table3.3.1 <- table3.3.1 %>% 
+  mutate(
+ ocv_information_social_media= round(ocv_information_social_media/total*100, 2) ,         
+ocv_information_radio= round(ocv_information_radio/total*100, 2),   
+
+ ocv_information_print_media= round(ocv_information_print_media/total*100, 2),
+
+ ocv_information_religious_leaders=round(ocv_information_religious_leaders/total*100, 2),    
+ ocv_information_government=round(ocv_information_government/total*100, 2), 
+
+ ocv_information_other_information = round(ocv_information_other_information/total*100, 2),     
+
+ ocv_information_healthcare_providers= round(ocv_information_healthcare_providers/total*100, 2),
+
+ ocv_information_friends_family  = round(ocv_information_friends_family/total*100, 2),
+
+ocv_information_internet=round(ocv_information_internet/total*100, 2),
+
+ocv_information_community_leaders = round(ocv_information_community_leaders/total*100, 2),
+ocv_information_communication_campaign = round(ocv_information_communication_campaign/total*100, 2)#,
+#other_source_of_ocv =round(other_source_of_ocv/total*100, 2)
+    )
+
+
+
+
+table3.3.1 <- table3.3.1 %>%
+  rename_with(~ str_replace_all(., "ocv_information_", " "))
+
+table3.3.1 <- table3.3.1 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+table3.3.1 <- table3.3.1 %>% 
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
+table3.3.1
+
+save_as_docx(table3.3.1, path = here("output/table3_3_1.docx"))
 
 
 ```
@@ -1285,7 +1373,10 @@ table3.4.0 <- cholera_data %>%
 
 # Convert to a flextable for Word export
 table_safe_combined <- table3.4.0 %>%
-  as_flex_table()
+  as_flex_table() |>  
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
 
 # Save as a Word document
 save_as_docx(table3.4.0, path = here("output/table3_4_0.docx"))
@@ -1309,7 +1400,10 @@ table3.4.1 <- cholera_data |>
 
  
 table3.4.1 <-  table3.4.1 %>% 
-         as_flex_table()
+         as_flex_table() |>  
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
 
 
 save_as_docx( table3.1.1, path = here("output/table3_4_1.docx"))
@@ -1323,7 +1417,72 @@ table3.4.1
 
 ```{r}
 
-              
+cI_info <- cholera_data %>% 
+               select(
+                 district,
+                 zone,
+                 residence,
+                 c(119:123)
+               )
+
+district_table<- process_data(cI_info,"district")
+age_group_table<- process_data(cI_info,"zone")
+residence_table<- process_data(cI_info,"residence")
+
+district_table <- district_table %>% 
+  rename(
+    "variable" = district
+  )
+
+zone_table<- age_group_table %>% 
+  rename(
+    "variable"= zone
+  )
+
+
+residence_table <- residence_table %>% 
+  rename(
+    "variable"=residence
+  )
+
+# Combine all tables into one
+table3.5.0 <- bind_rows(district_table,
+                     zone_table,
+                     residence_table)
+
+
+
+table3.5.0  <- table3.5.0  %>% 
+  mutate(
+ decision_about_getting_vaccinated_cultural_traditional= round(decision_about_getting_vaccinated_cultural_traditional/total*100, 2) , 
+ 
+decision_about_getting_vaccinated_religious= round(decision_about_getting_vaccinated_religious/total*100, 2),   
+
+ decision_about_getting_vaccinated_family_pressure= round(decision_about_getting_vaccinated_family_pressure/total*100, 2),
+
+ decision_about_getting_vaccinated_none_2=round(decision_about_getting_vaccinated_none_2/total*100, 2),    
+
+decision_about_getting_vaccinated_other_decision=round(decision_about_getting_vaccinated_other_decision/total*100, 2), 
+
+)
+
+
+table3.5.0  <- table3.5.0  %>%
+  rename_with(~ str_replace_all(., "decision_about_getting_vaccinated_", " "))
+
+table3.5.0  <- table3.5.0  %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+table3.5.0  <- table3.5.0  |>  
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
+table3.5.0 
+
+save_as_docx(table3.5.0 , path = here("output/table3_5_0.docx"))
+       
 
 
 ```
@@ -1401,7 +1560,15 @@ table3.6.1
 ##3. 7. 0 OCV status by Sex, Age Group, Education and Religious 
 
 ```{r}
-
+cholera_data |> 
+  select(sex,age_group,level_education,religion,received_ocv,residence) |>
+  tbl_summary(received_ocv,
+              percent = "row",
+              digits = list(
+              sex ~ c(0, 2),
+              age_group ~ c(0, 2),
+              level_education ~ c(0, 2)
+              ))
 
 
 ```
@@ -1434,40 +1601,144 @@ table3.6.1
 
 ```{r}
 
+table3.4.1 <- cholera_data |> 
+            select(safe_vaccine,district,zone) %>% 
+            tbl_summary(safe_vaccine,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
+
+
+ 
+table3.4.1 <-  table3.4.1 %>% 
+         as_flex_table() |>  
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
+
+save_as_docx( table3.1.1, path = here("output/table3_4_1.docx"))
+
+table3.4.1
+
+
+```
+
+## 3. 5. 0 Community Influence decision about vaccination by District and Zone 
+
+```{r}
+
+cI_info <- cholera_data %>% 
+               select(
+                 district,
+                 zone,
+                 residence,
+                 c(119:123)
+               )
+
+district_table<- process_data(cI_info,"district")
+age_group_table<- process_data(cI_info,"zone")
+residence_table<- process_data(cI_info,"residence")
+
+district_table <- district_table %>% 
+  rename(
+    "variable" = district
+  )
+
+zone_table<- age_group_table %>% 
+  rename(
+    "variable"= zone
+  )
+
+
+residence_table <- residence_table %>% 
+  rename(
+    "variable"=residence
+  )
+
+# Combine all tables into one
+table3.5.0 <- bind_rows(district_table,
+                     zone_table,
+                     residence_table)
+
+
+
+table3.5.0  <- table3.5.0  %>% 
+  mutate(
+ decision_about_getting_vaccinated_cultural_traditional= round(decision_about_getting_vaccinated_cultural_traditional/total*100, 2) , 
+ 
+decision_about_getting_vaccinated_religious= round(decision_about_getting_vaccinated_religious/total*100, 2),   
+
+ decision_about_getting_vaccinated_family_pressure= round(decision_about_getting_vaccinated_family_pressure/total*100, 2),
+
+ decision_about_getting_vaccinated_none_2=round(decision_about_getting_vaccinated_none_2/total*100, 2),    
+
+decision_about_getting_vaccinated_other_decision=round(decision_about_getting_vaccinated_other_decision/total*100, 2), 
+
+)
+
+
+table3.5.0  <- table3.5.0  %>%
+  rename_with(~ str_replace_all(., "decision_about_getting_vaccinated_", " "))
+
+table3.5.0  <- table3.5.0  %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+table3.5.0  <- table3.5.0  |>  
+  as_flextable() |> 
+   autofit() |> 
+  set_table_properties(layout = "autofit")
+
+table3.5.0 
+
+save_as_docx(table3.5.0 , path = here("output/table3_5_0.docx"))
+
 ```
 
 
 ## 3. 9. 1 Willingness to get vaccinated in the Future OCV by District and Zone 
 
 ```{r}
+table3.9.1 <- cholera_data |> 
+            select(district,zone,will_to_get_vaccinated,residence) %>% 
+            tbl_summary(will_to_get_vaccinated,,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
 
+
+ 
+table3.9.1 <-  table3.9.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.9.1, path = here("output/table3_9_1.docx"))
+
+table3.9.1
 ```
 
 
 ## 3. 10. 0 Recommend a Family member to get vaccinated by District and Zone 
 
 ```{r}
+table3.10.0 <- cholera_data %>% 
+               select(
+                 district,
+                 zone,
+                 residence,
+                 recommend_ocv_to_family
+               ) |> 
+  tbl_summary(recommend_ocv_to_family,
+              percent = "row",
+              digits = list(
+                district~c(0,2),
+                zone~c(0,2)
+              ))
+table3.10.0
 
 ```
-
-
-
-## 3. 13. 0 Prefer ways to Receive Information about Vaccine by Sex, Age Group and Education and Religious 
-```{r}
-
-```
-
-
-
-## 3. 13. 1 Prefer ways to Receive Information about Vaccine by District and Zone 
-
-```{r}
-
-```
-
-
-
-
-
-
-
