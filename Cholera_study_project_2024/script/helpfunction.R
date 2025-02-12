@@ -1,4 +1,6 @@
 process_data <- function(data, group_var) {
+  
+  # Identify numeric columns
   numeric_cols <- names(select(data, where(is.numeric)))
   
   data %>% 
