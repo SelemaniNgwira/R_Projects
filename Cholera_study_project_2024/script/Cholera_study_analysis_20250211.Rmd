@@ -728,7 +728,7 @@ freq_water_treatment_district <- cholera_data %>%
                                 )
 
 
-table15<- freq_water_treatment_district %>% 
+table15_a<- freq_water_treatment_district %>% 
           tbl_summary(often_treat_water, 
                       digits = list(
                         district~c(0,2), 
@@ -736,11 +736,11 @@ table15<- freq_water_treatment_district %>%
                       ))
 
 
-table15<- table15 %>% 
+table15_a<- table15_a %>% 
   as_flex_table()
 
 
-save_as_docx(table15, path = here("output/table15.docx"))
+save_as_docx(table15_a, path = here("output/table15_a.docx"))
 
 
 
