@@ -796,20 +796,72 @@ freq_water_treatment_district %>%
 # Social and cultural behavior determinants of vaccine uptake 
 
 
-## 3.1. 0 Aware of Cholera Vaccine by  Age- Group, Sex Level of Education, and 3.1. 1 Aware of Cholera Vaccine by  District and Zone  
+## 3.1. 0 Aware of Cholera Vaccine by  Age- Group, Sex Level of Education, and 3.1. 1 Aware of Cholera Vaccine by  District and Zone  ?? whcih variable is this? ignore the code below
+
 
 
 
 ```{r}
 
+table3.1.0 <- cholera_data |> 
+            select(ocv_prevent_cholera,age_group,sex,level_education) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              sex ~ c(0, 2),
+              age_group ~ c(0, 2),
+              level_education ~ c(0, 2)
+            ))
+
 
  
+table3.1.0 <-  table3.1.0 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.1.0, path = here("output/table3_1_0.docx"))
+
+
+table3.1.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district,zone) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
+
+
+ 
+table3.1.1 <-  table3.1.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.1.1, path = here("output/table3_1_1.docx"))
+
+
 ```
 
 ## 3.2.0  Believe Cholera Vaccine Prevent Cholera by Sex, Level of Education 
 
 ```{r}
+table3.2.0 <- cholera_data |> 
+            select(ocv_prevent_cholera,age_group,sex,level_education) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              sex ~ c(0, 2),
+              age_group ~ c(0, 2),
+              level_education ~ c(0, 2)
+            ))
 
+
+ 
+table3.2.0 <-  table3.2.0 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.2.0, path = here("output/table3_2_0.docx"))
 
 
 ```
@@ -818,7 +870,22 @@ freq_water_treatment_district %>%
 
 ```{r}
 
+table3.2.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district,zone) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
 
+
+ 
+table3.2.1 <-  table3.2.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 ```
 
@@ -837,7 +904,22 @@ freq_water_treatment_district %>%
 ## 3.3. 1 Information about Cholera Vaccine  by  District and Zone 
 
 ```{r}
+table3.2.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district,zone) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
 
+
+ 
+table3.2.1 <-  table3.2.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 
 ```
@@ -848,15 +930,59 @@ freq_water_treatment_district %>%
 
 ```{r}
 
+table3.4.0 <- cholera_data %>%
+  select(sex, age_group, level_education, religion, safe_vaccine) %>%
+  tbl_summary(
+    by = safe_vaccine,
+    statistic = list(
+      sex ~ "{n} ({p}%)",
+      age_group ~ "{n} ({p}%)",
+      level_education ~ "{n} ({p}%)",
+      religion ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      sex ~ c(0, 2),
+      age_group ~ c(0, 2),
+      level_education ~ c(0, 2),
+      religion ~ c(0, 2)
+    ),
+    percent = "row"
+  ) %>%
+  modify_header(label = "**Demographic Variable**") %>%
+  bold_labels()
 
+# Convert to a flextable for Word export
+table_safe_combined <- table3.4.0 %>%
+  as_flex_table()
 
+# Save as a Word document
+save_as_docx(table3.4.0, path = here("output/table3_4_0.docx"))
+
+table3.4.0
 ```
 
 
 ##3. 4. 1 Safe of Cholera Vaccine by District and Zone 
 
 ```{r}
+table3.4.1 <- cholera_data |> 
+            select(safe_vaccine,district,zone) %>% 
+            tbl_summary(safe_vaccine,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2),
+              zone ~ c(0, 2)
+            ))
 
+
+ 
+table3.4.1 <-  table3.4.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.1.1, path = here("output/table3_4_1.docx"))
+
+table3.4.1
 
 
 ```
@@ -876,7 +1002,35 @@ freq_water_treatment_district %>%
 
 ```{r}
 
+table3.6.0 <- cholera_data %>%
+  select(sex, age_group, level_education, religion, ocv_access) %>%
+  tbl_summary(
+    by = ocv_access,
+    statistic = list(
+      sex ~ "{n} ({p}%)",
+      age_group ~ "{n} ({p}%)",
+      level_education ~ "{n} ({p}%)",
+      religion ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      sex ~ c(0, 2),
+      age_group ~ c(0, 2),
+      level_education ~ c(0, 2),
+      religion ~ c(0, 2)
+    ),
+    percent = "row"
+  ) %>%
+  modify_header(label = "**Demographic Variable**") %>%
+  bold_labels()
 
+# Convert to a flextable for Word export
+table_safe_combined <- table3.6.0 %>%
+  as_flex_table()
+
+# Save as a Word document
+save_as_docx(table3.6.0, path = here("output/table3_6_0.docx"))
+
+table3.6.0
 
 
 
@@ -890,9 +1044,23 @@ freq_water_treatment_district %>%
 
 ```{r}
 
+table3.6.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2)
+            ))
 
 
+ 
+table3.6.1 <-  table3.6.1 %>% 
+         as_flex_table()
 
+
+save_as_docx( table3.6.1, path = here("output/table3_6_1.docx"))
+
+table3.6.1
 
 ```
 
@@ -902,19 +1070,30 @@ freq_water_treatment_district %>%
 
 ```{r}
 
-```
 
-
-
-## 3. 7. 0 OCV status by District and Zone  
-
-```{r}
 
 ```
 
 
 ## 3. 8. 0 Family Members vaccinated by District and Zone 
 ```{r}
+table3.6.1 <- cholera_data |> 
+            select(ocv_prevent_cholera,district) %>% 
+            tbl_summary(ocv_prevent_cholera,
+            percent = "row",
+            digits = list(
+              district~ c(0, 2)
+            ))
+
+
+ 
+table3.6.1 <-  table3.6.1 %>% 
+         as_flex_table()
+
+
+save_as_docx( table3.6.1, path = here("output/table3_6_1.docx"))
+
+table3.6.1
 
 ```
 
@@ -960,21 +1139,3 @@ freq_water_treatment_district %>%
 
 
 
-
-
-```{r cars}
-
-cholera_data<-import(here("data/cholera_study_20241216.xlsx"))
-
-
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
