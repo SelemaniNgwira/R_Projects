@@ -1,16 +1,35 @@
 ---
+title: "old code"
+author: "Selemani Ngwira"
+date: "2024-12-16"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# loading packages, first load the pacman package using a logic code
+
+if(!require(pacman)) install.packages("pacman")
+pacman:: p_load(
+  tidyverse, rio, here,
+  janitor)
+
+
+```
+
+---
 title: "Cholera Study Analysis"
 author: "Selemani Ngwira"
 date: "2025-01-08"
-output:
-  word_document: default
-  html_document: default
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-#seleman
+
 if(!require(pacman)) install.packages("pacman")
 
 p_load(
@@ -34,12 +53,16 @@ p_load(
 # loading data
 
 
-```{r}
+```{r cars}
 
 
 # importing the data 
 cholera_data<- import( here("data/cholera_data_.csv")) %>%
-                clean_names()
+                clean_names() %>% 
+  mutate(district=recode(
+      district, 
+      "Blantyre_City"="Blantyre"
+    ))
 
 # changing the data.frame into tibble object for easy handling 
 cholera_data<- tibble(cholera_data)
@@ -150,12 +173,112 @@ save_as_docx(table3, path = here("output/table3.docx"))
 
 
 
-
-
 ## 2.3. 0 Main sources of drinking water during the dry season by District/ Township 
 
 ```{r}
+drinking_dry<-cholera_data %>% 
+  select(district, 
+         zone, 
+         main_source_of_drinking_water_dry_season)
 
+
+drinking_dry<- drinking_dry %>% 
+  group_by( district, 
+           main_source_of_drinking_water_dry_season) %>%
+  count(main_source_of_drinking_water_dry_season) %>%
+    pivot_wider(
+    names_from = main_source_of_drinking_water_dry_season, 
+    values_from = n
+  )
+
+# replacing NA with Zero 
+drinking_dry[is.na(drinking_dry)]<-0
+
+
+table4<- drinking_dry %>% 
+  rowwise() %>% 
+  mutate(total= sum(across(where(is.numeric))), 
+         
+         community_standpipe=round(community_standpipe/total*100, 2), 
+         borehole_1=round(borehole_1/total*100, 2 ), 
+         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
+         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
+         protected_well_1=round(protected_well_1/total*100, 2), 
+         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
+         other_drinking_source=round(other_drinking_source/total*100, 2), 
+         river_stream=round(river_stream/total*100, 2), 
+         spring_1=round(spring_1/total*100, 2), 
+         dam=round(dam/total/100, 2), 
+         bottled_water=round(bottled_water/total*100, 2), 
+         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
+         lake=round(lake/total*100, 2)
+         
+         )
+
+
+   table4<-table4 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+
+
+table4<- table4 %>% 
+  as_flextable()
+
+
+save_as_docx(table4, path = here("output/table4.docx"))
+
+
+
+drinking_dry_zone<-cholera_data %>% 
+  select(zone, 
+         main_source_of_drinking_water_dry_season)
+
+drinking_dry_zone<- drinking_dry_zone%>% 
+  group_by( zone, 
+           main_source_of_drinking_water_dry_season) %>%
+  count(main_source_of_drinking_water_dry_season) %>%
+    pivot_wider(
+    names_from = main_source_of_drinking_water_dry_season, 
+    values_from = n
+  )
+
+
+# replacing NA with Zero 
+drinking_dry_zone[is.na(drinking_dry_zone)]<-0
+
+    table5<- drinking_dry_zone %>% 
+      rowwise() %>% 
+  mutate(total= sum(across(where(is.numeric))), 
+         
+         community_standpipe=round(community_standpipe/total*100, 2), 
+         borehole_1=round(borehole_1/total*100, 2 ), 
+         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
+         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
+         protected_well_1=round(protected_well_1/total*100, 2), 
+         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
+         other_drinking_source=round(other_drinking_source/total*100, 2), 
+         river_stream=round(river_stream/total*100, 2), 
+         spring_1=round(spring_1/total*100, 2), 
+         dam=round(dam/total/100, 2), 
+         bottled_water=round(bottled_water/total*100, 2), 
+         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
+         lake=round(lake/total*100, 2)
+         
+         )
+    
+    
+    
+    table5<-table5 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+    
+
+    
+table5<- table5 %>% 
+  as_flextable()
+
+
+save_as_docx(table5, path = here("output/table5.docx"))
 
 
 ```
@@ -165,7 +288,118 @@ save_as_docx(table3, path = here("output/table3.docx"))
 
 ```{r}
 
+wet_drink_district <- cholera_data %>% 
+                      select(district, 
+                             main_source_of_drinking_water_wet_season)
 
+
+wet_drink_district<- wet_drink_district %>% 
+  group_by( district, 
+           main_source_of_drinking_water_wet_season) %>%
+  count(main_source_of_drinking_water_wet_season) %>%
+    pivot_wider(
+    names_from = main_source_of_drinking_water_wet_season, 
+    values_from = n
+  )
+
+
+
+
+# replacing NA with Zero 
+wet_drink_district[is.na(wet_drink_district)]<-0
+
+
+table6<- wet_drink_district %>% 
+  rowwise() %>% 
+  mutate(total= sum(across(where(is.numeric))), 
+         
+         community_standpipe=round(community_standpipe/total*100, 2), 
+         borehole_1=round(borehole_1/total*100, 2 ), 
+         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
+         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
+         protected_well_1=round(protected_well_1/total*100, 2), 
+         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
+         other_drinking_source=round(other_drinking_source/total*100, 2), 
+         river_stream=round(river_stream/total*100, 2), 
+         spring_1=round(spring_1/total*100, 2), 
+         dam=round(dam/total/100, 2), 
+         bottled_water=round(bottled_water/total*100, 2), 
+         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
+         lake=round(lake/total*100, 2)
+         
+         )
+
+
+   table6<-table6 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+   
+       
+table6<- table6 %>% 
+  as_flextable()
+
+
+save_as_docx(table6, path = here("output/table6.docx"))
+
+
+
+
+
+
+
+# by Zone 
+
+
+wet_drink_zone <- cholera_data %>% 
+                      select(zone, 
+                             main_source_of_drinking_water_wet_season)
+
+
+wet_drink_zone<- wet_drink_zone %>% 
+  group_by( zone, 
+           main_source_of_drinking_water_wet_season) %>%
+  count(main_source_of_drinking_water_wet_season) %>%
+    pivot_wider(
+    names_from = main_source_of_drinking_water_wet_season, 
+    values_from = n
+  )
+
+
+
+
+# replacing NA with Zero 
+wet_drink_zone[is.na(wet_drink_zone)]<-0
+
+
+table7<- wet_drink_zone%>% 
+  rowwise() %>% 
+  mutate(total= sum(across(where(is.numeric))), 
+         
+         community_standpipe=round(community_standpipe/total*100, 2), 
+         borehole_1=round(borehole_1/total*100, 2 ), 
+         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
+         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
+         protected_well_1=round(protected_well_1/total*100, 2), 
+         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
+         other_drinking_source=round(other_drinking_source/total*100, 2), 
+         river_stream=round(river_stream/total*100, 2), 
+         spring_1=round(spring_1/total*100, 2), 
+         dam=round(dam/total/100, 2), 
+         bottled_water=round(bottled_water/total*100, 2), 
+         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
+         lake=round(lake/total*100, 2)
+         
+         )
+
+
+   table7<-table7 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+   
+       
+table7<- table7 %>% 
+  as_flextable()
+
+
+save_as_docx(table7, path = here("output/table7.docx"))
 
 ```
 
@@ -173,7 +407,29 @@ save_as_docx(table3, path = here("output/table3.docx"))
 
 ```{r}
 
+Water_treat<-cholera_data %>% 
+         select(sex, 
+                age_group, 
+                level_education, 
+                religion, 
+                treat_drinking_water)
 
+
+table8<- Water_treat %>% 
+  tbl_summary(treat_drinking_water, 
+              percent = "row", 
+              digits = list(
+                sex~ c(0, 2), 
+                age_group~c(0,2), 
+                level_education~ c(0,2), 
+                religion~c(0,2)
+              ))
+
+table8<- table8 %>% 
+  as_flex_table()
+
+
+save_as_docx(table8, path = here("output/table8.docx"))
 
 
 ```
@@ -184,26 +440,245 @@ save_as_docx(table3, path = here("output/table3.docx"))
 ```{r}
  
 
+
+Water_treat_district_zone<-cholera_data %>% 
+         select(district, 
+                zone, 
+                treat_drinking_water)
+
+
+table9<- Water_treat_district_zone%>% 
+  tbl_summary(treat_drinking_water, 
+              percent = "row", 
+              digits = list(
+                district~ c(0, 2), 
+                zone~c(0,2)
+                
+              ))
+
+table9<- table9 %>% 
+  as_flex_table()
+
+
+save_as_docx(table9, path = here("output/table9.docx"))
+
 ```
 
 
 ## 2.5.3 if yes, Methods of water treatment by District
 
 ```{r, fig.height=7, fig.width=14}
+methods_water <- cholera_data %>% 
+               select(
+                 #sex,
+                  # age_group, 
+                  # level_education, 
+                  religion, 
+                 c(34:41)
+               )
+
+
+religion_table<- methods_water %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>% 
+  drop_na(value) %>% 
+  group_by(
+    # sex, 
+     # age_group, 
+    # level_education, 
+     religion, 
+    name) %>% 
+  summarise(value=sum(value)) %>% 
+  pivot_wider(
+    names_from = name, 
+  values_from = value, 
+  ) %>% 
+  group_by(
+    religion
+  ) %>% 
+  rowwise() %>% 
+  mutate(total=sum(across(where(is.numeric))))
+
+
+sex_table<- sex_table %>% 
+  rename(
+    "variable"=sex
+  )
+
+age_group_table<- age_group_table %>% 
+  rename(
+    "variable"=age_group
+  )
+
+
+education_table<- education_table %>% 
+  rename(
+    "variable"=level_education
+  )
+
+
+religion_table<- religion_table %>% 
+  rename(
+    "variable"=religion
+  )
+
+
+# Combine all tables into one
+table10 <- bind_rows(sex_table,
+                     age_group_table,
+                     education_table,
+                     religion_table)
 
 
 
- 
+table10<- table10 %>% 
+  mutate(
+ method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
+ method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
+ method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
+ method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
+ method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
+ method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
+ method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
+ method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
+    )
 
+
+table10<- table10 %>%
+  rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
+
+
+table10<- table10 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+table10<- table10 %>% 
+  as_flextable()
+
+
+save_as_docx(table10, path = here("output/table10.docx"))
+```
+
+
+```{r}
+
+methods_water_district <- cholera_data %>% 
+               select(
+                 district, 
+                 c(34:41)
+               )
+
+
+
+tabel11<- methods_water_district %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>% 
+  drop_na(value) %>% 
+  group_by(
+    district, 
+    name) %>% 
+  summarise(value=sum(value)) %>% 
+  pivot_wider(
+    names_from = name, 
+  values_from = value, 
+  ) %>% 
+  group_by(
+    district
+  ) %>% 
+  rowwise() %>% 
+  mutate(total=sum(across(where(is.numeric))))
+
+
+
+tabel11<- tabel11 %>% 
+mutate(
+ method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
+ method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
+ method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
+ method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
+ method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
+ method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
+ method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
+ method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
+    )
+
+
+
+
+tabel11<- tabel11 %>%
+  rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
+
+
+tabel11<- tabel11 %>%
+  rename_with(~ str_replace_all(., "_", " "))
+
+
+tabel11<- tabel11%>% 
+  as_flextable()
+
+
+save_as_docx(tabel11, path = here("output/table11.docx"))
 
 ```
+
+
+
 
 ##2.5.4 Properly chlorination process by district.
 
 
 ```{r}
+properly_chro_district <- cholera_data %>% 
+            select(district, 
+                   chlorination_process_done_correctly)
 
 
+table12<- properly_chro_district %>% 
+  tbl_summary(chlorination_process_done_correctly, 
+              percent = "row", 
+              digits = list(
+                district~c(0,2)
+              ))
+
+
+table12<- table12 %>% 
+  as_flex_table()
+
+
+save_as_docx(table12, path = here("output/table12.docx"))
+
+
+
+
+## by Sex, Age and Education 
+
+
+properly_chro_demo<- cholera_data %>% 
+            select(sex,
+                   age_group, 
+                   level_education, 
+                   religion,
+                   chlorination_process_done_correctly)
+
+
+table13<- properly_chro_demo %>% 
+  tbl_summary(chlorination_process_done_correctly, 
+              percent = "row", 
+              digits = list(
+              sex~c(0,2), 
+                 age_group~c(0,2), 
+                 level_education~c(0,2), 
+                 religion~c(0,2)
+              ))
+
+
+table13<- table13 %>% 
+  as_flex_table()
+
+
+save_as_docx(table13, path = here("output/table13.docx"))
 
 
 ```
@@ -211,7 +686,49 @@ save_as_docx(table3, path = here("output/table3.docx"))
 ## 2.5. 5 Frequency of water treatment by Sex, Level of Education, Religion 
 
 ```{r}
+freq_water_treatment <- cholera_data %>% 
+                        select(
+                          sex, 
+                          age_group, 
+                          level_education, 
+                          religion, 
+                          often_treat_water
+                        )
 
+
+
+table14<- freq_water_treatment %>% 
+  tbl_summary(often_treat_water, 
+              digits = list(
+                sex~c(0,2), 
+                age_group~c(0,2), 
+                level_education~c(0,2), 
+                religion~c(0,2)
+              ))
+
+
+table14<- table14 %>% 
+  as_flex_table()
+
+
+save_as_docx(table14, path = here("output/table14.docx"))
+
+
+
+freq_water_treatment_district <- cholera_data %>% 
+                                select(
+                                  district,
+                                  zone,
+                                  often_treat_water
+                                )
+
+
+freq_water_treatment_district %>% 
+          tbl_summary(often_treat_water, 
+                      digits = list(
+                        district~c(0,2), 
+                        zone~c
+                      ))
 
 
 
@@ -279,72 +796,20 @@ save_as_docx(table3, path = here("output/table3.docx"))
 # Social and cultural behavior determinants of vaccine uptake 
 
 
-## 3.1. 0 Aware of Cholera Vaccine by  Age- Group, Sex Level of Education, and 3.1. 1 Aware of Cholera Vaccine by  District and Zone  ?? whcih variable is this? ignore the code below
-
+## 3.1. 0 Aware of Cholera Vaccine by  Age- Group, Sex Level of Education, and 3.1. 1 Aware of Cholera Vaccine by  District and Zone  
 
 
 
 ```{r}
 
-table3.1.0 <- cholera_data |> 
-            select(ocv_prevent_cholera,age_group,sex,level_education) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              sex ~ c(0, 2),
-              age_group ~ c(0, 2),
-              level_education ~ c(0, 2)
-            ))
-
 
  
-table3.1.0 <-  table3.1.0 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.1.0, path = here("output/table3_1_0.docx"))
-
-
-table3.1.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district,zone) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
-
-
- 
-table3.1.1 <-  table3.1.1 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.1.1, path = here("output/table3_1_1.docx"))
-
-
 ```
 
 ## 3.2.0  Believe Cholera Vaccine Prevent Cholera by Sex, Level of Education 
 
 ```{r}
-table3.2.0 <- cholera_data |> 
-            select(ocv_prevent_cholera,age_group,sex,level_education) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              sex ~ c(0, 2),
-              age_group ~ c(0, 2),
-              level_education ~ c(0, 2)
-            ))
 
-
- 
-table3.2.0 <-  table3.2.0 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.2.0, path = here("output/table3_2_0.docx"))
 
 
 ```
@@ -353,22 +818,7 @@ save_as_docx( table3.2.0, path = here("output/table3_2_0.docx"))
 
 ```{r}
 
-table3.2.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district,zone) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
 
-
- 
-table3.2.1 <-  table3.2.1 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 ```
 
@@ -387,22 +837,7 @@ save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 ## 3.3. 1 Information about Cholera Vaccine  by  District and Zone 
 
 ```{r}
-table3.2.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district,zone) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
 
-
- 
-table3.2.1 <-  table3.2.1 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 
 ```
@@ -413,59 +848,15 @@ save_as_docx( table3.2.1, path = here("output/table3_2_1.docx"))
 
 ```{r}
 
-table3.4.0 <- cholera_data %>%
-  select(sex, age_group, level_education, religion, safe_vaccine) %>%
-  tbl_summary(
-    by = safe_vaccine,
-    statistic = list(
-      sex ~ "{n} ({p}%)",
-      age_group ~ "{n} ({p}%)",
-      level_education ~ "{n} ({p}%)",
-      religion ~ "{n} ({p}%)"
-    ),
-    digits = list(
-      sex ~ c(0, 2),
-      age_group ~ c(0, 2),
-      level_education ~ c(0, 2),
-      religion ~ c(0, 2)
-    ),
-    percent = "row"
-  ) %>%
-  modify_header(label = "**Demographic Variable**") %>%
-  bold_labels()
 
-# Convert to a flextable for Word export
-table_safe_combined <- table3.4.0 %>%
-  as_flex_table()
 
-# Save as a Word document
-save_as_docx(table3.4.0, path = here("output/table3_4_0.docx"))
-
-table3.4.0
 ```
 
 
 ##3. 4. 1 Safe of Cholera Vaccine by District and Zone 
 
 ```{r}
-table3.4.1 <- cholera_data |> 
-            select(safe_vaccine,district,zone) %>% 
-            tbl_summary(safe_vaccine,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
 
-
- 
-table3.4.1 <-  table3.4.1 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.1.1, path = here("output/table3_4_1.docx"))
-
-table3.4.1
 
 
 ```
@@ -485,35 +876,7 @@ table3.4.1
 
 ```{r}
 
-table3.6.0 <- cholera_data %>%
-  select(sex, age_group, level_education, religion, ocv_access) %>%
-  tbl_summary(
-    by = ocv_access,
-    statistic = list(
-      sex ~ "{n} ({p}%)",
-      age_group ~ "{n} ({p}%)",
-      level_education ~ "{n} ({p}%)",
-      religion ~ "{n} ({p}%)"
-    ),
-    digits = list(
-      sex ~ c(0, 2),
-      age_group ~ c(0, 2),
-      level_education ~ c(0, 2),
-      religion ~ c(0, 2)
-    ),
-    percent = "row"
-  ) %>%
-  modify_header(label = "**Demographic Variable**") %>%
-  bold_labels()
 
-# Convert to a flextable for Word export
-table_safe_combined <- table3.6.0 %>%
-  as_flex_table()
-
-# Save as a Word document
-save_as_docx(table3.6.0, path = here("output/table3_6_0.docx"))
-
-table3.6.0
 
 
 
@@ -527,23 +890,9 @@ table3.6.0
 
 ```{r}
 
-table3.6.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2)
-            ))
 
 
- 
-table3.6.1 <-  table3.6.1 %>% 
-         as_flex_table()
 
-
-save_as_docx( table3.6.1, path = here("output/table3_6_1.docx"))
-
-table3.6.1
 
 ```
 
@@ -553,30 +902,19 @@ table3.6.1
 
 ```{r}
 
+```
 
+
+
+## 3. 7. 0 OCV status by District and Zone  
+
+```{r}
 
 ```
 
 
 ## 3. 8. 0 Family Members vaccinated by District and Zone 
 ```{r}
-table3.6.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2)
-            ))
-
-
- 
-table3.6.1 <-  table3.6.1 %>% 
-         as_flex_table()
-
-
-save_as_docx( table3.6.1, path = here("output/table3_6_1.docx"))
-
-table3.6.1
 
 ```
 
@@ -622,3 +960,21 @@ table3.6.1
 
 
 
+
+
+```{r cars}
+
+cholera_data<-import(here("data/cholera_study_20241216.xlsx"))
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
