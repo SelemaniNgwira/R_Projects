@@ -43,10 +43,16 @@ p_load(
   flextable,
   rio, 
   gtsummary, 
-  epikit
+  epikit, 
+  pwr
 )
 
 
+
+pwr.p.test(h = ES.h(0.3764, 0.5),
+                           n = 797,
+                           sig.level = 0.05,
+                           alternative = "two.sided")
 
 ```
 
@@ -62,7 +68,10 @@ cholera_data<- import( here("data/cholera_data_.csv")) %>%
   mutate(district=recode(
       district, 
       "Blantyre_City"="Blantyre"
-    ))
+    )) %>% 
+   mutate(residence = case_when(
+    district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
+    TRUE ~ "lake_share" ))
 
 # changing the data.frame into tibble object for easy handling 
 cholera_data<- tibble(cholera_data)
@@ -84,6 +93,11 @@ ta_shapefile<-st_read(
   dplyr::rename(
     "District"= NAME_1
   )
+
+
+
+
+
 
 
 
@@ -115,13 +129,14 @@ awareness_of_heathRisk<-cholera_data %>%
                    age_group, 
                    level_education, 
                    district,
+                   residence,
                    zone,
                    health_risk_associated_with_drinking_untreated_water
                  )
 
 
 table2<-awareness_of_heathRisk %>% 
-          select(-district , -zone) %>% 
+          select(-district , -zone, -residence) %>% 
             tbl_summary(health_risk_associated_with_drinking_untreated_water,
             percent = "row",
             digits = list(
@@ -152,12 +167,13 @@ table3<-awareness_of_heathRisk %>%
       district, 
       "Blantyre_City"="Blantyre"
     )) %>% 
-          select(district , zone, health_risk_associated_with_drinking_untreated_water) %>% 
+          select(district ,  zone, residence, health_risk_associated_with_drinking_untreated_water) %>% 
             tbl_summary(health_risk_associated_with_drinking_untreated_water,
             percent = "row",
             digits = list(
               district~ c(0, 2),
-              zone ~ c(0, 2)
+              zone ~ c(0, 2), 
+              residence~ c(0,2)
             ))
 
 
@@ -723,20 +739,42 @@ freq_water_treatment_district <- cholera_data %>%
                                 )
 
 
-freq_water_treatment_district %>% 
+table15<- freq_water_treatment_district %>% 
           tbl_summary(often_treat_water, 
                       digits = list(
                         district~c(0,2), 
-                        zone~c
+                        zone~c(0,2)
                       ))
+
+
+table15<- table15 %>% 
+  as_flex_table()
+
+
+save_as_docx(table15, path = here("output/table15.docx"))
 
 
 
 ```
 
-## 2. 5.6 Access to water treatment by district 
+## 2. 5.6 Access to water treatment product by district 
 
 ```{r}
+
+Access_to_water_treatment_pt<-cholera_data %>% 
+            select(district, 
+                   residence, 
+                   difficulties_accessing_water_treatment_products)
+
+
+Access_to_water_treatment_pt %>% 
+    tbl_summary(difficulties_accessing_water_treatment_products,
+                percent = "row",
+                digits = list(
+                  district~c(0,2), 
+                  residence~c(0,2)
+                ))
+
 
 
 
@@ -747,7 +785,7 @@ freq_water_treatment_district %>%
 
 ```{r}
 
-
+pwr(h=0.3764, )
 
 
 ```
