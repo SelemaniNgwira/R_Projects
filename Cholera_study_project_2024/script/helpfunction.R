@@ -1,6 +1,8 @@
 process_data <- function(data, group_var) {
+  numeric_cols <- names(select(data, where(is.numeric)))
+  
   data %>% 
-    pivot_longer(cols = 2:9) %>%  # Reshape from wide to long
+    pivot_longer(cols = all_of(numeric_cols)) %>%  # Reshape from wide to long
     drop_na(value) %>%  # Remove missing values
     group_by(.data[[group_var]], name) %>%  # Group by chosen variable and name
     summarise(value = sum(value), .groups = 'drop') %>%  # Sum values
