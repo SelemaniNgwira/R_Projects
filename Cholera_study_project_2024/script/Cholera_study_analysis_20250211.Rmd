@@ -767,7 +767,7 @@ Access_to_water_treatment_pt<-cholera_data %>%
                    difficulties_accessing_water_treatment_products)
 
 
-Access_to_water_treatment_pt %>% 
+table16<- Access_to_water_treatment_pt %>% 
     tbl_summary(difficulties_accessing_water_treatment_products,
                 percent = "row",
                 digits = list(
@@ -776,6 +776,10 @@ Access_to_water_treatment_pt %>%
                 ))
 
 
+table16<- table16 %>% 
+  as_flex_table()
+
+save_as_docx(table16, path = here("output/table16.docx"))
 
 
 
@@ -785,7 +789,16 @@ Access_to_water_treatment_pt %>%
 
 ```{r}
 
-pwr(h=0.3764, )
+knowledge_on_cholera_calender<-cholera_data %>% 
+                       select(
+                         sex, 
+                         age_group, 
+                         level_education, 
+                         religion, 
+                         c(48:51)
+                       )
+
+knowledge_on_cholera_calender
 
 
 ```
