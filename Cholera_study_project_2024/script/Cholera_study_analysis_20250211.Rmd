@@ -40,15 +40,15 @@ p_load(
   OpenStreetMap,
   flextable,
   rio, 
-<<<<<<< HEAD
+
   gtsummary, 
 
   epikit, 
   pwr, 
-  webshot2)
-=======
+  webshot2,
+
   gtsummary) 
->>>>>>> a305aa9af5c8ef665cf6333a3034c57790e4d2ee
+ 
 
 conflicted::conflict_prefer("select", "dplyr")
 
@@ -1742,3 +1742,116 @@ table3.10.0 <- cholera_data %>%
 table3.10.0
 
 ```
+
+
+# 4. 0 . Availability and use of sanitary services and infrastructure for cholera prevention
+
+
+
+# Percentage of households that have toilets
+
+## 1.	Do you have toilet?
+
+```{r}
+
+
+
+
+
+
+
+
+```
+
+
+
+## District from the toilets
+
+
+```{r}
+
+```
+
+
+
+## 2.	What type of toilet facility do members of your     household usually use? 
+
+
+```{r}
+
+```
+
+
+
+
+## 3.	Do you have Refuse pit?
+
+
+```{r}
+
+```
+
+## 4.	Do you have Bath Shelter with good drainage?
+
+
+```{r}
+
+```
+
+
+
+## 5.	Do they have hand wash facility at the pit latrine?
+
+
+```{r}
+
+```
+
+
+## 6.	How often do you and your family use these sanitation facilities?
+
+
+```{r}
+
+
+
+```
+
+
+## 7.	How often do you wash hands with soap after using the toilet or handling food?
+
+
+```{r}
+
+
+
+```
+
+## 8.	Is there any shared usage of toilets/latrines with other households
+
+
+```{r}
+
+
+
+```
+
+
+## 9.	Do people in this community consistently use the available sanitation facilities?
+
+
+
+## 10.	What are the common reasons for not using available sanitary facilities? 
+
+
+```{r}
+
+
+
+```
+
+
+## 11.	How do people manage when sanitation facilities are unavailable?
+
+
+
