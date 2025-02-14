@@ -7,21 +7,6 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-
-# loading packages, first load the pacman package using a logic code
-
-if(!require(pacman)) install.packages("pacman")
-pacman:: p_load(
-  tidyverse, rio, here,
-  janitor)
-
-
-```
-
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -40,17 +25,18 @@ p_load(
   OpenStreetMap,
   flextable,
   rio, 
-
   gtsummary, 
-
   epikit, 
   pwr, 
   webshot2,
-
-  gtsummary) 
+  gtsummary, 
+  officer) 
  
 
 conflicted::conflict_prefer("select", "dplyr")
+
+options("max.print" = 10000)  # Increase the print limit
+
 
 
 ```
@@ -60,9 +46,8 @@ conflicted::conflict_prefer("select", "dplyr")
 
 ```{r cars}
 
-
 # importing the data 
-cholera_data<- import( here("data/cholera_data_.csv")) %>%
+cholera_data<-import(here("Cholera_study_project_2024/data/cholera_data_.csv")) %>%
                 clean_names() %>% 
   mutate(district=recode(
       district, 
@@ -92,10 +77,6 @@ ta_shapefile<-sf:: st_read(
   dplyr::rename(
     "District"= NAME_1
   )
-
-
-
-
 
 
 
@@ -354,10 +335,6 @@ table6<- table6 %>%
 
 
 save_as_docx(table6, path = here("output/table6.docx"))
-
-
-
-
 
 
 
@@ -1754,10 +1731,67 @@ table3.10.0
 
 ```{r}
 
+knitr::opts_chunk$set(tidy = TRUE, collapse = TRUE, rows.print = 12)
+
+available_toilet<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   toilet_facility_avaiable)
+
+              
+toilet_dis_table<- available_toilet %>% 
+  group_by(district) %>%
+  count(toilet_facility_avaiable) %>% 
+  drop_na(toilet_facility_avaiable) %>% 
+  pivot_wider(names_from = toilet_facility_avaiable,
+              values_from = n) %>% 
+  # adorn_totals("row") %>%
+  mutate(total=available+not_available, 
+         available= round( available/total*100,2), 
+         not_available=round( not_available/total*100,2)) %>% 
+  rename("Background_charateristic" = district)
 
 
 
+toilet_res_table<- available_toilet %>% 
+  group_by(residence) %>%
+  count(toilet_facility_avaiable) %>% 
+  drop_na(toilet_facility_avaiable) %>% 
+  pivot_wider(names_from = toilet_facility_avaiable,
+              values_from = n) %>% 
+  adorn_totals("row") %>%
+  mutate(total=available+not_available, 
+         available= round( available/total*100,2), 
+         not_available=round( not_available/total*100,2)) %>% 
+  rename("Background_charateristic" = residence)
 
+
+
+table20<-rbind(toilet_dis_table, toilet_res_table) 
+
+empty_row1 <- data.frame(Background_charateristic= "District",
+                        available = NA,
+                        not_available = NA, 
+                        total = NA)
+  
+empty_row2 <- data.frame(Background_charateristic= "Residence",
+                        available = NA,
+                        not_available = NA, 
+                        total = NA)
+
+
+table20<- rbind(empty_row1, table20[1:7, ],
+      empty_row2, table20[8:nrow(table20), ])
+
+table20 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(table20, path = here("output/table20.docx"))
+  
 
 
 
@@ -1770,6 +1804,21 @@ table3.10.0
 
 ```{r}
 
+available_toilet_demo<- cholera_data %>% 
+            select(sex, 
+                   level_education,
+                   ethnicity,
+                   toilet_facility_avaiable)
+
+
+create_summary_table(available_toilet_demo, "sex", 
+                     "toilet_facility_avaiable")
+create_summary_table(available_toilet_demo, "level_education",
+                     "toilet_facility_avaiable")
+create_summary_table(available_toilet_demo, "ethnicity",
+                     "toilet_facility_avaiable", 
+                      adorn_totals = T)
+
 ```
 
 
@@ -1778,6 +1827,9 @@ table3.10.0
 
 
 ```{r}
+
+
+
 
 ```
 
