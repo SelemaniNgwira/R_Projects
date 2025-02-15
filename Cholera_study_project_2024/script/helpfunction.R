@@ -35,3 +35,5 @@ create_summary_table <- function(data, group_var, response_var, adorn_totals = F
   
   return(table)
 }
+
+
