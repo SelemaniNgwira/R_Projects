@@ -17,7 +17,7 @@ process_data <- function(data, group_var) {
 
 
 # Generic function to create a summary table
-create_summary_table <- function(data, group_var, response_var, adorn_totals = FALSE) {
+create_summary_table <- function(data, group_var, response_var, sum = FALSE) {
   table <- data %>%
     group_by(.data[[group_var]]) %>%
     count(.data[[response_var]]) %>%
@@ -29,11 +29,45 @@ create_summary_table <- function(data, group_var, response_var, adorn_totals = F
     select(Background_characteristic, ends_with("_percent"), total)  # Exclude total_percent
   
   # Apply adorn_totals if TRUE
-  if (adorn_totals) {
-    table <- table %>% adorn_totals("row")
+  if (sum) {
+    # Get the names of the percentage columns dynamically
+    percent_columns <- names(table)[grepl("_percent$", names(table))]
+    
+    # Calculate the mean for each percentage column dynamically
+    mean_values <- sapply(percent_columns, function(col) mean(table[[col]], na.rm = TRUE))
+    
+    # Create a "Total" row with the computed means for each percentage column
+    total_row <- tibble(
+      Background_characteristic = "Total",
+      total = sum(table$total, na.rm = TRUE)  # Compute total sum
+    )
+    
+    # Dynamically assign the mean values to the correct percentage columns
+    for (i in 1:length(percent_columns)) {
+      total_row[[percent_columns[i]]] <- mean_values[i]
+    }
+    
+    # Append the "Total" row at the bottom
+    table <- bind_rows(table, total_row)
   }
+  
   
   return(table)
 }
+
+
+
+# how to call the functions
+
+# if total row is required for the table the function will be call as a follows 
+## create_summary_table(data = data, group_var = "group_var", response_var = "response_var", sum = TRUE)
+# if not 
+## create_summary_table(data = data, group_var = "group_var", response_var = "response_var", sum = FALSE)
+
+
+
+
+
+
 
 
