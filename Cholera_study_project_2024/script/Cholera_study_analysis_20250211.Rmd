@@ -30,13 +30,24 @@ p_load(
   pwr, 
   webshot2,
   gtsummary, 
-  officer) 
+   BiocManager,
+  ggradar,
+  scales,
+  fmsb,
+  officer)
  
 
 conflicted::conflict_prefer("select", "dplyr")
 
 options("max.print" = 10000)  # Increase the print limit
 
+
+
+install.packages("devtools")
+
+devtools::install_github("ricardo-bion/ggradar")
+
+devtools::install_github("slidexyz/ggradar2")
 
 
 ```
@@ -1789,14 +1800,14 @@ empty_row2 <- data.frame(Background_charateristic= "Residence",
 table20<- rbind(empty_row1, table20[1:7, ],
       empty_row2, table20[8:nrow(table20), ])
 
-table20 %>%
+table20<- table20 %>%
   flextable() %>%
   autofit() %>%
   set_table_properties(layout = "autofit") %>%
   height_all(height =  0.5, unit = "in" )
 
 
-save_as_docx(table20, path = here("output/table20.docx"))
+save_as_docx(table20, path= here("output/table20.docx"))
   
 
 
@@ -1817,13 +1828,26 @@ available_toilet_demo<- cholera_data %>%
                    toilet_facility_avaiable)
 
 
-create_summary_table(available_toilet_demo, "sex", 
+sex_table<- create_summary_table(available_toilet_demo, "sex", 
                      "toilet_facility_avaiable")
-create_summary_table(available_toilet_demo, "level_education",
+leduction_table<- create_summary_table(available_toilet_demo, "level_education",
                      "toilet_facility_avaiable")
-create_summary_table(available_toilet_demo, "ethnicity",
+ethincity_table<- create_summary_table(available_toilet_demo,
+                                       "ethnicity",
                      "toilet_facility_avaiable", 
-                      adorn_totals = T)
+                      sum = T)
+
+toilet_table_demo<-rbind(sex_table, leduction_table, ethincity_table)
+
+
+toilet_table<-toilet_table_demo %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+save_as_docx(toilet_table, path = here("output/toilet_table.docx"))
+
 
 ```
 
@@ -1833,6 +1857,7 @@ create_summary_table(available_toilet_demo, "ethnicity",
 
 
 ```{r}
+
 
 
 
@@ -1847,6 +1872,73 @@ create_summary_table(available_toilet_demo, "ethnicity",
 
 ```{r}
 
+refuse_pit<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   soild_waste_disposal,
+                   bath_shelter_bathroom)
+
+
+refuse_pit_dis_table<- refuse_pit %>%
+             create_summary_table("district", "soild_waste_disposal")
+
+refuse_pit_res_table <- refuse_pit %>% 
+         create_summary_table("residence",
+                              "soild_waste_disposal",
+                              sum = T)
+
+
+refuse_pit_table<-rbind(refuse_pit_dis_table,
+                        refuse_pit_res_table)
+
+
+bath_shelter_dis_table<- refuse_pit %>%
+             create_summary_table("district", "bath_shelter_bathroom")
+
+bath_shelter_res_table <- refuse_pit %>%
+    create_summary_table("residence",
+                              "bath_shelter_bathroom",
+                              sum = T)
+
+
+bath_shelter_table<-rbind(bath_shelter_dis_table,
+                          bath_shelter_res_table)
+
+bath_shelter_table <- bath_shelter_table %>% 
+  rename("Bath_available"=available_percent, 
+         "Bath_not_available"=not_available_percent)
+
+
+
+refuse_pit_table <- refuse_pit_table %>%
+  rename("Refuse_pit_available"=available_percent, 
+         "Refuse_pit_not_available"=not_available_percent)
+
+merge(refuse_pit_table, bath_shelter_table,
+      by.x = "Background_charateristic")
+  # flextable() %>%
+  # autofit()
+  # set_table_properties(layout = "autofit") %>%
+  # height_all(height =  0.5, unit = "in" ) %>%
+  # save_as_docx(path = here("output/refuse_pit_table.docx"))
+
+
+refuse_pit_table1<-merge.data.frame(refuse_pit_table,
+                                    bath_shelter_table) %>% 
+   select(Background_characteristic,
+         Refuse_pit_available, Refuse_pit_not_available,
+         Bath_available, Bath_not_available, total)
+
+Refuse_pit_table1<- refuse_pit_table1 %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(Refuse_pit_table1, path = here("output/Refuse_pit_table1.docx"))
+  
+  
 ```
 
 ## 4.	Do you have Bath Shelter with good drainage?
@@ -1858,22 +1950,133 @@ create_summary_table(available_toilet_demo, "ethnicity",
 
 
 
-## 5.	Do they have hand wash facility at the pit latrine?
+## 5.	the pit latrine Condtion by District?
 
 
-```{r}
-
-```
-
-
-## 6.	How often do you and your family use these sanitation facilities?
 
 
 ```{r}
 
+Pit_condition <- cholera_data %>% 
+                   select(district,
+                          residence, 
+                          pit_condition)
+
+
+stack_bar_pit_conition<- Pit_condition %>% 
+  group_by(district, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(district, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+   mutate(Pit_condition = factor(Pit_condition, 
+                                 levels = c("properly_maintained",
+                                            "overflowing",
+                                            "not_pit"))) %>% 
+  ggplot(aes(x=district, y=Percentage, fill=Pit_condition))+
+  geom_col()+
+  coord_flip()+
+  scale_fill_manual(values = c( "properly_maintained" = "green",
+                                "overflowing" = "yellow",
+                                "not_pit" = "red" )) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"), 
+        axis.title.y = element_text(size = 14, colour = "black"), 
+        axis.title.x = element_text(size = 14, colour = "black"))+
+  labs(y = "Percentage") +
+  ggtitle("Pit Condition by District")+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust = 0.5))
+
+
+ggsave("output/stack_bar_pit_conition.png", 
+       plot = stack_bar_pit_conition,
+       width = 10, height = 10, units = "in", dpi = 300, 
+       bg="white")
+
+
+
 
 
 ```
+
+
+## 6.	Pit condition by residence 
+
+
+```{r}
+
+ stack_bar_residence<- Pit_condition %>% 
+  mutate(residence = recode(residence,
+                        "in_land"="in land", 
+                        "lake_share" = "Lake Shore")) %>%
+  group_by(residence, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(residence, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+   mutate(Pit_condition = factor(Pit_condition, 
+                                 levels = c("properly_maintained",
+                                            "overflowing",
+                                            "not_pit"))) %>% 
+  ggplot(aes(x=residence, y=Percentage, fill=Pit_condition))+
+  geom_col()+
+  coord_flip()+
+  scale_fill_manual(values = c( "properly_maintained" = "green",
+                                "overflowing" = "yellow",
+                                "not_pit" = "red" )) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"), 
+        axis.title.y = element_text(size = 14, colour = "black"), 
+        axis.title.x = element_text(size = 14, colour = "black"))+
+  labs(y = "Percentage", 
+       x="Residence") +
+  ggtitle("Pit Condition by Residence")+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust = 0.5))
+
+
+ggsave("output/stack_bar_residenc.png", 
+       plot = stack_bar_residence,
+       width = 10, height = 10, units = "in", dpi = 300, 
+       bg="white")
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+
+```
+
+
+
 
 
 ## 7.	How often do you wash hands with soap after using the toilet or handling food?
@@ -1881,14 +2084,52 @@ create_summary_table(available_toilet_demo, "ethnicity",
 
 ```{r}
 
+Pit_condition %>% 
+  group_by(district, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+         properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(district, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+
+ggplot(aes(x = district, y = Percentage, color = Pit_condition)) +
+  geom_point(size = 5) +
+  geom_line(aes(group = district), size = 1) +
+  coord_flip() +
+  theme_minimal() +
+  scale_color_manual(values = c("not_pit" = "red",
+                                "overflowing" = "yellow",
+                                "properly_maintained" = "green")) +
+  labs(y = "Percentage", title = "Pit Condition by District")
+
+
 
 
 ```
 
-## 8.	Is there any shared usage of toilets/latrines with other households
+## 8.	Hand washing facility by district and residence
 
 
 ```{r}
+
+Household_handwashing<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   household_handwashing_facility)
+
+
+
+
+
+
+
 
 
 
