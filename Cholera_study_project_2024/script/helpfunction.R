@@ -86,6 +86,7 @@ create_summary_table2 <- function(data, group_vars, response_var, sum = FALSE) {
   
   # Combine all tables into one
   final_table <- bind_rows(tables_list, .id = "Grouping_Variable")
+<<<<<<< Updated upstream
   
   # Apply total row if sum = TRUE
   if (sum) {
@@ -139,6 +140,8 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
   
   # Combine all tables into one
   final_table <- bind_rows(tables_list)
+=======
+>>>>>>> Stashed changes
   
   # Apply total row if sum = TRUE
   if (sum) {
@@ -153,6 +156,7 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
     
     # Create the total row as a summary of all response categories
     total_row <- tibble(
+      Grouping_Variable = "Total",
       Background_characteristic = "Total",
       total = total_counts$total
     )
@@ -170,7 +174,10 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
   
   return(final_table)
 }
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
