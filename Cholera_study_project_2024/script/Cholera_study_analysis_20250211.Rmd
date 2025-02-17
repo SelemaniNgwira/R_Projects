@@ -42,14 +42,6 @@ conflicted::conflict_prefer("select", "dplyr")
 options("max.print" = 10000)  # Increase the print limit
 
 
-
-install.packages("devtools")
-
-devtools::install_github("ricardo-bion/ggradar")
-
-devtools::install_github("slidexyz/ggradar2")
-
-
 ```
 
 # loading data
@@ -106,77 +98,79 @@ ta_shapefile<-sf:: st_read(
 
 
 
-
 ```
 
 
-## Awareness of the Health Risk Associated with drinking untreated Water by Sex, Age-Group, Level of Education,  and District 
+## Awareness of the Health Risk Associated with drinking untreated Water by Sex, Age-Group, Level of Education. 
 
 ```{r}
 
-awareness_of_heathRisk<-cholera_data %>% 
+awareness_of_heathRisk_demo<-cholera_data %>% 
                  select(
                    sex, 
                    age_group, 
                    level_education, 
-                   district,
-                   residence,
-                   zone,
-                   health_risk_associated_with_drinking_untreated_water
+                   ethnicity,
+                  health_risk_associated_with_drinking_untreated_water
                  )
 
 
-table2<-awareness_of_heathRisk %>% 
-          select(-district , -zone, -residence) %>% 
-            tbl_summary(health_risk_associated_with_drinking_untreated_water,
-            percent = "row",
-            digits = list(
-              sex ~ c(0, 2),
-              age_group ~ c(0, 2),
-              level_education ~ c(0, 2)
-            ))
+grouding_vars <- c("sex", "age_group", "level_education",
+                   "ethnicity")
+
+
+table2<-awareness_of_heathRisk_demo %>% 
+  create_summary_table3(grouding_vars, "health_risk_associated_with_drinking_untreated_water",
+                        sum = T)
 
 
 
-table2 <- table2 %>% 
-         as_flex_table()
+table2<- table2 %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height =  0.5, unit = "in" ) 
 
 
 save_as_docx(table2, path = here("output/table2.docx"))
 
 
+print(table2)
 
 
-sum(str_detect(cholera_data$ta, "TA"))
+```
 
 
-# tbale of the Zone and District 
+## Awareness of the Health Risk Associated with drinking untreated Water by district 
 
+
+```{r}
 
 table3<-awareness_of_heathRisk %>% 
-    mutate(district=recode(
-      district, 
-      "Blantyre_City"="Blantyre"
-    )) %>% 
-          select(district ,  zone, residence, health_risk_associated_with_drinking_untreated_water) %>% 
-            tbl_summary(health_risk_associated_with_drinking_untreated_water,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2), 
-              residence~ c(0,2)
-            ))
+      select(district , 
+             residence, health_risk_associated_with_drinking_untreated_water) 
 
 
-table3 <- table3 %>% 
-         as_flex_table()
+grouping_vars <- c("district", "residence")
+
+
+
+table3<- table3<- create_summary_table3(table3, grouping_vars, "health_risk_associated_with_drinking_untreated_water", sum = T)
+
+table3<- table3 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
 
 
 save_as_docx(table3, path = here("output/table3.docx"))
 
+print(table3)
 
 
 ```
+
 
 
 
@@ -185,46 +179,36 @@ save_as_docx(table3, path = here("output/table3.docx"))
 ```{r}
 drinking_dry<-cholera_data %>% 
   select(district, 
-         zone, 
+         residence, 
          main_source_of_drinking_water_dry_season)
 
 
-drinking_dry<- drinking_dry %>% 
-  group_by( district, 
-           main_source_of_drinking_water_dry_season) %>%
-  count(main_source_of_drinking_water_dry_season) %>%
-    pivot_wider(
-    names_from = main_source_of_drinking_water_dry_season, 
-    values_from = n
-  )
+grouding_vars <- c("district", "residence")
 
-# replacing NA with Zero 
-drinking_dry[is.na(drinking_dry)]<-0
+drinking_dry<- drinking_dry %>% 
+  create_summary_table3(grouding_vars, "main_source_of_drinking_water_dry_season", sum = T)
+
+   drinking_dry<-drinking_dry %>%
+  rename_with(~ str_replace_all(., "_", " "))
 
 
 table4<- drinking_dry %>% 
-  rowwise() %>% 
-  mutate(total= sum(across(where(is.numeric))), 
-         
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
-         )
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
 
-   table4<-table4 %>%
-  rename_with(~ str_replace_all(., "_", " "))
+
+save_as_docx(table4, path = here("output/table4.docx"))
+
+print(table4)
+
+
+
+
+
+
 
 
 
@@ -1050,7 +1034,8 @@ table3.1.0 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education")
 
 
-table3.1.0 <-  create_summary_table2(table3.1.0,grouping_vars,"vaccined_with_ocv") |> 
+table3.1.0 <-  create_summary_table2(table3.1.0,
+                                     grouping_vars,"vaccined_with_ocv") |> 
                     as_flextable() |>
                     autofit() |>
                     set_table_properties(layout = "autofit")
@@ -2099,10 +2084,25 @@ Household_handwashing<- cholera_data %>%
                    residence, 
                    household_handwashing_facility)
 
+grouding_vars<- c("district", "residence")
+
+
+ Household_handwashing_tab<- Household_handwashing %>% 
+  create_summary_table3(grouding_vars, "household_handwashing_facility",                         sum = T)
 
 
 
+Household_handwashing_tab<- Household_handwashing_tab%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
 
+
+save_as_docx(Household_handwashing_tab, path = here("output/Household_handwashing_tab.docx"))
+
+
+table(cholera_data$san_facility_unavailable)
 
 
 
@@ -2111,7 +2111,70 @@ Household_handwashing<- cholera_data %>%
 ```
 
 
-## 9.	Do people in this community consistently use the available sanitation facilities?
+## 9.	if san facilities is not available. how people manage by district
+
+```{r}
+
+san_facility_unavailable<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   san_facility_unavailable)
+
+
+grouping_vars<- c("district", "residence")
+
+
+san_table<- san_facility_unavailable %>% 
+  create_summary_table3(grouping_vars, 
+                        "san_facility_unavailable", sum = T)
+
+san_table<-san_table%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(san_table, path = here("output/san_table.docx"))
+
+
+```
+
+
+
+
+```{r}
+
+san_facility_unavailable_demo<- cholera_data %>% 
+            select(sex,
+                   age_group, 
+                   level_education, 
+                   ethnicity,
+                   san_facility_unavailable)
+
+grouding_vars <- c("sex", "age_group", "level_education", "ethnicity")
+
+
+
+san_demo_table<- san_facility_unavailable_demo %>% 
+  create_summary_table3(grouding_vars,
+                        "san_facility_unavailable",
+                        sum = T)
+
+
+san_demo_table<-san_demo_table%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+save_as_docx(san_demo_table, 
+             path = here("output/san_demo_table.docx"))
+
+
+```
+
+
 
 
 
@@ -2120,12 +2183,49 @@ Household_handwashing<- cholera_data %>%
 
 ```{r}
 
+common_reason<- cholera_data %>% 
+            select(district, 
+                   residence, 
+    common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance)
+
+
+
+common_reason <- common_reason %>%
+   rename_with(~ str_replace_all(.,
+                    "common_reasons_not_using_san_facilities_",
+                    ""))
+
+common_reason<- common_reason %>% 
+  pivot_longer(cols = c(poor_maintenance_unhygienic, cost, distance),
+               names_to = "Reason",
+               values_to = "Percentage") %>% 
+  filter(Percentage == 1) %>%
+  select(district, residence, Reason)
+
+
+grouding_vars<- c("district", "residence")
+
+
+
+common_reason<- common_reason %>% 
+create_summary_table3(grouding_vars, "Reason",
+                      sum = T)
+
+common_reason_table<-common_reason%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" ) 
+
+
+save_as_docx(common_reason_table,
+             path = here("output/common_reason_table.docx"))
 
 
 ```
 
 
-## 11.	How do people manage when sanitation facilities are unavailable?
 
 
 
