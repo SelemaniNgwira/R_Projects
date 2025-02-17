@@ -65,11 +65,6 @@ create_summary_table <- function(data, group_var, response_var, sum = FALSE) {
 ## create_summary_table(data = data, group_var = "group_var", response_var = "response_var", sum = FALSE)
 
 
-
-
-
-
-
 create_summary_table2 <- function(data, group_vars, response_var, sum = FALSE) {
   # Initialize an empty list to store tables for each group variable
   tables_list <- list()
@@ -90,13 +85,15 @@ create_summary_table2 <- function(data, group_vars, response_var, sum = FALSE) {
   }
   
   # Combine all tables into one
-  final_table <- bind_rows(tables_list)
+  final_table <- bind_rows(tables_list, .id = "Grouping_Variable")
+<<<<<<< Updated upstream
   
   # Apply total row if sum = TRUE
   if (sum) {
     percent_columns <- names(final_table)[grepl("_percent$", names(final_table))]
     mean_values <- sapply(percent_columns, function(col) mean(final_table[[col]], na.rm = TRUE))
     total_row <- tibble(
+      Grouping_Variable = "Total",
       Background_characteristic = "Total",
       total = sum(final_table$total, na.rm = TRUE)
     )
@@ -110,6 +107,7 @@ create_summary_table2 <- function(data, group_vars, response_var, sum = FALSE) {
   
   return(final_table)
 }
+<<<<<<< Updated upstream
 
 
 
@@ -142,6 +140,8 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
   
   # Combine all tables into one
   final_table <- bind_rows(tables_list)
+=======
+>>>>>>> Stashed changes
   
   # Apply total row if sum = TRUE
   if (sum) {
@@ -156,6 +156,7 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
     
     # Create the total row as a summary of all response categories
     total_row <- tibble(
+      Grouping_Variable = "Total",
       Background_characteristic = "Total",
       total = total_counts$total
     )
@@ -173,5 +174,10 @@ create_summary_table3 <- function(data, group_vars, response_var, sum = FALSE) {
   
   return(final_table)
 }
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
