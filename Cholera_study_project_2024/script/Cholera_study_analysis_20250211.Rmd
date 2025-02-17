@@ -43,11 +43,11 @@ options("max.print" = 10000)  # Increase the print limit
 
 
 
-install.packages("devtools")
-
-devtools::install_github("ricardo-bion/ggradar")
-
-devtools::install_github("slidexyz/ggradar2")
+# install.packages("devtools")
+# 
+# devtools::install_github("ricardo-bion/ggradar")
+# 
+# devtools::install_github("slidexyz/ggradar2")
 
 
 ```
@@ -1050,7 +1050,7 @@ table3.1.0 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education")
 
 
-table3.1.0 <-  create_summary_table2(table3.1.0,grouping_vars,"vaccined_with_ocv") |> 
+table3.1.0 <-  create_summary_table3(table3.1.0,grouping_vars,"vaccined_with_ocv") |> 
                     as_flextable() |>
                     autofit() |>
                     set_table_properties(layout = "autofit")
@@ -1063,20 +1063,13 @@ save_as_docx( table3.1.0, path = here("output/table3_1_0.docx"))
 table3.1.1 <- cholera_data |> 
             select(vaccined_with_ocv,district,residence)
 
-grouping_vars <- c("vaccined_with_ocv","district","residence")
+grouping_vars <- c("district","residence")
 
 
-table3.1.1 <-  create_summary_table2(table3.1.1,grouping_vars,"vaccined_with_ocv") |> 
-                    as_flextable() |>
-                    autofit() |>
-                    set_table_properties(layout = "autofit")
-
-table3.1.1 <-  table3.1.1 %>%
-         as_flex_table()
-  as_flextable() |>
-   autofit() |>
-  set_table_properties(layout = "autofit")
-
+table3.1.1 <-  create_summary_table3(table3.1.1,grouping_vars,"vaccined_with_ocv") |> 
+as_flextable() |>
+autofit() |>
+set_table_properties(layout = "autofit")
 
 
 save_as_docx( table3.1.1, path = here("output/table3_1_1.docx"))
@@ -1094,7 +1087,7 @@ table3.2.0 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education")
 
 
-table3.2.0 <-  create_summary_table2(table3.2.0,grouping_vars,"ocv_prevent_cholera") |> 
+table3.2.0 <-  create_summary_table3(table3.2.0,grouping_vars,"ocv_prevent_cholera") |> 
                     as_flextable() |>
                     autofit() |>
                     set_table_properties(layout = "autofit")
@@ -1118,7 +1111,7 @@ table3.2.1 <- cholera_data |>
 grouping_vars <- c("district","residence")
 
 
-table3.2.1 <-  create_summary_table2(table3.2.1,grouping_vars,"ocv_prevent_cholera") |> 
+table3.2.1 <-  create_summary_table3(table3.2.1,grouping_vars,"ocv_prevent_cholera") |> 
                     as_flextable() |>
                     autofit() |>
                     set_table_properties(layout = "autofit")
@@ -1212,14 +1205,14 @@ table3.3.0 <- table3.3.0 %>%
 
 table3.3.0 <- table3.3.0 %>%
   rename_with(~ str_replace_all(., "_", " "))
-
+table3.3.0
 
 table3.3.0 <- table3.3.0 %>% 
   as_flextable() |> 
    autofit() |> 
   set_table_properties(layout = "autofit")
 
-table3.3.0
+
 
 save_as_docx(table3.3.0, path = here("output/table3_3_0.docx"))
 
@@ -1265,7 +1258,6 @@ residence_table <- residence_table %>%
 
 # Combine all tables into one
 table3.3.1 <- bind_rows(district_table,
-                     zone_table,
                      residence_table)
 
 
@@ -1303,12 +1295,13 @@ table3.3.1 <- table3.3.1 %>%
   rename_with(~ str_replace_all(., "_", " "))
 
 
+table3.3.1
+
 table3.3.1 <- table3.3.1 %>% 
   as_flextable() |> 
    autofit() |> 
   set_table_properties(layout = "autofit")
 
-table3.3.1
 
 save_as_docx(table3.3.1, path = here("output/table3_3_1.docx"))
 
@@ -1327,7 +1320,7 @@ table3.4.0 <- cholera_data %>%
 grouping_vars <- c("age_group","sex","level_education","religion")
 
 
-table3.4.0 <-  create_summary_table2(table3.4.0,grouping_vars,"safe_vaccine") 
+table3.4.0 <-  create_summary_table3(table3.4.0,grouping_vars,"safe_vaccine") 
 
 table3.4.0
 
@@ -1348,24 +1341,23 @@ save_as_docx( table3.4.0, path = here("output/table3_4_0.docx"))
 
 ```{r}
 table3.4.1 <- cholera_data |> 
-            select(safe_vaccine,district,zone) %>% 
-            tbl_summary(safe_vaccine,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2),
-              zone ~ c(0, 2)
-            ))
+            select(safe_vaccine,district,residence)
+
+grouping_vars <- c("district","residence")
+
+table3.4.1 <-  create_summary_table3(table3.4.1,grouping_vars,"safe_vaccine") 
+
+table3.4.1
+
+table3.4.1 <- table3.4.1 |> 
+          as_flextable() |>
+          autofit() |>
+          set_table_properties(layout = "autofit")
 
 
+
+save_as_docx(table3.4.1, path = here("output/table3_4_1.docx"))
  
-table3.4.1 <-  table3.4.1 %>% 
-         as_flex_table() |>  
-  as_flextable() |> 
-   autofit() |> 
-  set_table_properties(layout = "autofit")
-
-
-save_as_docx( table3.1.1, path = here("output/table3_4_1.docx"))
 
 table3.4.1
 
@@ -1406,7 +1398,6 @@ residence_table <- residence_table %>%
 
 # Combine all tables into one
 table3.5.0 <- bind_rows(district_table,
-                     zone_table,
                      residence_table)
 
 
@@ -1453,34 +1444,26 @@ save_as_docx(table3.5.0 , path = here("output/table3_5_0.docx"))
 ```{r}
 
 table3.6.0 <- cholera_data %>%
-  select(sex, age_group, level_education, religion, ocv_access) %>%
-  tbl_summary(
-    by = ocv_access,
-    statistic = list(
-      sex ~ "{n} ({p}%)",
-      age_group ~ "{n} ({p}%)",
-      level_education ~ "{n} ({p}%)",
-      religion ~ "{n} ({p}%)"
-    ),
-    digits = list(
-      sex ~ c(0, 2),
-      age_group ~ c(0, 2),
-      level_education ~ c(0, 2),
-      religion ~ c(0, 2)
-    ),
-    percent = "row"
-  ) %>%
-  modify_header(label = "**Demographic Variable**") %>%
-  bold_labels()
+  select(sex, age_group, level_education, religion, ocv_access)
+  
 
-# Convert to a flextable for Word export
-table_safe_combined <- table3.6.0 %>%
-  as_flex_table()
 
-# Save as a Word document
-save_as_docx(table3.6.0, path = here("output/table3_6_0.docx"))
+grouping_vars <- c("age_group","sex","level_education","religion")
+
+
+table3.6.0 <-  create_summary_table3(table3.6.0,grouping_vars,"ocv_access") 
 
 table3.6.0
+
+table3.6.0 <- table3.6.0 |> 
+          as_flextable() |>
+          autofit() |>
+          set_table_properties(layout = "autofit")
+
+
+
+save_as_docx( table3.6.0, path = here("output/table3_6_0.docx"))
+
 
 
 
@@ -1495,23 +1478,25 @@ table3.6.0
 ```{r}
 
 table3.6.1 <- cholera_data |> 
-            select(ocv_prevent_cholera,district) %>% 
-            tbl_summary(ocv_prevent_cholera,
-            percent = "row",
-            digits = list(
-              district~ c(0, 2)
-            ))
+            select(ocv_access,district,residence)
+  
 
 
- 
-table3.6.1 <-  table3.6.1 %>% 
-         as_flex_table()
+grouping_vars <- c("district","residence")
 
 
-save_as_docx( table3.6.1, path = here("output/table3_6_1.docx"))
+table3.6.1 <-  create_summary_table3(table3.6.1,grouping_vars,"ocv_access") 
 
 table3.6.1
 
+table3.6.1 <- table3.6.1 |> 
+          as_flextable() |>
+          autofit() |>
+          set_table_properties(layout = "autofit")
+
+
+
+save_as_docx(table3.6.1, path = here("output/table3_6_1.docx"))
 
 ```
 
@@ -1526,7 +1511,7 @@ table3.7.0 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education","religion")
 
 
-table3.7.0 <-  create_summary_table2(table3.7.0,grouping_vars,"received_ocv") 
+table3.7.0 <-  create_summary_table3(table3.7.0,grouping_vars,"received_ocv") 
 
 table3.7.0
 
@@ -1547,7 +1532,7 @@ table3.7.1 <- cholera_data |>
 grouping_vars <- c("district","residence")
 
 
-table3.7.1 <-  create_summary_table2(table3.7.1,grouping_vars,"received_ocv") 
+table3.7.1 <-  create_summary_table3(table3.7.1,grouping_vars,"received_ocv") 
 
 table3.7.1
 
@@ -1572,7 +1557,7 @@ table3.8.0 <- cholera_data |>
 grouping_vars <- c("district","residence")
 
 
-table3.8.0 <-  create_summary_table2(table3.8.0,grouping_vars,"family_members_vaccinated") 
+table3.8.0 <-  create_summary_table3(table3.8.0,grouping_vars,"family_members_vaccinated") 
 
 table3.8.0
 
@@ -1605,7 +1590,7 @@ table3.4.1 <- cholera_data |>
 
  
 table3.4.1 <-  table3.4.1 %>% 
-         as_flex_table() |>  
+     
   as_flextable() |> 
    autofit() |> 
   set_table_properties(layout = "autofit")
@@ -1701,7 +1686,7 @@ table3.9.1 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education","religion")
 
 
-table3.9.1 <-  create_summary_table2(table3.9.1,grouping_vars,"will_to_get_vaccinated") 
+table3.9.1 <-  create_summary_table3(table3.9.1,grouping_vars,"will_to_get_vaccinated") 
 
 table3.9.1
 
