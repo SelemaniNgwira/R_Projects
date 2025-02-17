@@ -58,7 +58,7 @@ cholera_data<-import(here("/Users/alex/Documents/GitHub/R_Projects/Cholera_study
     )) %>% 
    mutate(residence = case_when(
     district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
-    TRUE ~ "lake_share" ))
+    TRUE ~ "lake_share" )) 
 
 # changing the data.frame into tibble object for easy handling 
 cholera_data<- tibble(cholera_data)
@@ -192,84 +192,16 @@ drinking_dry<- drinking_dry %>%
   rename_with(~ str_replace_all(., "_", " "))
 
 
-table4<- drinking_dry %>% 
+table4<-drinking_dry %>% 
   flextable() %>% 
   autofit() %>% 
   set_table_properties(layout = "autofit") %>% 
   height_all(height = 0.5, unit = "in")
 
 
-
 save_as_docx(table4, path = here("output/table4.docx"))
 
 print(table4)
-
-
-
-
-
-
-
-
-
-
-table4<- table4 %>% 
-  as_flextable()
-
-
-save_as_docx(table4, path = here("output/table4.docx"))
-
-
-
-drinking_dry_zone<-cholera_data %>% 
-  select(zone, 
-         main_source_of_drinking_water_dry_season)
-
-drinking_dry_zone<- drinking_dry_zone%>% 
-  group_by( zone, 
-           main_source_of_drinking_water_dry_season) %>%
-  count(main_source_of_drinking_water_dry_season) %>%
-    pivot_wider(
-    names_from = main_source_of_drinking_water_dry_season, 
-    values_from = n
-  )
-
-
-# replacing NA with Zero 
-drinking_dry_zone[is.na(drinking_dry_zone)]<-0
-
-    table5<- drinking_dry_zone %>% 
-      rowwise() %>% 
-  mutate(total= sum(across(where(is.numeric))), 
-         
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
-         )
-    
-    
-    
-    table5<-table5 %>%
-  rename_with(~ str_replace_all(., "_", " "))
-    
-
-    
-table5<- table5 %>% 
-  as_flextable()
-
-
-save_as_docx(table5, path = here("output/table5.docx"))
 
 
 ```
@@ -281,112 +213,33 @@ save_as_docx(table5, path = here("output/table5.docx"))
 
 wet_drink_district <- cholera_data %>% 
                       select(district, 
+                             residence,
                              main_source_of_drinking_water_wet_season)
 
+
+grouping_vars <- c("district", "residence")
 
 wet_drink_district<- wet_drink_district %>% 
-  group_by( district, 
-           main_source_of_drinking_water_wet_season) %>%
-  count(main_source_of_drinking_water_wet_season) %>%
-    pivot_wider(
-    names_from = main_source_of_drinking_water_wet_season, 
-    values_from = n
-  )
+  create_summary_table3(grouping_vars, "main_source_of_drinking_water_wet_season",
+                        sum = T)
 
-
-
-
-# replacing NA with Zero 
-wet_drink_district[is.na(wet_drink_district)]<-0
-
-
-table6<- wet_drink_district %>% 
-  rowwise() %>% 
-  mutate(total= sum(across(where(is.numeric))), 
-         
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
-         )
-
-
-   table6<-table6 %>%
+  wet_drink_district<-wet_drink_district %>%
   rename_with(~ str_replace_all(., "_", " "))
+
+
    
-       
-table6<- table6 %>% 
-  as_flextable()
+table5<- wet_drink_district %>%  
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
-
-save_as_docx(table6, path = here("output/table6.docx"))
-
-
-
-# by Zone 
-
-
-wet_drink_zone <- cholera_data %>% 
-                      select(zone, 
-                             main_source_of_drinking_water_wet_season)
-
-
-wet_drink_zone<- wet_drink_zone %>% 
-  group_by( zone, 
-           main_source_of_drinking_water_wet_season) %>%
-  count(main_source_of_drinking_water_wet_season) %>%
-    pivot_wider(
-    names_from = main_source_of_drinking_water_wet_season, 
-    values_from = n
-  )
-
-
-
-
-# replacing NA with Zero 
-wet_drink_zone[is.na(wet_drink_zone)]<-0
-
-
-table7<- wet_drink_zone%>% 
-  rowwise() %>% 
-  mutate(total= sum(across(where(is.numeric))), 
-         
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
-         )
-
-
-   table7<-table7 %>%
-  rename_with(~ str_replace_all(., "_", " "))
+save_as_docx(table5, path = here("output/table5.docx"))
    
-       
-table7<- table7 %>% 
-  as_flextable()
+print(table5)
 
 
-save_as_docx(table7, path = here("output/table7.docx"))
+
 
 ```
 
@@ -398,26 +251,28 @@ Water_treat<-cholera_data %>%
          select(sex, 
                 age_group, 
                 level_education, 
-                religion, 
+                ethnicity, 
                 treat_drinking_water)
 
-
-table8<- Water_treat %>% 
-  tbl_summary(treat_drinking_water, 
-              percent = "row", 
-              digits = list(
-                sex~ c(0, 2), 
-                age_group~c(0,2), 
-                level_education~ c(0,2), 
-                religion~c(0,2)
-              ))
-
-table8<- table8 %>% 
-  as_flex_table()
+grouding_vars_demo <- c("sex", "age_group", "level_education", "ethnicity")
 
 
-save_as_docx(table8, path = here("output/table8.docx"))
+table6<- Water_treat %>% 
+  create_summary_table3(grouding_vars_demo,
+                        "treat_drinking_water", 
+                        sum = T)
 
+
+table6<- table6 %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
+
+
+save_as_docx(table6, path = here("output/table6.docx"))
+
+print(table6)
 
 ```
 
@@ -430,24 +285,24 @@ save_as_docx(table8, path = here("output/table8.docx"))
 
 Water_treat_district_zone<-cholera_data %>% 
          select(district, 
-                zone, 
+                residence, 
                 treat_drinking_water)
 
 
-table9<- Water_treat_district_zone%>% 
-  tbl_summary(treat_drinking_water, 
-              percent = "row", 
-              digits = list(
-                district~ c(0, 2), 
-                zone~c(0,2)
-                
-              ))
-
-table9<- table9 %>% 
-  as_flex_table()
 
 
-save_as_docx(table9, path = here("output/table9.docx"))
+table7 <- Water_treat_district_zone%>% 
+  create_summary_table3(grouding_vars,
+                        "treat_drinking_water", 
+                        sum = T)
+
+table7<- table7 %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
+
+save_as_docx(table7, path = here("output/table7.docx"))
 
 ```
 
@@ -465,76 +320,41 @@ methods_water <- cholera_data %>%
                  sex,
                   age_group, 
                   level_education, 
-                  religion, 
+                  ethnicity, 
                  c(34:41)
                )
 
- 
-
-sex_table<- process_data(methods_water,"sex")
-age_group_table<- process_data(methods_water,"age_group")
-education_table<- process_data(methods_water,"level_education")
-religion_table<- process_data(methods_water,"religion")
-
-sex_table <- sex_table %>% 
-  rename(
-    "variable" = sex
-  )
-
-age_group_table<- age_group_table %>% 
-  rename(
-    "variable"=age_group
-  )
+methods_water<- methods_water %>% 
+  pivot_longer(
+    cols = (5:12), 
+    names_to = "method_of_water_treatment"
+  ) %>% 
+  filter(value==1) %>% 
+  select(sex, age_group,
+         level_education,
+         ethnicity, 
+         method_of_water_treatment) 
 
 
-education_table<- education_table %>% 
-  rename(
-    "variable"=level_education
-  )
+methods_water$method_of_water_treatment<- gsub("method_of_water_treatment_", "", methods_water$method_of_water_treatment)
 
 
-religion_table<- religion_table %>% 
-  rename(
-    "variable"=religion
-  )
+methods_water<- methods_water %>% 
+  create_summary_table3(grouding_vars_demo, 
+                        "method_of_water_treatment",
+                        sum = T)
 
 
-# Combine all tables into one
-table10 <- bind_rows(sex_table,
-                     age_group_table,
-                     education_table,
-                     religion_table)
+table8<- methods_water %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
 
+save_as_docx(table8, path = here("output/table8.docx"))
 
-table10<- table10 %>% 
-  mutate(
- method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
- method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
- method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
- method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
- method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
- method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
- method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
- method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
-    )
-
-
-table10<- table10 %>%
-  rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
-
-
-table10<- table10 %>%
-  rename_with(~ str_replace_all(., "_", " "))
-
-
-table10<- table10 %>% 
-  as_flextable()
-
-
-save_as_docx(table10, path = here("output/table10.docx"))
-
-table10
+table8
 ```
 
 
@@ -543,60 +363,40 @@ table10
 methods_water_district <- cholera_data %>% 
                select(
                  district, 
+                 residence,
                  c(34:41)
                )
 
 
 
-tabel11<- methods_water_district %>% 
+table9<- methods_water_district %>% 
   pivot_longer(
-    cols = (2:9)
+    cols = (3:10), 
+    names_to = "method_of_water_treatment"
   ) %>% 
-  drop_na(value) %>% 
-  group_by(
-    district, 
-    name) %>% 
-  summarise(value=sum(value)) %>% 
-  pivot_wider(
-    names_from = name, 
-  values_from = value, 
-  ) %>% 
-  group_by(
-    district
-  ) %>% 
-  rowwise() %>% 
-  mutate(total=sum(across(where(is.numeric))))
+  filter(value==1) %>% 
+  select(district, 
+         residence, 
+         method_of_water_treatment)
+
+table9$method_of_water_treatment<-gsub("method_of_water_treatment_",
+                                        "",
+                                      table9$method_of_water_treatment)
+
+table9<- table9 %>%
+  create_summary_table3(grouding_vars, 
+                        "method_of_water_treatment",
+                        sum = T)
 
 
-
-tabel11<- tabel11 %>% 
-mutate(
- method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
- method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
- method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
- method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
- method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
- method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
- method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
- method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
-    )
+table9<- table9 %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
 
 
-
-
-tabel11<- tabel11 %>%
-  rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
-
-
-tabel11<- tabel11 %>%
-  rename_with(~ str_replace_all(., "_", " "))
-
-
-tabel11<- tabel11%>% 
-  as_flextable()
-
-
-save_as_docx(tabel11, path = here("output/table11.docx"))
+save_as_docx(table9, path = here("output/table9.docx"))
 
 ```
 
@@ -609,58 +409,64 @@ save_as_docx(tabel11, path = here("output/table11.docx"))
 ```{r}
 properly_chro_district <- cholera_data %>% 
             select(district, 
+                   residence,
                    chlorination_process_done_correctly)
 
 
-table12<- properly_chro_district %>% 
-  tbl_summary(chlorination_process_done_correctly, 
-              percent = "row", 
-              digits = list(
-                district~c(0,2)
-              ))
+table10<- properly_chro_district %>% 
+         create_summary_table3(grouding_vars, 
+                               "chlorination_process_done_correctly",
+                               sum = T)
+
+table10<-table10 %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
 
-table12<- table12 %>% 
-  as_flex_table()
-
-
-save_as_docx(table12, path = here("output/table12.docx"))
-
-
-
-
-## by Sex, Age and Education 
-
-
-properly_chro_demo<- cholera_data %>% 
-            select(sex,
-                   age_group, 
-                   level_education, 
-                   religion,
-                   chlorination_process_done_correctly)
-
-
-table13<- properly_chro_demo %>% 
-  tbl_summary(chlorination_process_done_correctly, 
-              percent = "row", 
-              digits = list(
-              sex~c(0,2), 
-                 age_group~c(0,2), 
-                 level_education~c(0,2), 
-                 religion~c(0,2)
-              ))
-
-
-table13<- table13 %>% 
-  as_flex_table()
-
-
-save_as_docx(table13, path = here("output/table13.docx"))
+save_as_docx(table10, path = here("output/table10.docx"))
 
 
 ```
 
-## 2.5. 5 Frequency of water treatment by Sex, Level of Education, Religion 
+
+
+##2.5.4 Properly chlorination process by Sex, Education, Age group and ethnicity
+
+```{r}
+## by Sex, Age and Education 
+
+
+properly_chro_demo<-cholera_data %>% 
+            select(sex,
+                   age_group, 
+                   level_education, 
+                   ethnicity,
+                   chlorination_process_done_correctly)
+
+
+table11<- properly_chro_demo %>% 
+    create_summary_table3(grouding_vars_demo, 
+                          "chlorination_process_done_correctly",
+                          sum = T)
+
+table11<-table11 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
+
+
+
+
+save_as_docx(table11, path = here("output/table11.docx"))
+
+
+```
+
+## 2.5. 5 Frequency of water treatment by Sex, Level of Education, Religion, ethnicity
+
 
 ```{r}
 freq_water_treatment <- cholera_data %>% 
@@ -668,51 +474,63 @@ freq_water_treatment <- cholera_data %>%
                           sex, 
                           age_group, 
                           level_education, 
-                          religion, 
-                          often_treat_water
+                          religion,
+                          ethnicity,
+                        often_treat_water
                         )
 
 
+grouding_vars_demo <- c("sex",
+                        "age_group", 
+                        "level_education", 
+                        "religion", 
+                        "ethnicity")
+
 
 table14<- freq_water_treatment %>% 
-  tbl_summary(often_treat_water, 
-              digits = list(
-                sex~c(0,2), 
-                age_group~c(0,2), 
-                level_education~c(0,2), 
-                religion~c(0,2)
-              ))
-
+  create_summary_table3(grouding_vars_demo, 
+                        "often_treat_water",
+                        sum = T)
 
 table14<- table14 %>% 
-  as_flex_table()
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
 
 save_as_docx(table14, path = here("output/table14.docx"))
 
+```
 
 
+## 2.5. 5 Frequency of water treatment by districts
+
+
+```{r}
 freq_water_treatment_district <- cholera_data %>% 
                                 select(
                                   district,
-                                  zone,
+                                  residence,
                                   often_treat_water
                                 )
 
 
-table15_a<- freq_water_treatment_district %>% 
-          tbl_summary(often_treat_water, 
-                      digits = list(
-                        district~c(0,2), 
-                        zone~c(0,2)
-                      ))
 
 
-table15_a<- table15_a %>% 
-  as_flex_table()
+table15<- freq_water_treatment_district %>% 
+           create_summary_table3(grouding_vars, 
+                                 "often_treat_water",
+                                 sum = T)
+
+table15<- table15 %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in")
 
 
-save_as_docx(table15_a, path = here("output/table15_a.docx"))
+save_as_docx(table15, path = here("output/table15.docx"))
 
 
 
@@ -729,16 +547,14 @@ Access_to_water_treatment_pt<-cholera_data %>%
 
 
 table16<- Access_to_water_treatment_pt %>% 
-    tbl_summary(difficulties_accessing_water_treatment_products,
-                percent = "row",
-                digits = list(
-                  district~c(0,2), 
-                  residence~c(0,2)
-                ))
-
-
+  create_summary_table3(grouding_vars,                         "difficulties_accessing_water_treatment_products",
+                        sum = T)
+    
 table16<- table16 %>% 
-  as_flex_table()
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
 
 save_as_docx(table16, path = here("output/table16.docx"))
 
@@ -759,17 +575,14 @@ knowledge_on_cholera_calender<-cholera_data %>%
                          c(48:51)
                        )
 
-knowledge_on_cholera_calender
+knowledge_on_cholera_calender<- knowledge_on_cholera_calender %>% 
+  pivot_longer(
+    cols = (5:8), 
+    names_to = "knowledge_on_cholera_season"
+  ) %>% 
+  filter(value==1)
 
-sex_table<- process_data(knowledge_on_cholera_calender, "sex")
-age_group_table <- process_data(knowledge_on_cholera_calender,
-                                "age_group")
-education_table <- process_data(knowledge_on_cholera_calender,
-                                "level_education")
-religion_table <- process_data(knowledge_on_cholera_calender, "religion")
 
-sex_table<- sex_table %>% 
-  rename("variable" =sex)
 
 
 age_group_table<- age_group_table %>%
@@ -894,7 +707,7 @@ save_as_docx(table18, path = here("output/table18.docx"))
 ```
 
 
-## 2. 7. 0 Knowledge of the potential Cause of Cholera.
+## 2. 7. 0 Knowledge of the potential Cause of Cholera sex, Age Group, Level of Education, Religion
 
 ```{r}
 
@@ -902,85 +715,49 @@ knowledge_on_cholera_cause<-cholera_data %>%
                        select(sex, 
                               age_group, 
                               level_education, 
-                              religion, 
+                              religion,
+                              ethnicity,  
                             contains("potential_causes_of_cholera_"),
-                            -contains("potential_causes_of_cholera_other_causes")
+                  -contains("potential_causes_of_cholera_other_causes")
                               )
 
 
-
-sex_table<- process_data(knowledge_on_cholera_cause,"sex")
-age_table<- process_data(knowledge_on_cholera_cause,"age_group")
-education_table<- process_data(knowledge_on_cholera_cause,"level_education")
-religion_table<- process_data(knowledge_on_cholera_cause,"religion")
-
-
-
-sex_table<- sex_table %>% 
-  rename("variable"=sex)
-
-age_table<- age_table %>%
-  rename("variable"=age_group)
-
-education_table<- education_table %>%
-  rename("variable"=level_education)
+knowledge_on_cholera_cause<- knowledge_on_cholera_cause %>% 
+  pivot_longer(
+    cols = (6:19), 
+    names_to ="potential_causes_of_cholera"
+  ) %>% 
+  filter(value==1) %>% 
+  select(sex, 
+         age_group,
+         level_education,
+         religion, 
+         ethnicity,
+         potential_causes_of_cholera)
 
 
-religion_table<- religion_table %>%
-  rename("variable"=religion)
+
+knowledge_on_cholera_cause$potential_causes_of_cholera<- gsub("potential_causes_of_cholera_",
+      "",
+      knowledge_on_cholera_cause$potential_causes_of_cholera)
 
 
-table19<- bind_rows( sex_table, 
-                     age_table, 
-                     education_table,
-                     religion_table) 
+knowledge_on_cholera_cause$potential_causes_of_cholera<- gsub("_",
+      " ",
+      knowledge_on_cholera_cause$potential_causes_of_cholera)
 
-table19 %>% 
-  mutate(
-  potential_causes_of_cholera_affected_by_cholera_germ= round(potential_causes_of_cholera_affected_by_cholera_germ/total*100, 2),                                    
- potential_causes_of_cholera_affected_by_rota_virus =round(
- potential_causes_of_cholera_affected_by_rota_virus/total*100, 2),
-                                      
-potential_causes_of_cholera_density_population =round(potential_causes_of_cholera_density_population/total*100, 2),                                         
-potential_causes_of_cholera_donot_know_1=round( potential_causes_of_cholera_donot_know_1/total*100, 2),                                                 
-potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination= round(potential_causes_of_cholera_eating_rotten_food_lack_food_protection_against_contamination/total*100, 2),
- 
- potential_causes_of_cholera_hot_humid_climate=round( potential_causes_of_cholera_hot_humid_climate/total*100, 2),                                          
- potential_causes_of_cholera_illiteracy_ignorance_on_health_education=round(
- potential_causes_of_cholera_illiteracy_ignorance_on_health_education/total*100, 2),
-                     
- potential_causes_of_cholera_inadeguate_safe_water_supply_system=round(
-   potential_causes_of_cholera_inadeguate_safe_water_supply_system/total*100, 2),
-                           
-potential_causes_of_cholera_lack_of_safe_drinking_water=round(
-  potential_causes_of_cholera_lack_of_safe_drinking_water/total*100, 2),
-                                 
-potential_causes_of_cholera_not_taking_vaccine=round(
-  potential_causes_of_cholera_not_taking_vaccine/total*100, 2),
-                                          
-potential_causes_of_cholera_not_wash_hands=round(
-  potential_causes_of_cholera_not_wash_hands/total*100, 2),
-                                              
-potential_causes_of_cholera_touching_food_without_clean_hands=round(
-  potential_causes_of_cholera_touching_food_without_clean_hands/total*100, 2),
-                            
-potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse =round(
-  potential_causes_of_cholera_unhygiene_disposal_of_excreta_and_refuse/total*100, 2),
-                     
-potential_causes_of_cholera_unhygiene_living_environment=round(
-  potential_causes_of_cholera_unhygiene_living_environment/total*100, 2)
-    )
+
+table19<-knowledge_on_cholera_cause %>% 
+  create_summary_table3(grouding_vars_demo, 
+                        "potential_causes_of_cholera",
+                        sum = T)
+
 
 table19<- table19 %>%
-  rename_with(~ str_replace_all(., "potential_causes_of_cholera_", ""))
-
-table19<- table19 %>%
-  rename_with(~ str_replace_all(., "_", " "))
-
-table19<- table19 %>%
-  as_flextable() %>% 
-  autofit() %>% 
-  set_table_properties(layout = "autofit")
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
 
 
 save_as_docx(table19, path = here("output/table19.docx"))
@@ -991,12 +768,111 @@ save_as_docx(table19, path = here("output/table19.docx"))
  
 ```
 
-## 2.8. 0 Knowledge of the Prevention Measures of cholera by Sex, Level of Education and Religious Belief.  
 
+## 2. 7. 0 Knowledge of the potential by District and residence: 
 
 ```{r}
 
 
+knowledge_district<-cholera_data %>% 
+                       select(district,
+                              residence,
+                            contains("potential_causes_of_cholera_"),
+                  -contains("potential_causes_of_cholera_other_causes")
+                              )
+
+
+knowledge_district<- knowledge_district %>% 
+  pivot_longer(
+    cols = (3:16), 
+    names_to ="potential_causes_of_cholera"
+  ) %>% 
+  filter(value==1) %>% 
+  select(district,
+         residence,
+         potential_causes_of_cholera)
+
+
+
+knowledge_district$potential_causes_of_cholera<- gsub("potential_causes_of_cholera_",
+      "",
+      knowledge_district$potential_causes_of_cholera)
+
+
+knowledge_district$potential_causes_of_cholera<- gsub("_",
+      " ",
+      knowledge_district$potential_causes_of_cholera)
+
+
+table20<-knowledge_district %>% 
+  create_summary_table3(grouding_vars, 
+                        "potential_causes_of_cholera",
+                        sum = T)
+
+
+table20<- table20 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height = 0.5, unit = "in")
+
+
+save_as_docx(table20, path = here("output/table20.docx"))
+
+print(table20)
+  
+
+
+
+```
+
+
+
+
+
+## 2.8. 0 Knowledge of the Prevention Measures of cholera by Sex, Level of Education and Religious Belief.  
+
+
+```{r}
+Prevention_of_cholera <- cholera_data %>%
+         select(
+           district, 
+           residence, 
+           c(70:82)
+         )
+
+
+grouping_vars <- c("district", "residence")
+
+Prevention_of_cholera<-Prevention_of_cholera %>% 
+  pivot_longer(
+    cols = (3:15), 
+    names_to = "prevention_of_cholera"
+  ) %>% 
+  filter(value==1) %>%
+  select(district, 
+         residence, 
+         prevention_of_cholera)
+
+
+Prevention_of_cholera$prevention_of_cholera<- gsub("cholera_preventation_measures_",
+      "",
+      Prevention_of_cholera$prevention_of_cholera)
+
+
+Prevention_of_cholera$prevention_of_cholera<- gsub("_",
+      " ",
+      Prevention_of_cholera$prevention_of_cholera)
+
+Prevention_of_cholera %>% 
+  create_summary_table3(grouping_vars, 
+                        "prevention_of_cholera",
+                        sum = T) %>% 
+  flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit") %>% 
+  height_all(height = 0.5, unit = "in") %>% 
+  save_as_docx(path = here("output/table21.docx"))
 
 
 ```
