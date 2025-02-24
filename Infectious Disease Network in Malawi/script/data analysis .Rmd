@@ -1,0 +1,88 @@
+---
+title: "data analysis "
+output: html_document
+---
+
+```{r}
+
+install.packages("RISmed")
+library(RISmed)
+library(rio)
+library(tidyverse)
+
+query <- EUtilsSummary("pandemic preparedness[MeSH Terms]", db="pubmed", retmax=100)
+records <- EUtilsGet(query)
+
+# Extract Title, Author, and Abstract
+data <- data.frame(
+  Title = ArticleTitle(records),
+  Authors = sapply(Author(records), function(x) paste(x$LastName, collapse=", ")),
+  Abstract = AbstractText(records)
+)
+
+# Save to Excel
+install.packages("writexl")
+library(writexl)
+write_xlsx(data, "PubMed_Results.xlsx")
+
+```
+
+
+
+```{r}
+# Search for the MeSH term "Infectious Disease Network in Malawi"
+query <- EUtilsSummary("Infectious Disease Network in Malawi[MeSH Terms] AND 2020:2025[PDAT]", db="pubmed", retmax=100)
+records <- EUtilsGet(query)
+
+# Extract Relevant Information
+data <- data.frame(
+  Title = ArticleTitle(records),
+  Authors = sapply(Author(records), function(x) paste(x$LastName, collapse=", ")), 
+  Affiliations = sapply(Affiliation(records), function(x) paste(unique(x), collapse="; ")), # Extracting affiliations
+  Abstract = AbstractText(records),
+  Journal = Title(records),
+  Year = YearPubmed(records)
+)
+
+# Save the results to an Excel file
+write_xlsx(data, "PubMed_Infectious_Disease_Network_Malawi.xlsx")
+
+# View first few rows
+head(data)
+
+view(data)
+
+```
+
+
+
+```{r}
+
+library(RISmed)
+library(writexl)
+
+# Search PubMed
+query <- EUtilsSummary('("stakeholders" OR "organizations" OR "policy makers" OR"implementers")AND("implementation" OR "programs" OR "initiatives" OR "interventions")AND ("infectious disease" OR "public health" OR "epidemics") AND "Malawi"[Title/Abstract] AND 2020:2025[PDAT]',db="pubmed", retmax=100)
+
+records <- EUtilsGet(query)
+
+# Extract data
+data <- data.frame(
+  Title = ArticleTitle(records),
+  Authors = sapply(Author(records), function(x) paste(x$LastName, collapse=", ")), 
+  Affiliations = sapply(Affiliation(records), function(x) paste(unique(x), collapse="; ")), 
+  Abstract = AbstractText(records),
+  Journal = Title(records),
+  Year = YearPubmed(records)
+)
+
+# Save to Excel
+write_xlsx(data, "PubMed_Stakeholders_Infectious_Disease_Malawi.xlsx")
+
+# View results
+head(data)
+
+
+```
+
+

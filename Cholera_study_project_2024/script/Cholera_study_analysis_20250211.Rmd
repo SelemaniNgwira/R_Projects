@@ -374,8 +374,8 @@ table9<- methods_water_district %>%
     cols = (3:10), 
     names_to = "method_of_water_treatment"
   ) %>% 
-  filter(value==1) %>% 
-  select(district, 
+  dplyr:: filter(value==1) %>% 
+ dplyr:: select(district, 
          residence, 
          method_of_water_treatment)
 
