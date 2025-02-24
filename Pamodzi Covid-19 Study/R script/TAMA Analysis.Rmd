@@ -43,8 +43,6 @@ tama_data<-read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTZVNeFbJTi
 
 ## Analysis 
 
-
-
 ```{r analysis, echo=FALSE}
 
 # removing row number 47.
@@ -67,6 +65,7 @@ tapply(
 )
 
 
+freq(tama_data$occupation_designation)
 
 ```
 
@@ -168,7 +167,11 @@ demo_table<-demo_data %>%
              which_pillar_did_you_belong_to_when_supporting_the_covid_19_response, 
   "Infection Prevention and Disease Control."="Surveillance"
            )) %>%  
-  tbl_summary()
+  tbl_summary(
+    digits = list(
+      occupation_designation~c(2,2)
+    )
+  )
 
 
 
@@ -185,9 +188,6 @@ tama_data %>%
   filter(is_it_pre_or_post_survey=="Pre Survey") %>% 
   tabyl(general_public_or_mo_h)
 
-tapply(
-  tama_data$number_of_years_of_experience_in_covid_19_response
-)
 
 ```
 
@@ -377,6 +377,8 @@ addition_question<- tama_data %>%
   select(c(35:40))
 
 addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19_chatbot
+
+## experience using the chatbot 
 
 
 
@@ -815,5 +817,16 @@ my_fun(data = df_paired,
 summary(df_paired)
 
 
+
 ```
+
+
+
+
+```{r}
+tama_data %>% 
+  freq(covid_19_chatbot_increased_surveillance_activities_especially_case_detection_and_reporting~general_public_or_mo_h)
+
+```
+
 
