@@ -50,7 +50,7 @@ options("max.print" = 10000)  # Increase the print limit
 ```{r cars}
 
 # importing the data 
-cholera_data<-import(here("/Users/alex/Documents/GitHub/R_Projects/Cholera_study_project_2024/data/cholera_data_.csv")) %>%
+cholera_data<-import(here("data/cholera_data_.csv")) %>%
                 clean_names() %>% 
   mutate(district=recode(
       district, 
@@ -727,8 +727,11 @@ knowledge_on_cholera_cause<- knowledge_on_cholera_cause %>%
     cols = (6:19), 
     names_to ="potential_causes_of_cholera"
   ) %>% 
-  filter(value==1) %>% 
-  select(sex, 
+   dplyr:: filter(value==1) %>% 
+  group_by(sex, age_group, level_education, religion, ethnicity, 
+           potential_causes_of_cholera) %>% 
+  summarise(value=sum(value))%>% 
+  dplyr::select(sex, 
          age_group,
          level_education,
          religion, 
@@ -750,7 +753,7 @@ knowledge_on_cholera_cause$potential_causes_of_cholera<- gsub("_",
 table19<-knowledge_on_cholera_cause %>% 
   create_summary_table3(grouding_vars_demo, 
                         "potential_causes_of_cholera",
-                        sum = T)
+                        sum = F)
 
 
 table19<- table19 %>%
