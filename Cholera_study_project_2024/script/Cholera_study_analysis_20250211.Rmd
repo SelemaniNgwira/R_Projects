@@ -83,7 +83,6 @@ ta_shapefile<-sf:: st_read(
 
 
 
-
 ```
 
 # Social and behavioral factors that influence current water treatment practices
@@ -727,16 +726,16 @@ knowledge_on_cholera_cause<- knowledge_on_cholera_cause %>%
     cols = (6:19), 
     names_to ="potential_causes_of_cholera"
   ) %>% 
-   dplyr:: filter(value==1) %>% 
-  group_by(sex, age_group, level_education, religion, ethnicity, 
-           potential_causes_of_cholera) %>% 
-  summarise(value=sum(value))%>% 
+  dplyr::filter(value==1) %>% 
+  group_by(Sex, age_group, level_education, ethnicity) %>% 
+  
   dplyr::select(sex, 
          age_group,
          level_education,
          religion, 
          ethnicity,
-         potential_causes_of_cholera)
+         potential_causes_of_cholera, 
+         value)
 
 
 
@@ -753,7 +752,7 @@ knowledge_on_cholera_cause$potential_causes_of_cholera<- gsub("_",
 table19<-knowledge_on_cholera_cause %>% 
   create_summary_table3(grouding_vars_demo, 
                         "potential_causes_of_cholera",
-                        sum = F)
+                        sum = T)
 
 
 table19<- table19 %>%

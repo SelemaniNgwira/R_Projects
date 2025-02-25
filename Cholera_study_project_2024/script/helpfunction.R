@@ -16,44 +16,6 @@ process_data <- function(data, group_var) {
 
 
 
-# Generic function to create a summary table
-create_summary_table <- function(data, group_var, response_var, sum = FALSE) {
-  table <- data %>%
-    group_by(.data[[group_var]]) %>%
-    count(.data[[response_var]]) %>%
-    drop_na(.data[[response_var]]) %>%
-    pivot_wider(names_from = .data[[response_var]], values_from = n, values_fill = list(n = 0)) %>%
-    mutate(total = rowSums(across(where(is.numeric)), na.rm = TRUE)) %>%
-    mutate(across(-total, ~ round(. / total * 100, 2), .names = "{.col}_percent")) %>%  # Convert only counts to percentages
-    rename(Background_characteristic = !!group_var) %>%
-    select(Background_characteristic, ends_with("_percent"), total)  # Exclude total_percent
-  
-  # Apply adorn_totals if TRUE
-  if (sum) {
-    # Get the names of the percentage columns dynamically
-    percent_columns <- names(table)[grepl("_percent$", names(table))]
-    
-    # Calculate the mean for each percentage column dynamically
-    mean_values <- sapply(percent_columns, function(col) mean(table[[col]], na.rm = TRUE))
-    
-    # Create a "Total" row with the computed means for each percentage column
-    total_row <- tibble(
-      Background_characteristic = "Total",
-      total = sum(table$total, na.rm = TRUE)  # Compute total sum
-    )
-    
-    # Dynamically assign the mean values to the correct percentage columns
-    for (i in 1:length(percent_columns)) {
-      total_row[[percent_columns[i]]] <- mean_values[i]
-    }
-    
-    # Append the "Total" row at the bottom
-    table <- bind_rows(table, total_row)
-  }
-  
-  
-  return(table)
-}
 
 
 
@@ -70,46 +32,8 @@ create_summary_table <- function(data, group_var, response_var, sum = FALSE) {
 
 
 
-create_summary_table2 <- function(data, group_vars, response_var, sum = FALSE) {
-  # Initialize an empty list to store tables for each group variable
-  tables_list <- list()
-  
-  for (group_var in group_vars) {
-    table <- data %>%
-      group_by(.data[[group_var]]) %>%
-      count(.data[[response_var]]) %>%
-      drop_na(.data[[response_var]]) %>%
-      pivot_wider(names_from = .data[[response_var]], values_from = n, values_fill = list(n = 0)) %>%
-      mutate(total = rowSums(across(where(is.numeric)), na.rm = TRUE)) %>%
-      mutate(across(-total, ~ round(. / total * 100, 2), .names = "{.col}_percent")) %>%
-      rename(Background_characteristic = !!group_var) %>%
-      select(Background_characteristic, ends_with("_percent"), total)
-    
-    # Store table in list
-    tables_list[[group_var]] <- table
-  }
-  
-  # Combine all tables into one
-  final_table <- bind_rows(tables_list)
-  
-  # Apply total row if sum = TRUE
-  if (sum) {
-    percent_columns <- names(final_table)[grepl("_percent$", names(final_table))]
-    mean_values <- sapply(percent_columns, function(col) mean(final_table[[col]], na.rm = TRUE))
-    total_row <- tibble(
-      Background_characteristic = "Total",
-      total = sum(final_table$total, na.rm = TRUE)
-    )
-    
-    for (i in seq_along(percent_columns)) {
-      total_row[[percent_columns[i]]] <- mean_values[i]
-    }
-    
-    final_table <- bind_rows(final_table, total_row)
-  }
-  
-  return(final_table)
-}
+
+
 
 
 
