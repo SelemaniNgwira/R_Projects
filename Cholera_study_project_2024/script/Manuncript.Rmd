@@ -37,6 +37,8 @@ p_load(
   officer)
  
 
+install.packages("cardx")
+
 conflicted::conflict_prefer("select", "dplyr")
 
 options("max.print" = 10000)  # Increase the print limit
@@ -202,6 +204,8 @@ save_as_docx(table4, path = here("output/table4.docx"))
 
 print(table4)
 
+
+gsub("main_source_of_drinking_water_dry_season_", "", drinking_dry$main_source_of_drinking_water_dry_season)
 
 ```
 
@@ -1602,532 +1606,228 @@ table3.10.0
 ```
 
 
-# 4. 0 . Availability and use of sanitary services and infrastructure for cholera prevention
+# 4. 0 . Sanitary services and infrastructure for Cholera prevention at community and household levels
 
-
-
-# Percentage of households that have toilets
-
-## 1.	Do you have toilet?
+## Sainitary Infracture we access 
 
 ```{r}
 
-knitr::opts_chunk$set(tidy = TRUE, collapse = TRUE, rows.print = 12)
-
-available_toilet<- cholera_data %>% 
-            select(district, 
-                   residence, 
-                   toilet_facility_avaiable)
-
-              
-toilet_dis_table<- available_toilet %>% 
-  group_by(district) %>%
-  count(toilet_facility_avaiable) %>% 
-  drop_na(toilet_facility_avaiable) %>% 
-  pivot_wider(names_from = toilet_facility_avaiable,
-              values_from = n) %>% 
-  # adorn_totals("row") %>%
-  mutate(total=available+not_available, 
-         available= round( available/total*100,2), 
-         not_available=round( not_available/total*100,2)) %>% 
-  rename("Background_charateristic" = district)
+sanitary_infractures<- cholera_data %>% 
+  select(toilet_facility_avaiable,
+         soild_waste_disposal, 
+         bath_shelter_bathroom, 
+         household_handwashing_facility, 
+         san_facility_unavailable, 
+         soap_or_detergent_available,
+         drainage_around_household,
+         toilet_covered, 
+         toilet_cleanliness,
+         designated_kitchen_area,
+         pit_condition,
+         sanitary_and_infrastructure_category,
+         common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,            common_reasons_not_using_san_facilities_cost,
+         common_reasons_not_using_san_facilities_distance
+  )
 
 
+summarytools::freq(sanitary_infractures)
 
-toilet_res_table<- available_toilet %>% 
-  group_by(residence) %>%
-  count(toilet_facility_avaiable) %>% 
-  drop_na(toilet_facility_avaiable) %>% 
-  pivot_wider(names_from = toilet_facility_avaiable,
-              values_from = n) %>% 
-  adorn_totals("row") %>%
-  mutate(total=available+not_available, 
-         available= round( available/total*100,2), 
-         not_available=round( not_available/total*100,2)) %>% 
-  rename("Background_charateristic" = residence)
+# this code is extrating a data set on the availability of sanitary infractures in the community and household level
 
-
-
-table20<-rbind(toilet_dis_table, toilet_res_table) 
-
-empty_row1 <- data.frame(Background_charateristic= "District",
-                        available = NA,
-                        not_available = NA, 
-                        total = NA)
-  
-empty_row2 <- data.frame(Background_charateristic= "Residence",
-                        available = NA,
-                        not_available = NA, 
-                        total = NA)
+table_san_facility <- sanitary_infractures %>% 
+  select(
+    toilet_facility_avaiable,
+    soild_waste_disposal,
+    bath_shelter_bathroom,
+    household_handwashing_facility, 
+    soap_or_detergent_available,
+    designated_kitchen_area
+  )
 
 
-table20<- rbind(empty_row1, table20[1:7, ],
-      empty_row2, table20[8:nrow(table20), ])
+table_san_facility_2<-sanitary_infractures %>%
+  select(
+    drainage_around_household,
+    toilet_covered,
+    toilet_cleanliness,
+    pit_condition )
 
-table20<- table20 %>%
+
+
+```
+
+
+
+```{r}
+
+## This table provide a freq on the availability of sanitary infrastructures in the community and household level
+
+table_san_facility<- table_san_facility %>% 
+  pivot_longer(
+    cols = 1:6,
+    names_to = "sanitary_infractures"
+  ) %>% 
+  count(sanitary_infractures, value) %>% 
+  dplyr::filter(value != 4) %>% 
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>% 
+  mutate(
+    total = available + not_available,
+    available = paste0(available, " (", round(available / total * 100, 1), "%)"),
+    not_available = paste0(not_available, " (", round(not_available / total * 100, 1), "%)")
+  ) %>% 
+  select(sanitary_infractures, available, not_available)
+
+
+table_san_facility<- table_san_facility %>%
   flextable() %>%
   autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
+  set_table_properties(layout = "autofit")
 
 
-save_as_docx(table20, path= here("output/table20.docx"))
-  
-
-
+save_as_docx(table_san_facility, path = here("output/table_sanitary_infractures.docx"))
 
 ```
-
-
-
-## District from the toilets
-
-
-```{r}
-
-available_toilet_demo<- cholera_data %>% 
-            select(sex, 
-                   level_education,
-                   ethnicity,
-                   toilet_facility_avaiable)
-
-
-sex_table<- create_summary_table(available_toilet_demo, "sex", 
-                     "toilet_facility_avaiable")
-leduction_table<- create_summary_table(available_toilet_demo, "level_education",
-                     "toilet_facility_avaiable")
-ethincity_table<- create_summary_table(available_toilet_demo,
-                                       "ethnicity",
-                     "toilet_facility_avaiable", 
-                      sum = T)
-
-toilet_table_demo<-rbind(sex_table, leduction_table, ethincity_table)
-
-
-toilet_table<-toilet_table_demo %>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
-
-save_as_docx(toilet_table, path = here("output/toilet_table.docx"))
-
-
-```
-
-
-
-## 2.	What type of toilet facility do members of your     household usually use? 
-
-
-```{r}
-
-
-
-
-
-```
-
-
-
-
-## 3.	Do you have Refuse pit?
-
-
-```{r}
-
-refuse_pit<- cholera_data %>% 
-            select(district, 
-                   residence, 
-                   soild_waste_disposal,
-                   bath_shelter_bathroom)
-
-
-refuse_pit_dis_table<- refuse_pit %>%
-             create_summary_table("district", "soild_waste_disposal")
-
-refuse_pit_res_table <- refuse_pit %>% 
-         create_summary_table("residence",
-                              "soild_waste_disposal",
-                              sum = T)
-
-
-refuse_pit_table<-rbind(refuse_pit_dis_table,
-                        refuse_pit_res_table)
-
-
-bath_shelter_dis_table<- refuse_pit %>%
-             create_summary_table("district", "bath_shelter_bathroom")
-
-bath_shelter_res_table <- refuse_pit %>%
-    create_summary_table("residence",
-                              "bath_shelter_bathroom",
-                              sum = T)
-
-
-bath_shelter_table<-rbind(bath_shelter_dis_table,
-                          bath_shelter_res_table)
-
-bath_shelter_table <- bath_shelter_table %>% 
-  rename("Bath_available"=available_percent, 
-         "Bath_not_available"=not_available_percent)
-
-
-
-refuse_pit_table <- refuse_pit_table %>%
-  rename("Refuse_pit_available"=available_percent, 
-         "Refuse_pit_not_available"=not_available_percent)
-
-merge(refuse_pit_table, bath_shelter_table,
-      by.x = "Background_charateristic")
-  # flextable() %>%
-  # autofit()
-  # set_table_properties(layout = "autofit") %>%
-  # height_all(height =  0.5, unit = "in" ) %>%
-  # save_as_docx(path = here("output/refuse_pit_table.docx"))
-
-
-refuse_pit_table1<-merge.data.frame(refuse_pit_table,
-                                    bath_shelter_table) %>% 
-   select(Background_characteristic,
-         Refuse_pit_available, Refuse_pit_not_available,
-         Bath_available, Bath_not_available, total)
-
-Refuse_pit_table1<- refuse_pit_table1 %>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
-
-
-save_as_docx(Refuse_pit_table1, path = here("output/Refuse_pit_table1.docx"))
-  
-  
-```
-
-## 4.	Do you have Bath Shelter with good drainage?
-
-
-```{r}
-
-```
-
-
-
-## 5.	the pit latrine Condtion by District?
-
 
 
 
 ```{r}
 
-Pit_condition <- cholera_data %>% 
-                   select(district,
-                          residence, 
-                          pit_condition)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# List of sanitation-related variables
+vars <- c("drainage_around_household", "toilet_covered", "toilet_cleanliness", "pit_condition")
+
+# Reshape to long format
+long_data <- table_san_facility_2%>%
+  select(all_of(vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "response")
+
+# Summarize counts and compute percentages
+summary_data <- long_data %>%
+  group_by(variable, response) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(
+    percent = n / sum(n) * 100,
+    label = paste0(response, " (", round(percent, 1), "%)")
+  )
+
+# Plot pie charts with response values shown
+pie_chart_image<- ggplot(summary_data, aes(x = "", y = percent, fill = factor(response))) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  facet_wrap(~ variable, scales = "free") +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 3) +
+  labs(title = "Condition of Sanitary Infrasctures at study visit ", fill = "Response Value") +
+  theme_void() +
+  theme(
+    strip.text = element_text(size = 12, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 16)
+  )+
+  theme(legend.position = "none")
 
 
-stack_bar_pit_conition<- Pit_condition %>% 
-  group_by(district, pit_condition) %>%
-  summarise(n=n()) %>% 
-  drop_na(pit_condition) %>%
-  pivot_wider(names_from = pit_condition,
-              values_from = n) %>% 
-  mutate(total=not_pit+overflowing+properly_maintained, 
-         not_pit= round(not_pit/total*100, 2), 
-         overflowing=round(overflowing/total*100, 2), 
-       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
-  select(district, not_pit, overflowing, properly_maintained) %>% 
-  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
-               names_to = "Pit_condition",
-               values_to = "Percentage") %>% 
-   mutate(Pit_condition = factor(Pit_condition, 
-                                 levels = c("properly_maintained",
-                                            "overflowing",
-                                            "not_pit"))) %>% 
-  ggplot(aes(x=district, y=Percentage, fill=Pit_condition))+
-  geom_col()+
-  coord_flip()+
-  scale_fill_manual(values = c( "properly_maintained" = "green",
-                                "overflowing" = "yellow",
-                                "not_pit" = "red" )) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 12, colour = "black"), 
-        axis.text.y = element_text(size = 12, colour = "black"), 
-        axis.title.y = element_text(size = 14, colour = "black"), 
-        axis.title.x = element_text(size = 14, colour = "black"))+
-  labs(y = "Percentage") +
-  ggtitle("Pit Condition by District")+
-  geom_text(aes(label = paste0(Percentage,"%")), 
-            position = position_stack(vjust = 0.5))
-
-
-ggsave("output/stack_bar_pit_conition.png", 
-       plot = stack_bar_pit_conition,
-       width = 10, height = 10, units = "in", dpi = 300, 
-       bg="white")
-
-
-
+ggsave(here("output/pie_chart_image.png"),
+       pie_chart_image, 
+       width = 10, 
+       height = 10, 
+       bg="white",
+       dpi = 300)
 
 
 ```
 
-
-## 6.	Pit condition by residence 
-
-
-```{r}
-
- stack_bar_residence<- Pit_condition %>% 
-  mutate(residence = recode(residence,
-                        "in_land"="in land", 
-                        "lake_share" = "Lake Shore")) %>%
-  group_by(residence, pit_condition) %>%
-  summarise(n=n()) %>% 
-  drop_na(pit_condition) %>%
-  pivot_wider(names_from = pit_condition,
-              values_from = n) %>% 
-  mutate(total=not_pit+overflowing+properly_maintained, 
-         not_pit= round(not_pit/total*100, 2), 
-         overflowing=round(overflowing/total*100, 2), 
-       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
-  select(residence, not_pit, overflowing, properly_maintained) %>% 
-  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
-               names_to = "Pit_condition",
-               values_to = "Percentage") %>% 
-   mutate(Pit_condition = factor(Pit_condition, 
-                                 levels = c("properly_maintained",
-                                            "overflowing",
-                                            "not_pit"))) %>% 
-  ggplot(aes(x=residence, y=Percentage, fill=Pit_condition))+
-  geom_col()+
-  coord_flip()+
-  scale_fill_manual(values = c( "properly_maintained" = "green",
-                                "overflowing" = "yellow",
-                                "not_pit" = "red" )) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 12, colour = "black"), 
-        axis.text.y = element_text(size = 12, colour = "black"), 
-        axis.title.y = element_text(size = 14, colour = "black"), 
-        axis.title.x = element_text(size = 14, colour = "black"))+
-  labs(y = "Percentage", 
-       x="Residence") +
-  ggtitle("Pit Condition by Residence")+
-  geom_text(aes(label = paste0(Percentage,"%")), 
-            position = position_stack(vjust = 0.5))
-
-
-ggsave("output/stack_bar_residenc.png", 
-       plot = stack_bar_residence,
-       width = 10, height = 10, units = "in", dpi = 300, 
-       bg="white")
-
-
-
-
-
-
-
-```
+## overall sanitary infrastructures in the community and household level
 
 
 ```{r}
 
 
+overall_sanitary <- cholera_data %>% 
+  select(sanitary_and_infrastructure_category)
+
+
+
+pie_chart_overall_san <- overall_sanitary %>% 
+  count(sanitary_and_infrastructure_category) %>% 
+  rename("Overall_Sanitary_status"= sanitary_and_infrastructure_category) %>% 
+  mutate(
+    Overall_Sanitary_status = fct_reorder(Overall_Sanitary_status, n), 
+    percent= round(n/sum(n)*100, 2)
+  ) %>%
+  ggplot(aes(x = "", y = percent, fill = factor(Overall_Sanitary_status))) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y")+
+  geom_text(aes(label = paste0(Overall_Sanitary_status, " (", percent, "%)")), 
+            position = position_stack(vjust = 0.5),
+            size = 6) +
+  labs(title = "Overall Sanitary Status at Study Visit") +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16)
+  )+
+  theme(legend.position = "none")
+
+ggsave(here("output/pie_chart_overall_san.png"),
+       pie_chart_overall_san,
+       width = 10,
+       height = 10,
+       bg="white",
+       dpi = 300)
 
 
 ```
 
 
-
-
-
-## 7.	How often do you wash hands with soap after using the toilet or handling food?
-
+## Association of sanitary and demographic variables 
 
 ```{r}
 
-Pit_condition %>% 
-  group_by(district, pit_condition) %>%
-  summarise(n=n()) %>% 
-  drop_na(pit_condition) %>%
-  pivot_wider(names_from = pit_condition,
-              values_from = n) %>% 
-  mutate(total=not_pit+overflowing+properly_maintained, 
-         not_pit= round(not_pit/total*100, 2), 
-         overflowing=round(overflowing/total*100, 2), 
-         properly_maintained=round(properly_maintained/total*100, 2)) %>% 
-  select(district, not_pit, overflowing, properly_maintained) %>% 
-  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
-               names_to = "Pit_condition",
-               values_to = "Percentage") %>% 
-
-ggplot(aes(x = district, y = Percentage, color = Pit_condition)) +
-  geom_point(size = 5) +
-  geom_line(aes(group = district), size = 1) +
-  coord_flip() +
-  theme_minimal() +
-  scale_color_manual(values = c("not_pit" = "red",
-                                "overflowing" = "yellow",
-                                "properly_maintained" = "green")) +
-  labs(y = "Percentage", title = "Pit Condition by District")
+sanitary_by_person<- cholera_data %>% 
+  select(
+    sex,
+    age_group, 
+    level_education,
+    religion,
+    marital_status, 
+    occupation, 
+    ethnicity, 
+    sanitary_and_infrastructure_category
+  )
 
 
 
-
-```
-
-## 8.	Hand washing facility by district and residence
-
-
-```{r}
-
-Household_handwashing<- cholera_data %>% 
-            select(district, 
-                   residence, 
-                   household_handwashing_facility)
-
-grouding_vars<- c("district", "residence")
-
-
- Household_handwashing_tab<- Household_handwashing %>% 
-  create_summary_table3(grouding_vars, "household_handwashing_facility",                         sum = T)
-
-
-
-Household_handwashing_tab<- Household_handwashing_tab%>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
-
-
-save_as_docx(Household_handwashing_tab, path = here("output/Household_handwashing_tab.docx"))
-
-
-table(cholera_data$san_facility_unavailable)
-
-
+sanitary_by_person|>
+  tbl_summary(by=sanitary_and_infrastructure_category) |>
+  add_p() |>
+  add_ci()
 
 
 
 ```
 
 
-## 9.	if san facilities is not available. how people manage by district
-
-```{r}
-
-san_facility_unavailable<- cholera_data %>% 
-            select(district, 
-                   residence, 
-                   san_facility_unavailable)
-
-
-grouping_vars<- c("district", "residence")
-
-
-san_table<- san_facility_unavailable %>% 
-  create_summary_table3(grouping_vars, 
-                        "san_facility_unavailable", sum = T)
-
-san_table<-san_table%>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
-
-
-save_as_docx(san_table, path = here("output/san_table.docx"))
-
-
-```
-
-
-
-
-```{r}
-
-san_facility_unavailable_demo<- cholera_data %>% 
-            select(sex,
-                   age_group, 
-                   level_education, 
-                   ethnicity,
-                   san_facility_unavailable)
-
-grouding_vars <- c("sex", "age_group", "level_education", "ethnicity")
-
-
-
-san_demo_table<- san_facility_unavailable_demo %>% 
-  create_summary_table3(grouding_vars,
-                        "san_facility_unavailable",
-                        sum = T)
-
-
-san_demo_table<-san_demo_table%>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" )
-
-save_as_docx(san_demo_table, 
-             path = here("output/san_demo_table.docx"))
-
-
-```
 
 
 
 
 
-## 10.	What are the common reasons for not using available sanitary facilities? 
-
-
-```{r}
-
-common_reason<- cholera_data %>% 
-            select(district, 
-                   residence, 
-    common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, common_reasons_not_using_san_facilities_cost,
-    common_reasons_not_using_san_facilities_distance)
 
 
 
-common_reason <- common_reason %>%
-   rename_with(~ str_replace_all(.,
-                    "common_reasons_not_using_san_facilities_",
-                    ""))
-
-common_reason<- common_reason %>% 
-  pivot_longer(cols = c(poor_maintenance_unhygienic, cost, distance),
-               names_to = "Reason",
-               values_to = "Percentage") %>% 
-  filter(Percentage == 1) %>%
-  select(district, residence, Reason)
-
-
-grouding_vars<- c("district", "residence")
 
 
 
-common_reason<- common_reason %>% 
-create_summary_table3(grouding_vars, "Reason",
-                      sum = T)
-
-common_reason_table<-common_reason%>% 
-  flextable() %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit") %>%
-  height_all(height =  0.5, unit = "in" ) 
 
 
-save_as_docx(common_reason_table,
-             path = here("output/common_reason_table.docx"))
 
 
-```
+
+
+
+
 
 
 
