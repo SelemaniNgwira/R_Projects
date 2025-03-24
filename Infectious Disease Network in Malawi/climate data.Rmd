@@ -1,0 +1,32 @@
+---
+title: "Untitled"
+author: "PHIM-Research division"
+date: "2025-03-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages("geodata")
+
+if(!require("pacman")) install.packages("pacman")
+
+pacman::p_load( 
+  raster, rgdal, sp, rnaturalearth)
+
+library(geodata)
+```
+
+
+
+```{r}
+# Download WorldClim bioclimatic variables with 10 arc-minute resolution
+worldclim_data <- geodata::worldclim(var = "bio", res = 10)
+
+geodata::worldclim_global(var = "bio", res = 10, path = "worldclim")
+
+
+
+```
+

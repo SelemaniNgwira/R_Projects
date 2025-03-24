@@ -86,3 +86,26 @@ head(data)
 ```
 
 
+```{r}
+
+
+# # Install and load the igraph package
+# install.packages("igraph")
+# library(igraph)
+# 
+# # Define the variables and their relationships
+# variables <- c("Population", "Birth Rate")
+# relations <- data.frame(
+#   from = c("Population", "Birth Rate"),
+#   to = c("Birth Rate", "Population"),
+#   effect = c("-", "+")  # "+" for positive, "-" for negative
+# )
+# 
+# # Create the graph
+# g <- graph_from_data_frame(relations, directed = TRUE, vertices = variables)
+# 
+# # Plot the graph
+# plot(g, edge.label = relations$effect, main = "Causal Loop Diagram: Population and Birth Rate")
+```
+
+
