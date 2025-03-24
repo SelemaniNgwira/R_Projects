@@ -1889,7 +1889,6 @@ ta_shapefile<- st_read(here("data/mw_shp/mwi_admbnda_adm3_nso_hotosm_20230405.sh
 
 
 
-
 sanitary_by_ta <- cholera_data %>% 
   select(
     district, 
@@ -1939,7 +1938,6 @@ sanitary_by_ta<- sanitary_by_ta|>
   )
 
 
-
 merged_san_ta<- merge(ta_shapefile,
                       sanitary_by_ta,
                       by = "ta")
@@ -1948,16 +1946,6 @@ merged_san_ta<- merge(ta_shapefile,
 
 
 
-tm_shape(ta_shapefile)+
-tmap_options(check.and.fix = T)+
-tm_borders(col = "skyblue")+
-  tm_shape(district_shapefile)+
-  tm_borders(col = "black")+
-tm_shape(merged_san_ta)+
-tm_polygons(col = "Adequate", 
-            palette = "green", 
-            style = "count", 
-            title = "Sanitary Infrastructure Availability (%)")
 
 
 
@@ -1973,25 +1961,28 @@ tm_polygons(col = "Adequate",
 
 library(tmap)
 
-# Set tmap to plotting mode (you can switch to view mode if desired)
 tmap_mode("plot")
+# Create manual breaks to avoid overlapping
+breaks <- c(0, 50, 75, 90, 100)  
 
-sanitary_infrastructure_map<- tm_shape(ta_shapefile) +
+# Create a map of the availability of sanitary infrastructure by TA
+sanitary_infrastructure_map<-tm_shape(ta_shapefile) +
   tmap_options(check.and.fix = TRUE) +
   tm_borders(col = "skyblue", lwd = 1) +
 
-  tm_shape(merged_san_ta) +
+tm_shape(merged_san_ta) +
   tm_polygons(
-    col = "Adequate",                     
-    palette = "YlGn",                     
-    style = "quantile",                   
-    n = 5,                                
-    title = "Sanitary Infrastructure\nAvailability (%) in PAMI",
-    border.col = "grey60",                
-    textNA = "No data",                   
-    colorNA = "lightgrey"
-  ) +
-   tm_layout(
+    col = "Adequate",
+    palette = "YlGn",
+    style = "fixed",
+    breaks = breaks,
+    title = "Sanitary Infrastructure\nAvailability (%)",
+    border.col = "grey60",
+    textNA = "No data",
+    colorNA = "lightgrey",
+    legend.format = list(digits = 0, format = "f")
+  )+
+  tm_layout(
     legend.outside = TRUE,
     legend.title.size = 1.1,
     legend.text.size = 0.8,
@@ -2005,23 +1996,7 @@ sanitary_infrastructure_map<- tm_shape(ta_shapefile) +
 
 
 
-tmap_save(
-  filename = 
-    here("output/sanitary_infrastructure_map.png"),
-  width = 10,
-  height = 10,
-  dpi = 300
-)
-
-
-
-
 ```
-
-
-
-
-
 
 
 
