@@ -41,6 +41,8 @@ install.packages("cardx")
 
 conflicted::conflict_prefer("select", "dplyr")
 
+conflicted::conflicts_prefer(stats::fisher.test)
+
 options("max.print" = 10000)  # Increase the print limit
 
 
@@ -72,7 +74,7 @@ cholera_data<-cholera_data %>%
   dplyr::filter(age_group!="<18")
 
 
-ta_shapefile<-sf:: st_read(
+district_shapefile<-sf:: st_read(
   here("data/MWI_adm1.shp")
 ) %>% 
   select(
@@ -1799,14 +1801,258 @@ sanitary_by_person<- cholera_data %>%
 
 
 
-sanitary_by_person|>
+association_table<- sanitary_by_person|>
   tbl_summary(by=sanitary_and_infrastructure_category) |>
   add_p() |>
   add_ci()
 
+association_table<- association_table|>
+  as_flex_table()|>
+  autofit()
+
+save_as_docx(association_table, 
+             path = "output/association_table.docx")
+
 
 
 ```
+
+
+## Association of sanitary and place variables
+```{r}
+
+
+sanitary_by_place<- cholera_data %>% 
+  select(
+    district, 
+    residence,
+    sanitary_and_infrastructure_category
+  )
+
+
+association_table_place<- sanitary_by_place|>
+  tbl_summary(by=sanitary_and_infrastructure_category) |>
+  add_p() |>
+  add_ci()
+
+association_table_place <- association_table_place|>
+  as_flex_table()|>
+  autofit()
+
+
+save_as_docx(association_table_place, 
+             path = "output/association_table_place.docx")
+
+
+```
+
+# Map of Study Sites
+
+```{r}
+
+# Define study site districts
+study_sites <- c("Blantyre", "Lilongwe", "Balaka", "Nkhata Bay", "Salima", "Mangochi", "Dedza")
+
+# Create a new column to categorize districts
+ta_shapefile$SiteType <- ifelse(ta_shapefile$District %in% study_sites, "Study site", "Other")
+
+study_site_map<-tm_shape(ta_shapefile) +
+  tm_polygons(col = "SiteType",
+              palette = c("Study site" = "green", 
+                          "Other" = "white"), 
+              title = "Site Type", border.col = "gray") +
+  tm_text("District", size = 0.8) +
+  tm_layout(legend.position = c("left", "bottom"), 
+            legend.bg.color = "white", 
+            legend.text.size = 0.5)
+
+tmap_save(study_site_map,
+        filename = here("output/study_site_map.png"), 
+      width = 10, height = 10, dpi = 300)
+
+```
+
+
+# spatial analysis of the availabiliyt of the sanitaty infrastructure by TA(PAMI). 
+
+```{r}
+
+# Load the shapefile for the TA boundaries
+
+
+ta_shapefile<- st_read(here("data/mw_shp/mwi_admbnda_adm3_nso_hotosm_20230405.shp")) |>
+  rename("ta" = ADM3_EN, 
+         "district"=ADM2_EN)|>
+  select(
+  district, 
+  ta)
+
+
+
+
+sanitary_by_ta <- cholera_data %>% 
+  select(
+    district, 
+    ta,
+    sanitary_and_infrastructure_category
+  )|>
+  mutate(
+    ta=recode(
+      ta, 
+      "TA_Msosa"="TA_Karonga", 
+     "TA_Amidu"= "TA_Kalembo",
+      "TA_Chanthunya"="TA_Nsamala",
+     "TA_Nkaya"="TA_Nsamala",
+     "TA_Msamala"="TA_Nsamala", 
+     "TA_Phalula"="TA_Nsamala", 
+     "Limbe_Central_ward"="Blantyre_City", 
+     "Blantyre_City_Centre_ward"="Blantyre_City", 
+     "SC_Kambwiri"="TA_Kambwiri", 
+     "SC_Mwanza"="TA_Mwanza", 
+     "SC_Kambalame"="TA_Kambalame", 
+     "TA_Lundu_blantye"="TA_Lundu", 
+     "SC_Tsabango"="TA_Tsabango",
+      "SC_Njewa"= "TA_Njewa", 
+     "SC_Kamenya_Gwaza"="TA_Kamenya_gwaza", 
+     "SC_Namabvi"="TA_Namabvi",
+      "SC_Chowe"="TA_Chowe", 
+      "SC_Zilakoma"="TA_Zilakoma",
+      "SC_Fukamalaza"="TA_Fukamalaza"
+        )  )
+
+sanitary_by_ta$ta<- gsub("_", " ", sanitary_by_ta$ta)
+
+
+sanitary_by_ta<- sanitary_by_ta|>
+  count(district, ta, sanitary_and_infrastructure_category)|>
+  pivot_wider(names_from = sanitary_and_infrastructure_category, 
+              values_from = n)|>
+  mutate(
+   total= Adequate + Inadequate,
+    Adequate= round(
+      Adequate/total*100, 2
+    ) )|>
+  select(
+    district, 
+    ta, 
+    Adequate
+  )
+
+
+
+merged_san_ta<- merge(ta_shapefile,
+                      sanitary_by_ta,
+                      by = "ta")
+ 
+    
+
+
+
+tm_shape(ta_shapefile)+
+tmap_options(check.and.fix = T)+
+tm_borders(col = "skyblue")+
+  tm_shape(district_shapefile)+
+  tm_borders(col = "black")+
+tm_shape(merged_san_ta)+
+tm_polygons(col = "Adequate", 
+            palette = "green", 
+            style = "count", 
+            title = "Sanitary Infrastructure Availability (%)")
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+
+library(tmap)
+
+# Set tmap to plotting mode (you can switch to view mode if desired)
+tmap_mode("plot")
+
+sanitary_infrastructure_map<- tm_shape(ta_shapefile) +
+  tmap_options(check.and.fix = TRUE) +
+  tm_borders(col = "skyblue", lwd = 1) +
+
+  tm_shape(merged_san_ta) +
+  tm_polygons(
+    col = "Adequate",                     
+    palette = "YlGn",                     
+    style = "quantile",                   
+    n = 5,                                
+    title = "Sanitary Infrastructure\nAvailability (%) in PAMI",
+    border.col = "grey60",                
+    textNA = "No data",                   
+    colorNA = "lightgrey"
+  ) +
+   tm_layout(
+    legend.outside = TRUE,
+    legend.title.size = 1.1,
+    legend.text.size = 0.8,
+    frame = FALSE,
+    main.title = "Spatial Distribution of Sanitary Infrastructure Availability",
+    main.title.size = 1.2
+  )+
+   tm_shape(district_shapefile) +
+  tm_borders(col = "black", lwd = 1.2) +
+  tm_text("District", size = 0.7)
+
+
+
+tmap_save(
+  filename = 
+    here("output/sanitary_infrastructure_map.png"),
+  width = 10,
+  height = 10,
+  dpi = 300
+)
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
