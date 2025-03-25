@@ -14,6 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 if(!require(pacman)) install.packages("pacman")
 
+
+
+installed.packages("flextable")
+
 p_load(
   tidyverse,
   here,
@@ -34,7 +38,8 @@ p_load(
   ggradar,
   scales,
   fmsb,
-  officer)
+  officer, 
+  broom.helpers)
  
 
 install.packages("cardx")
@@ -1655,6 +1660,18 @@ table_san_facility_2<-sanitary_infractures %>%
     pit_condition )
 
 
+ci_table_san<- table_san_facility|>
+  tbl_summary()|>
+  # add_p()|>
+  add_ci()
+
+ci_table_san<- ci_table_san|>
+  as_flex_table()|>
+  autofit()
+
+save_as_docx(ci_table_san, 
+             path = "output/ci_table_san.docx")
+
 
 ```
 
@@ -1814,6 +1831,13 @@ save_as_docx(association_table,
              path = "output/association_table.docx")
 
 
+# sanitary_by_person %>% 
+#   select(sanitary_and_infrastructure_category, 
+#          sex) %>% 
+#   tbl_summary(by=sanitary_and_infrastructure_category) %>% 
+#   add_p() %>%
+#   add_ci()
+
 
 ```
 
@@ -1941,16 +1965,6 @@ sanitary_by_ta<- sanitary_by_ta|>
 merged_san_ta<- merge(ta_shapefile,
                       sanitary_by_ta,
                       by = "ta")
- 
-    
-
-
-
-
-
-
-
-
 
 
 ```
@@ -1997,6 +2011,249 @@ tm_shape(merged_san_ta) +
 
 
 ```
+
+
+## common resson of not using the sanitary infractures
+```{r}
+
+common_reasons_not_using_san_facilities<- cholera_data %>%   select(
+    common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+  )
+
+ common_reason_graph<- common_reasons_not_using_san_facilities|>
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   )|>
+  pivot_longer(
+    cols = everything(),
+    names_to = "reason",
+    values_to = "response"
+  )|>
+  dplyr::filter(response == 1)|>
+  count(reason)|>
+  mutate(
+    percent = n / sum(n) * 100
+  )|>
+  ggplot(aes(x = fct_reorder(reason, percent), y = percent)) +
+   geom_col(fill = "skyblue") +
+   theme_minimal() +
+   labs(
+    x = "Reason for Not Using Sanitary Facilities",
+    y = "Percentage (%)",
+    title = "Common Reasons for Not Using Sanitary Facilities") +
+  theme(axis.text.x = element_text(angle = 0, size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"))+
+   geom_text(aes(label = paste0(round(percent, 1), "%")), 
+             position = position_stack(vjust = 0.5), 
+             size = 4) 
+ 
+ 
+ggsave(here("output/common_reason_graph.png"), 
+       common_reason_graph, 
+       width = 10, 
+       height = 10, 
+       bg = "white", 
+       dpi = 300)
+
+```
+
+
+# Regession Analysis on the sanitary infractures and cholera vaccination.
+
+```{r}
+
+      san_model<- cholera_data %>%
+      select(
+          sex,
+          age_group, 
+          level_education,
+          religion,
+          marital_status, 
+          occupation, 
+          ethnicity,
+          district, 
+          residence,
+          sanitary_and_infrastructure_category
+        )
+
+
+san_model<- san_model|>
+  mutate(
+    sanitary_and_infrastructure_category = recode(
+      sanitary_and_infrastructure_category,
+      "Adequate" = 1,
+      "Inadequate" = 0
+    )
+  )
+
+
+
+summarytools::freq(san_model)
+
+unique(san_model$sanitary_and_infrastructure_category)
+
+
+
+
+           Crudes_OR<-san_model%>% 
+                gtsummary::tbl_uvregression(method = glm,
+               y = sanitary_and_infrastructure_category,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+           
+           
+           Crudes_OR <- Crudes_OR|>
+             as_flex_table()|>
+             autofit()
+           
+           
+           save_as_docx(Crudes_OR, 
+                        path = "output/Crudes_OR.docx")
+           
+           
+           
+    Adjusted_OR<-glm(
+        sanitary_and_infrastructure_category~
+          sex+
+          age_group+
+          level_education+
+          religion+
+          marital_status+
+          occupation+
+          ethnicity+
+          district+
+          residence,
+        data = san_model,
+   family = binomial(link = "logit"))
+    
+    
+    
+    
+    
+  Adjusted_OR <- Adjusted_OR %>%
+  gtsummary::tbl_regression(exponentiate = TRUE)
+  
+  Adjusted_OR <- Adjusted_OR|>
+    as_flex_table()|>
+    autofit()
+  
+  save_as_docx(Adjusted_OR, 
+               path = "output/Adjusted_OR.docx")
+
+
+  View(sanitary_by_person)
+  
+  sanitary_by_person %>% 
+    select(sanitary_and_infrastructure_category, 
+           occupation) %>%
+    tbl_summary(by = sanitary_and_infrastructure_category)|>
+    add_p()|>
+    add_n()|>
+    add_ci()
+  
+  
+  
+fisher_test1<- fisher.test(sanitary_by_person$sanitary_and_infrastructure_category, sanitary_by_person$occupation,                            simulate.p.value = T)
+
+fisher_test1
+
+
+
+
+
+
+```
+
+
+
+## OCV awarenes
+
+```{r}
+
+
+      OCV_awareness<- cholera_data[grep( "information_about_ocv" , colnames(cholera_data))] 
+
+
+
+OCV_awareness<- OCV_awareness %>% 
+  pivot_longer(
+    cols = (2:13),
+    names_to = "variable",
+    values_to = "response"
+  )|>
+  select(variable, response)|>
+  dplyr::filter(response == 1) %>% 
+  count(variable) %>% 
+  mutate(
+    percent = round (n / sum(n) * 100, 2)
+  ) 
+
+OCV_awareness$variable<- gsub("information_about_ocv_",
+                              " ",
+                              OCV_awareness$variable)
+
+OCV_awareness$variable<- gsub("_",
+                              " ",
+                              OCV_awareness$variable)
+
+
+OCV_awareness<- OCV_awareness %>% 
+  ggplot(aes(x = fct_reorder(variable, percent), y = percent)) +
+  geom_col(fill = "skyblue") +
+  coord_flip() +
+  theme_minimal()+
+  labs(
+    x = "Source of OCV Information",
+    y = "Percentage (%)",
+    title = "Main source of OCV Information among Study Participants"
+  )+
+  geom_text(aes(label = paste0(round(percent, 1), "%")), 
+            position = position_stack(vjust = 1), 
+            size = 4)+
+  theme(axis.text.x = element_text(angle = 0, 
+                                   size = 12, colour = "black"),
+        axis.text.y = element_text(size = 12, colour = "black"))
+
+ggsave(here("output/OCV_awareness.png"),
+       OCV_awareness, 
+       width = 10, 
+       height = 10, 
+       bg = "white", 
+       dpi = 300)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
