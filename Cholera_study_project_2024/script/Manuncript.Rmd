@@ -96,9 +96,7 @@ district_shapefile<-sf:: st_read(
 
 ```{r pressure, echo=FALSE}
 
-names(cholera_data)
-
-  table(cholera_data$water_treatment_category) 
+table(cholera_data$water_treatment_category) 
 
 
 ```
@@ -1739,6 +1737,13 @@ ggsave(here("output/pie_chart_image.png"),
        dpi = 300)
 
 
+practice_df|>
+  tbl_summary(type = list(all_categorical() ~ "categorical")) 
+
+summarytools::freq(practice_df$health_risk_associated_with_drinking_untreated_water)
+
+
+
 ```
 
 ## overall sanitary infrastructures in the community and household level
@@ -1998,7 +2003,7 @@ tm_shape(merged_san_ta) +
 
 ```
 
-
+WATER TREATMENT
 
 
 
