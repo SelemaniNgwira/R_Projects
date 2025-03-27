@@ -17,38 +17,20 @@ df <- read_csv("/Users/alex/Documents/GitHub/R_Projects/Cholera_study_project_20
 ## Demographics
 
 ```{r}
-df |> select("age_group","sex","level_education","ethnicity","religion","water_treatment_category") |> 
-        tbl_summary(
-          by = water_treatment_category
-        ) |> 
-        add_ci() |> 
-        add_p()
-```
-
-## Water treatment Practice
-
-```{r}
-practice <- c(
-  "health_risk_associated_with_drinking_untreated_water",
-  "treat_drinking_water",
-  "difficulties_accessing_water_treatment_products",
-  "often_treat_water",
-  "drinking_water_treated",
-  "traditional_beliefs_binary",
-  "water_treatment_category")
-
+df |> 
+  select("age_group", "sex", "level_education", "ethnicity", "religion", 
+         "water_treatment_category", "health_risk_associated_with_drinking_untreated_water",
+         "treat_drinking_water", "difficulties_accessing_water_treatment_products",
+         "often_treat_water", "drinking_water_treated", "traditional_beliefs_binary") |> 
+  tbl_strata(
+    strata = c(water_treatment_category, sex),  # Stratify by both variables
+    ~ tbl_summary(
+        data = .,
+        missing = "no"
+      ) |> 
+      add_ci() )
 
 ```
 
-```{r}
-
-df|> select(practice) |> 
-  tbl_summary(
-    by = water_treatment_category,
-    missing = "no",
-    type = list(all_categorical() ~ "categorical")
-  )|> 
-  add_stat_label() |>
-  add_ci() |> 
-  add_p()
+```         
 ```
