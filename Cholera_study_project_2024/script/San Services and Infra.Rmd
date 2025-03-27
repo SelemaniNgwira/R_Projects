@@ -1,0 +1,1047 @@
+---
+title: "San Services and Infra"
+output: word_document
+---
+
+```{r, loading packages, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if(!require(pacman)) install.packages("pacman")
+
+installed.packages("flextable")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  terra,
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit, 
+  pwr, 
+  webshot2,
+  gtsummary, 
+   BiocManager,
+  ggradar,
+  scales,
+  fmsb,
+  officer, 
+  broom.helpers, 
+  cardx, 
+  ggthemes, 
+  patchwork, 
+ )
+  # rstatix
+
+conflicted::conflict_prefer("select", "dplyr")
+
+conflicted::conflicts_prefer(stats::fisher.test)
+
+options("max.print" = 10000)  # Increase the print limit
+
+
+```
+
+
+```{r loading data sets, echo=FALSE}
+
+# importing the data 
+cholera_data<-import(here("data/cholera_data_.csv")) %>%
+                clean_names() %>% 
+  mutate(district=recode(
+      district, 
+      "Blantyre_City"="Blantyre"
+    )) %>% 
+   mutate(residence = case_when(
+    district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
+    TRUE ~ "lake_shore" )) 
+
+# changing the data.frame into tibble object for easy handling 
+cholera_data<- tibble(cholera_data)
+
+
+
+# filtering out those less than 18 years 
+cholera_data<-cholera_data %>% 
+  dplyr::filter(age_group!="<18")
+
+
+district_shapefile<-sf:: st_read(
+  here("data/MWI_adm1.shp")
+) %>% 
+  select(
+   NAME_1,
+    ID_0,
+    ID_1) %>% 
+  dplyr::rename(
+    "District"= NAME_1
+  )
+
+
+
+```
+
+
+### Availability of Sainitary Infrastrauture  
+
+```{r echo=FALSE}
+##   )
+
+table_san_facility <- cholera_data %>% 
+  select(
+    toilet_facility_avaiable,
+    soild_waste_disposal,
+    bath_shelter_bathroom,
+    household_handwashing_facility, 
+    soap_or_detergent_available,
+    designated_kitchen_area
+  )
+
+table_san_facility<- table_san_facility %>% 
+  pivot_longer(
+    cols = 1:6,
+    names_to = "sanitary_infractures"
+  ) %>% 
+  count(sanitary_infractures, value) %>% 
+  dplyr::filter(value != 4) %>% 
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>% 
+  mutate(
+    total = available + not_available,
+    available = paste0(available, " (", round(available / total * 100, 1), "%)"),
+    not_available = paste0(not_available, " (", round(not_available / total * 100, 1), "%)")
+  ) %>% 
+  select(sanitary_infractures, available, not_available)
+
+
+table_san_facility %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit")
+
+
+cholera_data %>% 
+  select(sanitary_and_infrastructure_category) %>% 
+  pivot_wider(
+    cols=everything()
+  )
+  
+
+
+```
+
+
+### Pie chart on the condition of the sanitary infractures at the study visit
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+ table_san_facility_2<-cholera_data %>% 
+  select(
+    drainage_around_household,
+    toilet_covered,
+    toilet_cleanliness,
+    pit_condition )
+
+
+table_san_facility_2<- table_san_facility_2 %>% 
+  mutate(across(everything(), ~gsub("_", " ",.)))
+
+
+# change the name of the variable in the figure. 
+
+# List of sanitation-related variables
+vars <- c("drainage_around_household", "toilet_covered", "toilet_cleanliness", "pit_condition")
+
+# Reshape to long format
+long_data <- table_san_facility_2%>%
+  select(all_of(vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "response")
+
+# Summarize counts and compute percentages
+summary_data <- long_data %>%
+  group_by(variable, response) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(
+    percent = n / sum(n) * 100,
+    label = paste0(response, " (", round(percent, 1), "%)")
+  )
+
+# Plot pie charts with response values shown
+pie_chart_image<- ggplot(summary_data, aes(x = "", y = percent, fill = factor(response))) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  facet_wrap(~ variable, scales = "free") +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 3) +
+  labs(title = "Condition of Sanitary Infrasctures at study visit ", fill = "Response Value") +
+  theme_void() +
+  theme(
+    strip.text = element_text(size = 12, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 16)
+  )+
+  theme(legend.position = "none")+
+  scale_color_colorblind()
+
+ggsave(here("output/pie_chart_image.png"),
+       pie_chart_image, 
+       width = 10, 
+       height = 10, 
+       bg="white",
+       dpi = 300)
+
+pie_chart_image
+
+
+```
+
+### other methods of fecal disposal if the toilet is not available
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+
+
+cholera_data %>%
+  dplyr::filter(toilet_facility_avaiable == "not_available") %>%
+  select(
+      san_facility_unavailable
+  )%>%
+  mutate(across(everything(), ~gsub("_", " ",.))) %>% 
+  count(san_facility_unavailable) %>% 
+  rename("Fecal_Disposal_Method"= san_facility_unavailable) %>% 
+  mutate(
+    Fecal_Disposal_Method = fct_reorder(Fecal_Disposal_Method, n), 
+    percent= round(n/sum(n)*100, 2)
+  ) %>% 
+  ggplot(aes(x = Fecal_Disposal_Method, y = percent)) +
+  geom_col( fill= "skyblue")+
+  theme_minimal() +
+   labs(
+    x = "Source of fecal disposal",
+    y = "Percentage (%)",
+    title = "Other source of fecal disposal if toilet is not available"
+  )+
+  geom_text(aes(label = paste0(round(percent, 1), "%")), 
+            position = position_stack(vjust = 1), 
+            size = 4)+
+  theme(axis.text.x = element_text(angle = 0, 
+                                   size = 12, colour = "black"),
+        axis.text.y = element_text(size = 12, colour = "black"))
+
+  
+
+
+```
+
+
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+freq_graph <- cholera_data %>% 
+  select(hand_wash_after_toilet_or_handling_food) %>% 
+  mutate(across(everything(), ~gsub("_", " ",.))) %>%
+  count(hand_wash_after_toilet_or_handling_food) %>% 
+  rename("Handwashing_Frequency"= hand_wash_after_toilet_or_handling_food) %>% 
+  mutate(
+    Handwashing_Frequency = fct_reorder(Handwashing_Frequency, n), 
+    percent= round(n/sum(n)*100, 2)
+  ) %>% 
+  ggplot(aes(x = Handwashing_Frequency, y = percent)) +
+  geom_col( fill= "skyblue")+
+  theme_minimal() +
+   labs(
+    x = "Handwashing Frequency",
+    y = "Percentage (%)",
+    title = "Frequency of Handwashing at Household Level"
+  )+
+  geom_text(aes(label = paste0(round(percent, 1), "%")), 
+            position = position_stack(vjust = 1), 
+            size = 4)+
+  theme(axis.text.x = element_text(angle = 0, 
+                                   size = 12, colour = "black"),
+        axis.text.y = element_text(size = 12, colour = "black"))
+
+
+
+
+```
+
+
+## overall sanitary infrastructures in the community and household level and frequency of handwashing at the household level.
+
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+overall_sanitary <- cholera_data %>% 
+  select(sanitary_and_infrastructure_category)
+
+
+
+pie_chart_overall_san <- overall_sanitary %>% 
+  count(sanitary_and_infrastructure_category) %>% 
+  rename("Overall_Sanitary_status"= sanitary_and_infrastructure_category) %>% 
+  mutate(
+    Overall_Sanitary_status = fct_reorder(Overall_Sanitary_status, n), 
+    percent= round(n/sum(n)*100, 2)
+  ) %>%
+  ggplot(aes(x = "", y = percent, fill = factor(Overall_Sanitary_status))) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y")+
+  geom_text(aes(label = paste0(Overall_Sanitary_status, " (", percent, "%)")), 
+            position = position_stack(vjust = 0.5),
+            size = 6) +
+  labs(title = "Overall Sanitary Status at Study Visit") +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16)
+  )+
+  theme(legend.position = "none")
+
+pie_chart_overall_san 
+
+
+
+combined_plot<-patchwork::wrap_plots(pie_chart_overall_san, freq_graph, ncol = 2)
+
+
+combined_plot
+
+```
+
+
+## Crosstabulation sanitary and demographic variables 
+
+```{r echo=FALSE}
+
+sanitary_by_person<- cholera_data %>% 
+  select(
+    sex,
+    age_group, 
+    level_education,
+    religion,
+    marital_status, 
+    occupation, 
+    ethnicity,
+    district, 
+    residence,
+    sanitary_and_infrastructure_category
+  )
+
+
+
+sanitary_by_person<-sanitary_by_person|>
+  tbl_summary(by=sanitary_and_infrastructure_category, 
+              type = list(all_categorical() ~ "categorical")) |>
+            add_p() |>
+            add_ci()
+
+sanitary_by_person|>
+  as_flex_table()|>
+  autofit() %>% 
+  set_table_properties(layout = "autofit")
+
+
+```
+
+
+# Map of Study Sites
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+# Define study site districts
+study_sites <- c("Blantyre", "Lilongwe", "Balaka", "Nkhata Bay", "Salima", "Mangochi", "Dedza")
+
+district_shapefile
+# Create a new column to categorize districts
+district_shapefile$SiteType <- ifelse(district_shapefile$District %in% study_sites, "Study site", "Other")
+
+study_site_map<-tm_shape(district_shapefile) +
+  tm_polygons(col = "SiteType",
+              palette = c("Study site" = "green", 
+                          "Other" = "white"), 
+              title = "Site Type", border.col = "gray") +
+  tm_text("District", size = 0.8) +
+  tm_layout(legend.position = c("left", "bottom"), 
+            legend.bg.color = "white", 
+            legend.text.size = 0.5)
+
+tmap_save(study_site_map,
+        filename = here("output/study_site_map.png"), 
+      width = 10, height = 10, dpi = 300)
+
+study_site_map
+
+```
+
+
+# spatial analysis of the availabiliyt of the sanitaty infrastructure by TA(PAMI). 
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+# Load the shapefile for the TA boundaries
+
+
+ta_shapefile<- st_read(here("data/mw_shp/mwi_admbnda_adm3_nso_hotosm_20230405.shp")) |>
+  rename("ta" = ADM3_EN, 
+         "district"=ADM2_EN)|>
+  select(
+  district, 
+  ta)
+
+
+
+sanitary_by_ta <- cholera_data %>% 
+  select(
+    district, 
+    ta,
+    sanitary_and_infrastructure_category
+  )|>
+  mutate(
+    ta=recode(
+      ta, 
+      "TA_Msosa"="TA_Karonga", 
+     "TA_Amidu"= "TA_Kalembo",
+      "TA_Chanthunya"="TA_Nsamala",
+     "TA_Nkaya"="TA_Nsamala",
+     "TA_Msamala"="TA_Nsamala", 
+     "TA_Phalula"="TA_Nsamala", 
+     "Limbe_Central_ward"="Blantyre_City", 
+     "Blantyre_City_Centre_ward"="Blantyre_City", 
+     "SC_Kambwiri"="TA_Kambwiri", 
+     "SC_Mwanza"="TA_Mwanza", 
+     "SC_Kambalame"="TA_Kambalame", 
+     "TA_Lundu_blantye"="TA_Lundu", 
+     "SC_Tsabango"="TA_Tsabango",
+      "SC_Njewa"= "TA_Njewa", 
+     "SC_Kamenya_Gwaza"="TA_Kamenya_gwaza", 
+     "SC_Namabvi"="TA_Namabvi",
+      "SC_Chowe"="TA_Chowe", 
+      "SC_Zilakoma"="TA_Zilakoma",
+      "SC_Fukamalaza"="TA_Fukamalaza"
+        )  )
+
+sanitary_by_ta$ta<- gsub("_", " ", sanitary_by_ta$ta)
+
+
+sanitary_by_ta<- sanitary_by_ta|>
+  count(district, ta, sanitary_and_infrastructure_category)|>
+  pivot_wider(names_from = sanitary_and_infrastructure_category, 
+              values_from = n)|>
+  mutate(
+   total= Adequate + Inadequate,
+    Adequate= round(
+      Adequate/total*100, 2
+    ) )|>
+  select(
+    district, 
+    ta, 
+    Adequate
+  )
+
+
+merged_san_ta<- merge(ta_shapefile,
+                      sanitary_by_ta,
+                      by = "ta")
+
+
+```
+
+
+```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
+
+
+library(tmap)
+
+tmap_mode("plot")
+# Create manual breaks to avoid overlapping
+breaks <- c(0, 50, 75, 90, 100)  
+
+# Create a map of the availability of sanitary infrastructure by TA
+sanitary_infrastructure_map<-tm_shape(ta_shapefile) +
+  tmap_options(check.and.fix = TRUE) +
+  tm_borders(col = "skyblue", lwd = 1) +
+
+tm_shape(merged_san_ta) +
+  tm_polygons(
+    col = "Adequate",
+    palette = "YlGn",
+    style = "fixed",
+    breaks = breaks,
+    title = "Sanitary Infrastructure\nAvailability (%)",
+    border.col = "grey60",
+    textNA = "No data",
+    colorNA = "lightgrey",
+    legend.format = list(digits = 0, format = "f")
+  )+
+  tm_layout(
+    legend.outside = TRUE,
+    legend.title.size = 1.1,
+    legend.text.size = 0.8,
+    frame = FALSE,
+    main.title = "Spatial Distribution of Sanitary Infrastructure Availability",
+    main.title.size = 1.2
+  )+
+   tm_shape(district_shapefile) +
+  tm_borders(col = "black", lwd = 1.2) +
+  tm_text("District", size = 0.7)
+
+
+sanitary_infrastructure_map
+
+```
+
+
+
+## common resson of not using the sanitary infractures
+```{r echo=FALSE}
+
+common_reasons_not_using_san_facilities<- cholera_data %>%   select(
+common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+  )
+
+ common_reason_graph<- common_reasons_not_using_san_facilities|>
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   )|>
+  pivot_longer(
+    cols = everything(),
+    names_to = "reason",
+    values_to = "response"
+  )|>
+  dplyr::filter(response == 1)|>
+  count(reason)|>
+  mutate(
+    percent = n / sum(n) * 100
+  )|>
+  ggplot(aes(x = fct_reorder(reason, percent), y = percent)) +
+   geom_col(fill = "skyblue") +
+   theme_minimal() +
+   labs(
+    x = "Reason for Not Using Sanitary Facilities",
+    y = "Percentage (%)",
+    title = "Common Reasons for Not Using Sanitary Facilities") +
+  theme(axis.text.x = element_text(angle = 0, size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"))+
+   geom_text(aes(label = paste0(round(percent, 1), "%")), 
+             position = position_stack(vjust = 0.5), 
+             size = 4) 
+ 
+ 
+ggsave(here("output/common_reason_graph.png"), 
+       common_reason_graph, 
+       width = 10, 
+       height = 10, 
+       bg = "white", 
+       dpi = 300)
+
+common_reason_graph
+
+```
+
+
+# Regession Analysis on the sanitary infractures and cholera vaccination.(cruded)
+
+```{r echo=FALSE}
+san_model<- cholera_data %>%
+      select(
+          sex,
+          age_group, 
+          level_education,
+          religion,
+          marital_status, 
+          occupation, 
+          ethnicity,
+          district, 
+          residence,
+          sanitary_and_infrastructure_category
+        )
+
+
+san_model<- san_model|>
+  mutate(
+    sanitary_and_infrastructure_category = recode(
+      sanitary_and_infrastructure_category,
+      "Adequate" = 1,
+      "Inadequate" = 0
+    )
+  )
+
+
+           COR_table<-san_model%>% 
+                gtsummary::tbl_uvregression(method = glm,
+               y = sanitary_and_infrastructure_category,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+           
+           
+           COR_table <- COR_table|>
+             as_flex_table()|>
+             autofit()
+           
+           
+          
+           
+COR_table 
+
+```
+
+
+
+## Regession Analysis on the sanitary infractures and cholera vaccination.(Adjusted OR) 
+
+```{r echo=FALSE}
+Adjusted_OR<-glm(
+        sanitary_and_infrastructure_category~
+          sex+
+          age_group+
+          level_education+
+          religion+
+          marital_status+
+          occupation+
+          ethnicity+
+          district+
+          residence,
+        data = san_model,
+   family = binomial(link = "logit"))
+    
+    
+    
+    
+    
+  Adjusted_OR <- Adjusted_OR %>%
+  gtsummary::tbl_regression(exponentiate = TRUE)
+  
+  Adjusted_OR <- Adjusted_OR|>
+    as_flex_table()|>
+    autofit()
+  
+
+Adjusted_OR
+
+```
+
+
+## Table of Availabe of the sanitary infractures by district
+
+
+```{r}
+
+
+san_df<- cholera_data %>% 
+  select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence,
+    
+    toilet_facility_avaiable,
+    soild_waste_disposal,
+    bath_shelter_bathroom,
+    household_handwashing_facility,
+    soap_or_detergent_available,
+    designated_kitchen_area
+          ) %>% 
+  mutate(across(everything(), ~gsub("_", " ",.)))
+# 
+
+
+
+
+
+# Avaialabilit_toilet<-san_df %>% 
+#   
+#   select(
+#     
+#    #  toilet_facility_avaiable,
+#     #soild_waste_disposal,
+#      bath_shelter_bathroom,
+#     # household_handwashing_facility,
+#     #soap_or_detergent_available,
+#      # designated_kitchen_area,
+#     
+#     
+#     sex,
+#     age_group,
+#     level_education,
+#     religion,
+#     marital_status,
+#     ethnicity, 
+#     district, 
+#     residence   
+#     
+#   ) %>% 
+#   tbl_summary(
+#     by= 
+#     # toilet_facility_avaiable
+#      #soild_waste_disposal
+#     # bath_shelter_bathroom
+#     # household_handwashing_facility
+#    # soap_or_detergent_available
+#      # designated_kitchen_area
+#              
+#     
+#   ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_toilet<-san_df %>% 
+  
+  select(
+    
+     toilet_facility_avaiable,
+    #soild_waste_disposal,
+     #bath_shelter_bathroom,
+    # household_handwashing_facility,
+    #soap_or_detergent_available,
+     # designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    toilet_facility_avaiable
+    # soild_waste_disposal
+    # bath_shelter_bathroom
+    # household_handwashing_facility
+   # soap_or_detergent_available
+     # designated_kitchen_area
+             
+    
+  ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_soild_waste<-san_df %>% 
+  
+  select(
+    
+    # toilet_facility_avaiable,
+    soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    #soap_or_detergent_available,
+     # designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    # toilet_facility_avaiable
+     soild_waste_disposal
+#bath_shelter_bathroom
+    # household_handwashing_facility
+   # soap_or_detergent_available
+     # designated_kitchen_area
+             
+    
+  ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_bathroom <- san_df %>%  
+  select(
+    
+   #  toilet_facility_avaiable,
+    #soild_waste_disposal,
+     bath_shelter_bathroom,
+    # household_handwashing_facility,
+    #soap_or_detergent_available,
+     # designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    # toilet_facility_avaiable
+    # soild_waste_disposal
+     bath_shelter_bathroom
+    # household_handwashing_facility
+   # soap_or_detergent_available
+     # designated_kitchen_area
+             
+    
+  ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_hh_wash<-san_df %>% 
+  
+  select(
+    
+   #  toilet_facility_avaiable,
+    #soild_waste_disposal,
+    # bath_shelter_bathroom,
+     household_handwashing_facility,
+    #soap_or_detergent_available,
+     # designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    # toilet_facility_avaiable
+     #soild_waste_disposal
+    # bath_shelter_bathroom
+     household_handwashing_facility
+   # soap_or_detergent_available
+     # designated_kitchen_area
+             
+    
+  ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_soap<-san_df %>% 
+  
+  select(
+    
+   #  toilet_facility_avaiable,
+    #soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    soap_or_detergent_available,
+     # designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    # toilet_facility_avaiable
+    # soild_waste_disposal
+    # bath_shelter_bathroom
+    #household_handwashing_facility
+    soap_or_detergent_available
+     # designated_kitchen_area
+             
+    
+  ) %>% add_p()
+
+
+```
+
+```{r}
+Avaialabilit_kitchen<-san_df %>% 
+  
+  select(
+    
+   #  toilet_facility_avaiable,
+    #soild_waste_disposal,
+     #bath_shelter_bathroom,
+    # household_handwashing_facility,
+    #soap_or_detergent_available,
+      designated_kitchen_area,
+    
+    
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity, 
+    district, 
+    residence   
+    
+  ) %>% 
+  tbl_summary(
+    by= 
+    # toilet_facility_avaiable
+     #soild_waste_disposal
+    # bath_shelter_bathroom
+    # household_handwashing_facility
+   # soap_or_detergent_available
+      designated_kitchen_area
+             
+    
+  ) %>% add_p(
+    
+    # test = list(
+    #   all_categorical() ~ rstatix::fisher_test
+    # ),
+    # test.args = list(
+    #   all_categorical() ~ list(simulate.p.value = TRUE, B = 2000) # Use simulation with 10,000 replicates
+    # )
+    
+  )
+
+
+```
+
+```{r}
+San_availability_table<- tbl_merge(
+  tbls=list(Avaialabilit_toilet, 
+          Avaialabilit_hh_wash,
+          Avaialabilit_soild_waste,
+          Avaialabilit_soap,
+          Avaialabilit_kitchen, 
+          Avaialabilit_bathroom), 
+          tab_spanner = c("*Toilet*", "*Handwashing facility*", 
+                          "*Soild Waste*", "*Soap/Detergent*",
+                          "*Kitchen Area*", "*Bathroom*"))
+
+
+san_table1<- San_availability_table %>% 
+  as_flex_table() %>% 
+  autofit() %>%
+  set_table_properties(layout = "autofit")
+
+
+save_as_docx(san_table1, 
+             
+             path =here("output/san_table1.docx"))
+
+
+  
+
+```
+
+
+## Combined Table of the common reason not usinng the availabilty san facility. 
+
+
+```{r}
+
+common_reason_toilet<- cholera_data %>% 
+  dplyr::filter(
+    toilet_facility_avaiable=="available" 
+    # soild_waste_disposal == "available",
+    # bath_shelter_bathroom == "available",
+    # household_handwashing_facility == "available",
+    # soap_or_detergent_available == "available",
+    # designated_kitchen_area == "available"
+  ) %>%
+  select(
+    toilet_facility_avaiable,
+    # soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area,
+    
+  common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+    
+  ) %>% 
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   )  
+  #  pivot_longer(
+  #   cols = (7:9),
+  #   names_to = "reason",
+  #   values_to = "response"
+  # )
+
+
+  
+
+
+common_reason<- common_reason %>% 
+  dplyr::filter(response == 1) %>% 
+  select(-response)
+
+
+common_reason %>% 
+  pivot_longer(
+      cols = (1:6),
+    names_to = "Sanitary_infrastructure",
+    values_to = "response")
+
+  # ) %>% 
+  # dplyr::filter(response=="available") %>% 
+  # count(reason,Sanitary_infrastructure) %>% 
+  # pivot_wider(
+  #   values_from = n,
+  #   names_from =reason
+  # ) %>% 
+  #  mutate(
+  #   percentage=     Cost/(Cost+Distance+`Poor Maintenance/Unhygienic`)*100, 
+  # 
+  #    label = paste0(Cost, " (", round(percentage, 1), "%)")
+  #   
+  # )
+    
+
+  
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
