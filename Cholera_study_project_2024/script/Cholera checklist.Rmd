@@ -3,3 +3,89 @@ title: "Cholera checklist"
 output: html_document
 ---
 
+```{r}
+
+
+knitr::opts_chunk$set(echo = TRUE)
+
+if(!require(pacman)) install.packages("pacman")
+
+installed.packages("flextable")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  terra,
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit, 
+  pwr, 
+  webshot2,
+  gtsummary, 
+   BiocManager,
+  ggradar,
+  scales,
+  fmsb,
+  officer, 
+  broom.helpers, 
+  cardx, 
+  ggthemes, 
+  patchwork)
+ 
+
+conflicted::conflict_prefer("select", "dplyr")
+
+conflicted::conflicts_prefer(stats::fisher.test)
+
+options("max.print" = 10000)  # Increase the print limit
+
+
+```
+
+
+```{r}
+
+
+cholera_check<-import(
+  here("data/cholera_data_set.xlsx")) %>% 
+  clean_names()
+
+cholera_check<-cholera_check %>% 
+ dplyr::filter(which_form_are_you_filling_cholera_study_questionniare_or_hygiene_water_and_sanitation_checklist=="Hygiene Water and Sanitation Checklist")
+
+cholera_check
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

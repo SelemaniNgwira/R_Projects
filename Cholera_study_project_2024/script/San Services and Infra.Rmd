@@ -140,6 +140,10 @@ cholera_data %>%
 ```{r echo=FALSE, fig.height=10, fig.width=10, dpi=300}
 
  table_san_facility_2<-cholera_data %>% 
+  drop_na(drainage_around_household, 
+          toilet_cleanliness, 
+          toilet_covered, 
+          pit_condition) %>%
   select(
     drainage_around_household,
     toilet_covered,
@@ -969,7 +973,7 @@ save_as_docx(san_table1,
 
 common_reason_toilet<- cholera_data %>% 
   dplyr::filter(
-    toilet_facility_avaiable=="available" 
+    toilet_facility_avaiable=="available"
     # soild_waste_disposal == "available",
     # bath_shelter_bathroom == "available",
     # household_handwashing_facility == "available",
@@ -982,7 +986,7 @@ common_reason_toilet<- cholera_data %>%
     # bath_shelter_bathroom,
     # household_handwashing_facility,
     # soap_or_detergent_available,
-    # designated_kitchen_area,
+    # designated_kitchen_area, 
     
   common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
     common_reasons_not_using_san_facilities_cost,
@@ -993,44 +997,36 @@ common_reason_toilet<- cholera_data %>%
      "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
      "Cost" = common_reasons_not_using_san_facilities_cost,
      "Distance" = common_reasons_not_using_san_facilities_distance
-   )  
-  #  pivot_longer(
-  #   cols = (7:9),
-  #   names_to = "reason",
-  #   values_to = "response"
-  # )
+   ) %>% 
+   pivot_longer(
+    cols = c(-1),
+    names_to = "reason",
+    values_to = "response"
+  ) %>%  
+   dplyr::filter(response == 1) %>% 
+  select(-response) %>% 
+  count(toilet_facility_avaiable, reason) %>% 
+  mutate(
+    percentage=     n/sum(n)*100, 
+    n = paste0(n, " (", round(percentage, 1), "%)")
+  ) %>% 
+  select(-percentage) %>% 
+  pivot_wider(
+    names_from = reason,
+    values_from = n
+  ) %>% 
+  mutate(
+    toilet_facility_avaiable = recode(
+      toilet_facility_avaiable,
+      "available" = "Toilet facility",
+      
+    )
+  ) %>% 
+  rename("Sanitary Facility" = toilet_facility_avaiable)
 
 
-  
 
 
-common_reason<- common_reason %>% 
-  dplyr::filter(response == 1) %>% 
-  select(-response)
-
-
-common_reason %>% 
-  pivot_longer(
-      cols = (1:6),
-    names_to = "Sanitary_infrastructure",
-    values_to = "response")
-
-  # ) %>% 
-  # dplyr::filter(response=="available") %>% 
-  # count(reason,Sanitary_infrastructure) %>% 
-  # pivot_wider(
-  #   values_from = n,
-  #   names_from =reason
-  # ) %>% 
-  #  mutate(
-  #   percentage=     Cost/(Cost+Distance+`Poor Maintenance/Unhygienic`)*100, 
-  # 
-  #    label = paste0(Cost, " (", round(percentage, 1), "%)")
-  #   
-  # )
-    
-
-  
 
 
 
@@ -1042,6 +1038,286 @@ common_reason %>%
 
 
 
+```{r}
 
 
+common_reason_soild<- cholera_data %>% 
+  dplyr::filter(
+    # toilet_facility_avaiable=="available"
+    soild_waste_disposal == "available"
+    # bath_shelter_bathroom == "available",
+    # household_handwashing_facility == "available",
+    # soap_or_detergent_available == "available",
+    # designated_kitchen_area == "available"
+  ) %>%
+  select(
+    # toilet_facility_avaiable,
+     soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+  common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+    
+  ) %>% 
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   ) %>% 
+   pivot_longer(
+    cols = c(-1),
+    names_to = "reason",
+    values_to = "response"
+  ) %>%  
+   dplyr::filter(response == 1) %>% 
+  select(-response) %>% 
+  count(soild_waste_disposal, reason) %>% 
+  mutate(
+    percentage=     n/sum(n)*100, 
+    n = paste0(n, " (", round(percentage, 1), "%)")
+  ) %>% 
+  select(-percentage) %>% 
+  pivot_wider(
+    names_from = reason,
+    values_from = n
+  ) %>% 
+  mutate(
+    soild_waste_disposal = recode(
+      soild_waste_disposal,
+      "available" = "Soild Waste facility",
+      
+    )
+  ) %>% 
+  rename("Sanitary Facility" = soild_waste_disposal)
+
+
+```
+
+
+
+```{r}
+
+common_reason_bath<- cholera_data %>% 
+  dplyr::filter(
+    # toilet_facility_avaiable=="available"
+    # soild_waste_disposal == "available"
+    bath_shelter_bathroom == "available",
+    # household_handwashing_facility == "available",
+    # soap_or_detergent_available == "available",
+    # designated_kitchen_area == "available"
+  ) %>%
+  select(
+    # toilet_facility_avaiable,
+     # soild_waste_disposal,
+     bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+  common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+    
+  ) %>% 
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   ) %>% 
+   pivot_longer(
+    cols = c(-1),
+    names_to = "reason",
+    values_to = "response"
+  ) %>%  
+   dplyr::filter(response == 1) %>% 
+  select(-response) %>% 
+  count(bath_shelter_bathroom, reason) %>% 
+  mutate(
+    percentage=     n/sum(n)*100, 
+    n = paste0(n, " (", round(percentage, 1), "%)")
+  ) %>% 
+  select(-percentage) %>% 
+  pivot_wider(
+    names_from = reason,
+    values_from = n
+  ) %>% 
+  mutate(
+    bath_shelter_bathroom = recode(
+      bath_shelter_bathroom,
+      "available" = "Bathroom facility",
+      
+    )
+  ) %>% 
+  rename("Sanitary Facility" = bath_shelter_bathroom)
+
+
+```
+
+
+```{r}
+
+common_reason_bath<- cholera_data %>% 
+  dplyr::filter(
+    # toilet_facility_avaiable=="available"
+    # soild_waste_disposal == "available"
+    bath_shelter_bathroom == "available",
+    # household_handwashing_facility == "available",
+    # soap_or_detergent_available == "available",
+    # designated_kitchen_area == "available"
+  ) %>%
+  select(
+    # toilet_facility_avaiable,
+     # soild_waste_disposal,
+     bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+  common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+    
+  ) %>% 
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   ) %>% 
+   pivot_longer(
+    cols = c(-1),
+    names_to = "reason",
+    values_to = "response"
+  ) %>%  
+   dplyr::filter(response == 1) %>% 
+  select(-response) %>% 
+  count(bath_shelter_bathroom, reason) %>% 
+  mutate(
+    percentage=     n/sum(n)*100, 
+    n = paste0(n, " (", round(percentage, 1), "%)")
+  ) %>% 
+  select(-percentage) %>% 
+  pivot_wider(
+    names_from = reason,
+    values_from = n
+  ) %>% 
+  mutate(
+    bath_shelter_bathroom = recode(
+      bath_shelter_bathroom,
+      "available" = "Bathroom facility",
+      
+    )
+  ) %>% 
+  rename("Sanitary Facility" = bath_shelter_bathroom)
+
+```
+
+
+
+```{r}
+
+common_reason_kitchen<- cholera_data %>% 
+  dplyr::filter(
+    # toilet_facility_avaiable=="available"
+    # soild_waste_disposal == "available"
+    # bath_shelter_bathroom == "available",
+    # household_handwashing_facility == "available"
+    # soap_or_detergent_available == "available"
+     designated_kitchen_area == "available"
+  ) %>%
+  select(
+    # toilet_facility_avaiable,
+     # soild_waste_disposal,
+     # bath_shelter_bathroom,
+    # household_handwashing_facility,
+     # soap_or_detergent_available,
+     designated_kitchen_area, 
+    
+  common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, 
+    common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance
+    
+  ) %>% 
+   rename(
+     "Poor Maintenance/Unhygienic" = common_reasons_not_using_san_facilities_poor_maintenance_unhygienic,
+     "Cost" = common_reasons_not_using_san_facilities_cost,
+     "Distance" = common_reasons_not_using_san_facilities_distance
+   ) %>% 
+   pivot_longer(
+    cols = c(-1),
+    names_to = "reason",
+    values_to = "response"
+  ) %>%  
+   dplyr::filter(response == 1) %>% 
+  select(-response) %>% 
+  count(designated_kitchen_area, reason) %>% 
+  mutate(
+    percentage=     n/sum(n)*100, 
+    n = paste0(n, " (", round(percentage, 1), "%)")
+  ) %>% 
+  select(-percentage) %>% 
+  pivot_wider(
+    names_from = reason,
+    values_from = n
+  ) %>% 
+  mutate(
+    designated_kitchen_area= recode(
+      designated_kitchen_area,
+      "available" = "Designated Kitchen Area",
+      
+    )
+  ) %>% 
+  rename("Sanitary Facility" = designated_kitchen_area)
+
+
+
+
+Common_reason_table<- union_all(
+  common_reason_toilet, 
+  common_reason_soild
+   # common_reason_bath
+  # common_reason_kitchen,
+  # common_reason_soap, 
+  # common_reason_handwashing
+)
+
+
+common_reason_table<- union_all(
+  Common_reason_table, 
+  common_reason_bath
+)
+
+
+common_reason_table<- union_all(
+  common_reason_table, 
+  common_reason_kitchen
+)
+
+
+common_reason_table<- union_all(
+  common_reason_table, 
+  common_reason_soap
+)
+
+
+common_reason_table<- union_all(
+  common_reason_table, 
+  common_reason_handwashing
+)
+
+
+
+common_reason_table<- common_reason_table %>% 
+  as_flextable() %>% 
+  autofit() %>% 
+  set_table_properties(layout = "autofit")
+
+
+save_as_docx(common_reason_table, 
+             path =here("output/common_reason_table.docx"))
+
+```
 

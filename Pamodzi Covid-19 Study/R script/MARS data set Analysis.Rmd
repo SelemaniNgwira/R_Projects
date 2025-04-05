@@ -70,9 +70,8 @@ save_as_docx(table1, path = "table1.docx")
   
 
 
-unique(engag_score$covid_19_whats_app_chatbot_content_visual_information_language_design)
 
-engag_score_2 <- engag_score %>% 
+engag_score_2 <-Mars_data1%>% 
   mutate(
   covid_19_whats_app_chatbot_fun_entertaining_to_use=recode(
     covid_19_whats_app_chatbot_fun_entertaining_to_use, 
@@ -565,7 +564,6 @@ Calculating the overall mean score of the Mars on the Malawi COVID-19 chatbot
 
 ```{r}
 
-
 Mars_data1<- Mars_data1 %>% mutate(
   covid_19_whats_app_chatbot_fun_entertaining_to_use=recode(
     covid_19_whats_app_chatbot_fun_entertaining_to_use, 
@@ -784,7 +782,11 @@ Mars_data1<- Mars_data1 %>%
   select(-c(id, age_group_all_that_apply, technical_aspects_of_the_app_all_that_apply))
 
 # replacing all NA with Zeros
-Mars_data1[is.na(Mars_data1[c(2:26,1)])]<-0
+# Replace NA values with 0 in numeric columns
+Mars_data1[sapply(Mars_data1, is.numeric)] <- lapply(Mars_data1[sapply(Mars_data1, is.numeric)], function(x) replace(x, is.na(x), 0))
+
+
+
 
 
 
@@ -815,9 +817,7 @@ Mars_data1<-Mars_data1 %>% mutate(
   ease_of_use_of_covid_19_whats_app_chatbot+ 
   the_chatbot_is_interactive_consistent_and_intuitive_across_all_components
   ), 
-  
-  
-  Functionality=round(
+    Functionality=round(
     Functionality/3
   )
   
@@ -854,8 +854,6 @@ chatbot_is_likely_to_increase_intentions_motivation_to_get_covid_19_vaccination_
 `Subjective quality`=round(
   `Subjective quality`/6
 )
-
-    
   )
 
 
@@ -873,7 +871,7 @@ Mars_data_long <- Mars_data1 %>%
                 Aesthetic,
                 Information, 
                 `Subjective quality`, 
-                affiliations) %>% 
+                affiliations) %>%
   pivot_longer(
          cols = c(Quality, 
                 Engagement,
@@ -885,7 +883,8 @@ Mars_data_long <- Mars_data1 %>%
     values_to = "Score"
   )
 
-
+# calculating the mean of the score for each variable
+tapply( Mars_data_long$Score, Mars_data_long$Variable, mean)
 
 # the overall mean score 
 mean(Mars_data_long$Score, na.rm = T)
@@ -906,18 +905,16 @@ tapply(
    Mars_data_long$Score,
    Mars_data_long$affiliations,
    sd, na.rm=T )
-
+ 
 
 ```
 
 
 ## ploting the boxplot 
-
 ```{r}
 
-
 #Creating the boxplot with mean and median lines
-plots_score<- Mars_data_long %>%
+Mars_data_long %>%
   ggplot(aes(x = Variable, y = Score, fill = Variable)) +
   geom_boxplot(alpha = 0.6) + # Boxplots with variable-specific colors
   stat_summary(
@@ -944,6 +941,7 @@ plots_score<- Mars_data_long %>%
     width = 0.75
   ) + # Median as solid blue lines
   scale_fill_brewer(palette = "Set3") + # Color palette for variable-specific colors
+   facet_wrap(~affilications, scales = "free_y")+
   theme_minimal() +
   labs(
     title = "Malawi COVID-19 Chatbot scores",
@@ -961,11 +959,10 @@ plots_score<- Mars_data_long %>%
   )
 
 
-
-ggsave(plot = plots_score, "Plot_sscores.png", bg = "white", dpi = 300)
-
-plots_score
-
+# 
+# ggsave(plot = plots_score, "Plot_sscores.png", bg = "white", dpi = 300)
+# 
+# plots_score
 
 
 ```
@@ -991,5 +988,190 @@ t.test( t_test$Moh , t_test$`general public`)
 
 
 ```
+
+# Quality test for difference in mean score between the two groups
+
+```{r}
+
+
+ quality_test<- Mars_data_long %>% 
+   mutate(ID = row_number()) %>% 
+  pivot_wider(
+          names_from = affiliations, 
+    values_from = Score
+  ) %>% 
+  select(-ID) %>% 
+  filter(Variable=="Quality") %>% 
+  print(n=Inf)
+  
+    
+
+  
+# Replace NA values with 0 in numeric columns
+quality_test[sapply(quality_test, is.numeric)] <- lapply(quality_test[sapply(quality_test, is.numeric)], function(x) replace(x, is.na(x), 0)) 
+
+
+
+my_fun(data = quality_test,
+  "general public" , "Moh")
+
+
+
+
+```
+
+
+# Engagement test for difference in mean score between the two groups
+
+
+```{r}
+
+ Functionality_test<- Mars_data_long %>% 
+   mutate(ID = row_number()) %>% 
+  pivot_wider(
+          names_from = affiliations, 
+    values_from = Score
+  ) %>% 
+  select(-ID) %>% 
+  filter(Variable=="Functionality") %>% 
+  print(n=Inf)
+  
+    
+
+  
+# Replace NA values with 0 in numeric columns
+Functionality_test[sapply(Functionality_test, is.numeric)] <- lapply(Functionality_test[sapply(Functionality_test, is.numeric)], function(x) replace(x, is.na(x), 0)) 
+
+
+
+my_fun(data = Functionality_test,
+  "general public" , "Moh")
+
+
+
+```
+
+# Aesthetic test for difference in mean score between the two groups
+
+
+```{r}
+
+
+ Aesthetic_test<- Mars_data_long %>% 
+   mutate(ID = row_number()) %>% 
+  pivot_wider(
+          names_from = affiliations, 
+    values_from = Score
+  ) %>% 
+  select(-ID) %>% 
+  filter(Variable=="Aesthetic") %>% 
+  print(n=Inf)
+  
+    
+
+  
+# Replace NA values with 0 in numeric columns
+Aesthetic_test[sapply(Aesthetic_test, is.numeric)] <- lapply(Aesthetic_test[sapply(Aesthetic_test, is.numeric)], function(x) replace(x, is.na(x), 0)) 
+
+
+
+my_fun(data = Aesthetic_test,
+  "Moh" , "general public")
+
+```
+
+
+# Information test for difference in mean score between the two groups
+
+
+```{r}
+
+Information_test<- Mars_data_long %>% 
+   mutate(ID = row_number()) %>% 
+  pivot_wider(
+          names_from = affiliations, 
+    values_from = Score
+  ) %>% 
+  select(-ID) %>% 
+  filter(Variable=="Information") %>% 
+  print(n=Inf)
+  
+    
+
+  
+# Replace NA values with 0 in numeric columns
+Information_test[sapply(Information_test, is.numeric)] <- lapply(Information_test[sapply(Information_test, is.numeric)], function(x) replace(x, is.na(x), 0)) 
+
+
+
+my_fun(data = Information_test,
+  "Moh" , "general public")
+
+
+
+```
+
+# Subjective quality test for difference in mean score between the two groups
+
+
+```{r}
+
+
+
+Subjective_quality_test<- Mars_data_long %>% 
+   mutate(ID = row_number()) %>% 
+  pivot_wider(
+          names_from = affiliations, 
+    values_from = Score
+  ) %>% 
+  select(-ID) %>% 
+  filter(Variable=="Subjective quality") %>% 
+  print(n=Inf)
+  
+    
+
+  
+# Replace NA values with 0 in numeric columns
+Subjective_quality_test[sapply(Subjective_quality_test, is.numeric)] <- lapply(Subjective_quality_test[sapply(Subjective_quality_test, is.numeric)], function(x) replace(x, is.na(x), 0)) 
+
+
+
+my_fun(data = Subjective_quality_test,
+ "Moh" , "general public")
+
+
+
+```
+
+
+# the fifference between MoH and General Public in the mean score of the Malawi COVID-19 chatbot
+
+
+```{r}
+
+ Mean_score_table<- Mars_data_long %>% 
+  group_by(Variable) %>% 
+  summarise(
+  `mean score MoH`=mean(Score[affiliations=="Moh"]),
+  `mean score general public`=mean(Score[affiliations=="general public"])
+  )
+
+Mean_score_table <- Mean_score_table %>% 
+  as_flextable() %>% 
+  autofit()
+
+Mean_score_table
+
+save_as_docx(
+  Mean_score_table, 
+  path = here("output/mean score.docx"))
+
+
+
+
+```
+
+
+
 
 

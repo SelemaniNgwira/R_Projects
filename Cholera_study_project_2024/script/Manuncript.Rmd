@@ -94,6 +94,8 @@ district_shapefile<-sf:: st_read(
 
 ```
 
+
+
 # Social and behavioral factors that influence current water treatment practices
 
 ## Source of Water for Daily use by District   
@@ -1713,6 +1715,9 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
+
+# change the name of the variable in the figure. 
+
 # List of sanitation-related variables
 vars <- c("drainage_around_household", "toilet_covered", "toilet_cleanliness", "pit_condition")
 
@@ -1763,11 +1768,28 @@ summarytools::freq(practice_df$health_risk_associated_with_drinking_untreated_wa
 
 ```
 
+
+
+## Usage of Sanitary Infractures in the Community and Household Level
+
+```{r}
+cholera_data %>% 
+  select(
+    shared_usage_of_toilets_latrines, 
+    san_facility_unavailable
+  ) %>% 
+  summarytools::freq()
+
+
+
+```
+
+
+
 ## overall sanitary infrastructures in the community and household level
 
 
 ```{r}
-
 
 overall_sanitary <- cholera_data %>% 
   select(sanitary_and_infrastructure_category)

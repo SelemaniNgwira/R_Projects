@@ -11,7 +11,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-
 if(!require(pacman)) install.packages("pacman")
 
 p_load(
@@ -35,7 +34,7 @@ p_load(
   scales,
   fmsb,
   officer)
- 
+
 
 conflicted::conflict_prefer("select", "dplyr")
 

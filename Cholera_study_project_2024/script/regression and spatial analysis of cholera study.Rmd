@@ -1908,7 +1908,7 @@ ocv_data1<- ocv_data %>%
 regression_table2<-ocv_data1 %>% 
   gtsummary::tbl_uvregression(method = glm,
                                y = received_ocv,
-                    method.args = list(family = binomial(link="logit")),
+               method.args = list(family = binomial(link="logit")),
                                exponentiate = TRUE,
                                hide_n = TRUE)
 

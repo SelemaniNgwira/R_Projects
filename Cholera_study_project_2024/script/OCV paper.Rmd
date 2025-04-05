@@ -1,5 +1,186 @@
 ---
-title: "OCV paper"
-output: html_document
+title: "water treatment paper"
+output: word_document
 ---
+
+```{r include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+if(!require(pacman)) install.packages("pacman")
+
+installed.packages("flextable")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  terra,
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit, 
+  pwr, 
+  webshot2,
+  gtsummary, 
+   BiocManager,
+  ggradar,
+  scales,
+  fmsb,
+  officer, 
+  broom.helpers, 
+  cardx, 
+  ggthemes, 
+  patchwork)
+ 
+
+conflicted::conflict_prefer("select", "dplyr")
+
+conflicted::conflicts_prefer(stats::fisher.test)
+
+options("max.print" = 10000)  # Increase the print limit
+
+
+
+
+
+```
+
+
+```{r include=FALSE}
+
+
+
+# importing the data 
+cholera_data<-import(here("data/cholera_data_.csv")) %>%
+                clean_names() %>% 
+  mutate(district=recode(
+      district, 
+      "Blantyre_City"="Blantyre"
+    )) %>% 
+   mutate(residence = case_when(
+    district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
+    TRUE ~ "lake_share" )) 
+
+# changing the data.frame into tibble object for easy handling 
+cholera_data<- tibble(cholera_data)
+
+
+
+# filtering out those less than 18 years 
+cholera_data<-cholera_data %>% 
+  dplyr::filter(age_group!="<18")
+
+
+district_shapefile<-sf:: st_read(
+  here("data/MWI_adm1.shp")
+) %>% 
+  select(
+   NAME_1,
+    ID_0,
+    ID_1) %>% 
+  dplyr::rename(
+    "District"= NAME_1
+  )
+
+
+```
+
+
+
+# main source of drinking water in the study area
+
+```{r eval=FALSE, fig.height=6, fig.width=10, dpi=300, include=FALSE}
+cholera_data %>% 
+  select(
+    main_source_of_drinking_water_dry_season, 
+    main_source_of_drinking_water_wet_season
+  ) %>% 
+  mutate(across(everything(), ~gsub("_", " ",.))) %>% # replace _ with space
+  mutate(across(everything(), ~ gsub("\\d+", " ", as.character(.)))) %>% # remove 
+  pivot_longer(
+    cols = everything(),
+    names_to = "season",
+    values_to = "main_source_of_drinking_water"
+  ) %>%  
+ mutate(across(everything(), ~gsub("main_source_of_drinking_water_", " ",.))) %>% 
+   mutate(across(everything(), ~gsub("_", " ",.))) %>% 
+   count(season, main_source_of_drinking_water) %>% 
+  group_by(season) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup() %>% 
+  ggplot(aes(x = fct_reorder(main_source_of_drinking_water, percentage), y = percentage, fill = season)) +
+  geom_col(position = "dodge")+
+  coord_flip()+
+  theme_minimal()+
+  facet_wrap(~season)+
+  labs(
+    x = "Main source of drinking water",
+    y = "Percentage (%)",
+    title = "Main source of drinking water in the study area",
+    fill = "Season"
+  )+
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.25)+
+  theme(legend.position = "bottom")
+
+
+```
+
+
+
+```{r}
+
+ocv_coverage<- cholera_data %>% 
+  select(district, 
+         ta, 
+         received_ocv) %>% 
+  mutate(
+    ta=recode(
+      ta, 
+      "TA_Msosa"="TA_Karonga", 
+     "TA_Amidu"= "TA_Kalembo",
+      "TA_Chanthunya"="TA_Nsamala",
+     "TA_Nkaya"="TA_Nsamala",
+     "TA_Msamala"="TA_Nsamala", 
+     "TA_Phalula"="TA_Nsamala", 
+     "Limbe_Central_ward"="Blantyre_City", 
+     "Blantyre_City_Centre_ward"="Blantyre_City", 
+     "SC_Kambwiri"="TA_Kambwiri", 
+     "SC_Mwanza"="TA_Mwanza", 
+     "SC_Kambalame"="TA_Kambalame", 
+     "TA_Lundu_blantye"="TA_Lundu", 
+     "SC_Tsabango"="TA_Tsabango",
+      "SC_Njewa"= "TA_Njewa", 
+     "SC_Kamenya_Gwaza"="TA_Kamenya_gwaza", 
+     "SC_Namabvi"="TA_Namabvi",
+      "SC_Chowe"="TA_Chowe", 
+      "SC_Zilakoma"="TA_Zilakoma",
+      "SC_Fukamalaza"="TA_Fukamalaza"
+        )  ) %>%
+  count(district, ta, received_ocv) %>% 
+  pivot_wider(
+    names_from = received_ocv,
+    values_from = n,
+    values_fill = 0
+  ) %>% 
+  mutate(
+    total = yes+no,
+    coverage =round(yes/total*100, digits = 2)) %>% 
+  select(district, ta, coverage) %>% 
+  mutate(across(everything(), ~gsub("_", " ",.)))
+
+
+
+
+
+
+
+
+
+```
 
