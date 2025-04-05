@@ -285,33 +285,54 @@ table6<- wet_drink_district %>%
   rowwise() %>% 
   mutate(total= sum(across(where(is.numeric))), 
          
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
+          percentage=round(community_standpipe/total*100, 2),
+          community_standpipe=paste0(community_standpipe,
+                                   " (", round(percentage, 1), "%)"),
+        percentage=round(borehole_1/total*100, 2 ),
+        borehole_1=paste0(borehole_1, " (", round(percentage, 1), "%)"),
+             percentage= round(piped_into_dwelling/total*100, 2),
+                 piped_into_dwelling=paste0(piped_into_dwelling,
+                                   " (", round(percentage, 1), "%)"),
+             percentage= round(piped_into_yard_plot/total*100, 2),
+                 piped_into_yard_plot=paste0(piped_into_yard_plot,
+                                   " (", round(percentage, 1), "%)"),
+                 percentage=round(protected_well_1/total*100, 2), 
+           protected_well_1=paste0(protected_well_1,
+                                   " (", round(percentage, 1), "%)"),
+                 percentage=round(unprotected_well_1/total*100, 2),
+           unprotected_well_1=paste0(unprotected_well_1,
+                                   " (", round(percentage, 1), "%)"),
+                   percentage=round(other_drinking_source/total*100, 2),
+              other_drinking_source=paste0(other_drinking_source,
+                                   " (", round(percentage, 1), "%)"),
+         percentage=round(river_stream/total*100, 2), 
+              river_stream=paste0(river_stream,
+                                   " (", round(percentage, 1), "%)"),
+         percentage=round(spring_1/total*100, 2), 
+       spring_1=paste0(spring_1, " (", round(percentage, 1), "%)"),
+         percentage=round(dam/total/100, 2), 
+      dam=paste0(dam, " (", round(percentage, 1), "%)"),
+         percentage=round(bottled_water/total*100, 2), 
+   bottled_water=paste0(bottled_water, " (", round(percentage, 1), "%)"),
+         percentage=round(tanker_truck_bower/total*100, 2), 
+tanker_truck_bower=paste0(tanker_truck_bower,
+                          " (", round(percentage, 1), "%)"),
+         percentage=round(lake/total*100, 2),
+    lake=paste0(lake, " (", round(percentage, 1), "%)")
          )
+         
 
 
-   table6<-table6 %>%
-  rename_with(~ str_replace_all(., "_", " "))
-   
-       
-table6<- table6 %>% 
-  as_flextable()
-
-
-save_as_docx(table6, path = here("output/table6.docx"))
-
+ table6 %>% 
+rename_with(~ str_replace_all(., "_", " ")) %>% 
+    rename_with(~ str_replace_all(., "1", "")) %>% 
+  select(-total, -percentage) %>%
+    as_flextable() %>% 
+ flextable::rotate(j = c(2:15), part = "header",
+         rotation = "btlr") %>%  # Rotate header text 90°
+flextable:: align(align = "center", part = "header") %>% 
+  autofit() %>%  # Fit column content first
+ flextable:: width(j = NULL, width = 1.2)
 
 
 
@@ -322,12 +343,12 @@ save_as_docx(table6, path = here("output/table6.docx"))
 
 
 wet_drink_zone <- cholera_data %>% 
-                      select(zone, 
+                      select(residence, 
                              main_source_of_drinking_water_wet_season)
 
 
 wet_drink_zone<- wet_drink_zone %>% 
-  group_by( zone, 
+  group_by( residence,, 
            main_source_of_drinking_water_wet_season) %>%
   count(main_source_of_drinking_water_wet_season) %>%
     pivot_wider(
@@ -346,36 +367,60 @@ table7<- wet_drink_zone%>%
   rowwise() %>% 
   mutate(total= sum(across(where(is.numeric))), 
          
-         community_standpipe=round(community_standpipe/total*100, 2), 
-         borehole_1=round(borehole_1/total*100, 2 ), 
-         piped_into_dwelling= round(piped_into_dwelling/total*100, 2), 
-         piped_into_yard_plot= round(piped_into_yard_plot/total*100, 2), 
-         protected_well_1=round(protected_well_1/total*100, 2), 
-         unprotected_well_1=round(unprotected_well_1/total*100, 2), 
-         other_drinking_source=round(other_drinking_source/total*100, 2), 
-         river_stream=round(river_stream/total*100, 2), 
-         spring_1=round(spring_1/total*100, 2), 
-         dam=round(dam/total/100, 2), 
-         bottled_water=round(bottled_water/total*100, 2), 
-         tanker_truck_bower=round(tanker_truck_bower/total*100, 2), 
-         lake=round(lake/total*100, 2)
-         
+             percentage=round(community_standpipe/total*100, 2),
+          community_standpipe=paste0(community_standpipe,
+                                   " (", round(percentage, 1), "%)"),
+        percentage=round(borehole_1/total*100, 2 ),
+        borehole_1=paste0(borehole_1, " (", round(percentage, 1), "%)"),
+             percentage= round(piped_into_dwelling/total*100, 2),
+                 piped_into_dwelling=paste0(piped_into_dwelling,
+                                   " (", round(percentage, 1), "%)"),
+             percentage= round(piped_into_yard_plot/total*100, 2),
+                 piped_into_yard_plot=paste0(piped_into_yard_plot,
+                                   " (", round(percentage, 1), "%)"),
+                 percentage=round(protected_well_1/total*100, 2), 
+           protected_well_1=paste0(protected_well_1,
+                                   " (", round(percentage, 1), "%)"),
+                 percentage=round(unprotected_well_1/total*100, 2),
+           unprotected_well_1=paste0(unprotected_well_1,
+                                   " (", round(percentage, 1), "%)"),
+                   percentage=round(other_drinking_source/total*100, 2),
+              other_drinking_source=paste0(other_drinking_source,
+                                   " (", round(percentage, 1), "%)"),
+         percentage=round(river_stream/total*100, 2), 
+              river_stream=paste0(river_stream,
+                                   " (", round(percentage, 1), "%)"),
+         percentage=round(spring_1/total*100, 2), 
+       spring_1=paste0(spring_1, " (", round(percentage, 1), "%)"),
+         percentage=round(dam/total/100, 2), 
+      dam=paste0(dam, " (", round(percentage, 1), "%)"),
+         percentage=round(bottled_water/total*100, 2), 
+   bottled_water=paste0(bottled_water, " (", round(percentage, 1), "%)"),
+         percentage=round(tanker_truck_bower/total*100, 2), 
+tanker_truck_bower=paste0(tanker_truck_bower,
+                          " (", round(percentage, 1), "%)"),
+         percentage=round(lake/total*100, 2),
+    lake=paste0(lake, " (", round(percentage, 1), "%)")
          )
+         
 
 
-   table7<-table7 %>%
-  rename_with(~ str_replace_all(., "_", " "))
+table7 %>% 
+     rename_with(~ str_replace_all(., "_", " ")) %>% 
+    rename_with(~ str_replace_all(., "1", "")) %>% 
+  select(-total, -percentage) %>%
+    as_flextable() %>% 
+ flextable::rotate(j = c(2:15), part = "header",
+         rotation = "btlr") %>%  # Rotate header text 90°
+flextable:: align(align = "center", part = "header") %>% 
+  autofit() %>%  # Fit column content first
+ flextable:: width(j = NULL, width = 1.2)
    
-       
-table7<- table7 %>% 
-  as_flextable()
 
-
-save_as_docx(table7, path = here("output/table7.docx"))
 
 ```
 
-## 2.5.1 Water Treatment at Household by Sex, Level of Education, Religion
+### 2.5.1 Water Treatment at Household by Sex, Level of Education, Religion
 
 ```{r echo=FALSE}
 
@@ -397,139 +442,229 @@ table8<- Water_treat %>%
                 religion~c(0,2)
               ))
 
-table8<- table8 %>% 
-  as_flex_table()
-
-
-save_as_docx(table8, path = here("output/table8.docx"))
+table8
 
 
 ```
 
 
-## 2.5.2 Water Treatment at Household by District 
+### 2.5.2 Water Treatment at Household by District 
 
 ```{r echo=FALSE}
  
 
 
-# Water_treat_district_zone<-cholera_data %>% 
-#          select(district, 
-#                 zone, 
-#                 treat_drinking_water)
-# 
-# 
-# table9<- Water_treat_district_zone%>% 
-#   tbl_summary(treat_drinking_water, 
-#               percent = "row", 
-#               digits = list(
-#                 district~ c(0, 2), 
-#                 zone~c(0,2)
-#                 
-#               ))
-# 
-# table9<- table9 %>% 
-#   as_flex_table()
-# 
-# 
-# save_as_docx(table9, path = here("output/table9.docx"))
+Water_treat_district_zone<-cholera_data %>%
+         select(district,
+                residence,
+                treat_drinking_water)
+
+
+table9<- Water_treat_district_zone%>%
+  tbl_summary(treat_drinking_water,
+              percent = "row",
+              digits = list(
+                district~ c(0, 2),
+                residence~c(0,2)
+
+              ))
+
+table9
 
 ```
 
 
-## 2.5.3 if yes, Methods of water treatment by District
+### yes, Methods of water treatment by District
 
-```{r fig.height=7, fig.width=14, include=FALSE}
-# methods_water <- cholera_data %>% 
-#                select(
-#                  #sex,
-#                   # age_group, 
-#                   # level_education, 
-#                   religion, 
-#                  c(34:41)
-#                )
+```{r echo=FALSE, fig.height=7, fig.width=14}
+
+methods_water <- cholera_data %>%
+               select(
+                  sex,
+                  age_group,
+                  level_education,
+                  religion,
+                 c(34:41)
+               )
+
+
+age_group_table<-methods_water %>%
+  select(
+    age_group,
+    where(is.numeric)
+  ) %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>%
+  drop_na(value) %>%
+  group_by(
+     age_group,
+      name) %>%
+  summarise(value=sum(value)) %>%
+  pivot_wider(
+    names_from = name,
+  values_from = value,
+  ) %>%
+  group_by(
+    age_group
+  ) %>%
+  rowwise() %>%
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+   rename("variable"=age_group)
+
+
+  sex_table<-methods_water %>%
+  select(
+    sex,
+    where(is.numeric)
+  ) %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>%
+  drop_na(value) %>%
+  group_by(
+     sex,
+      name) %>%
+  summarise(value=sum(value)) %>%
+  pivot_wider(
+    names_from = name,
+  values_from = value,
+  ) %>%
+  group_by(
+    sex
+  ) %>%
+  rowwise() %>%
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+   rename("variable"=sex)
+    
+
+    
+education_table<- methods_water %>%
+  select(
+    level_education,
+    where(is.numeric)
+  ) %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>%
+  drop_na(value) %>%
+  group_by(
+     level_education,
+      name) %>%
+  summarise(value=sum(value)) %>%
+  pivot_wider(
+    names_from = name,
+  values_from = value,
+  ) %>%
+  group_by(
+    level_education,
+  ) %>%
+  rowwise() %>%
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+   rename("variable"=level_education)
+ 
+    
+    
+    
+religion_table<-methods_water %>%
+  select(
+    religion,
+    where(is.numeric)
+  ) %>% 
+  pivot_longer(
+    cols = (2:9)
+  ) %>%
+  drop_na(value) %>%
+  group_by(
+     religion,
+      name) %>%
+  summarise(value=sum(value)) %>%
+  pivot_wider(
+    names_from = name,
+  values_from = value,
+  ) %>%
+  group_by(
+    religion,
+  ) %>%
+  rowwise() %>%
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+   rename("variable"=religion)
+
+    
+    # Combine all tables into one
+    table10 <- bind_rows(sex_table,
+                         age_group_table,
+                         education_table,
+                         religion_table)
 # 
 # 
-# religion_table<- methods_water %>% 
-#   pivot_longer(
-#     cols = (2:9)
-#   ) %>% 
-#   drop_na(value) %>% 
-#   group_by(
-#     # sex, 
-#      # age_group, 
-#     # level_education, 
-#      religion, 
-#     name) %>% 
-#   summarise(value=sum(value)) %>% 
-#   pivot_wider(
-#     names_from = name, 
-#   values_from = value, 
-#   ) %>% 
-#   group_by(
-#     religion
-#   ) %>% 
-#   rowwise() %>% 
-#   mutate(total=sum(across(where(is.numeric))))
-# 
-# 
-# sex_table<- sex_table %>% 
-#   rename(
-#     "variable"=sex
-#   )
-# 
-# age_group_table<- age_group_table %>% 
-#   rename(
-#     "variable"=age_group
-#   )
-# 
-# 
-# education_table<- education_table %>% 
-#   rename(
-#     "variable"=level_education
-#   )
-# 
-# 
-# religion_table<- religion_table %>% 
-#   rename(
-#     "variable"=religion
-#   )
-# 
-# 
-# # Combine all tables into one
-# table10 <- bind_rows(sex_table,
-#                      age_group_table,
-#                      education_table,
-#                      religion_table)
-# 
-# 
-# 
-# table10<- table10 %>% 
-#   mutate(
-#  method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
-#  method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
-#  method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
-#  method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
-#  method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
-#  method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
-#  method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
-#  method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
-#     )
-# 
-# 
-# table10<- table10 %>%
-#   rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
-# 
-# 
-# table10<- table10 %>%
-#   rename_with(~ str_replace_all(., "_", " "))
-# 
-# 
-# table10<- table10 %>% 
-#   as_flextable()
-# 
-# 
-# save_as_docx(table10, path = here("output/table10.docx"))
+
+ table10<- table10 %>%
+  mutate(
+ percentage= round(method_of_water_treatment_boiling/total*100, 2) ,
+ 
+ method_of_water_treatment_boiling= paste0(method_of_water_treatment_boiling,
+          " (", round(percentage, 1), "%)"),
+ 
+ percentage= round(method_of_water_treatment_ceramic_filter/total*100, 2),
+ 
+ method_of_water_treatment_ceramic_filter= paste0(method_of_water_treatment_ceramic_filter,
+          " (", round(percentage, 1), "%)"), 
+ 
+ 
+ percentage= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
+ 
+ 
+ method_of_water_treatment_filter_with_cloth= paste0(method_of_water_treatment_filter_with_cloth,
+          " (", round(percentage, 1), "%)"),
+ 
+percentage=round(method_of_water_treatment_others_methods/total*100, 2),
+ 
+ 
+ method_of_water_treatment_others_methods= paste0(method_of_water_treatment_others_methods,
+          " (", round(percentage, 1), "%)"),
+ 
+ 
+ percentage=round(method_of_water_treatment_solar_disinfection/total*100, 2),
+
+
+ method_of_water_treatment_solar_disinfection= paste0(method_of_water_treatment_solar_disinfection,
+          " (", round(percentage, 1), "%)"),
+
+
+percentage=round(method_of_water_treatment_stand_settle/total*100, 2),
+
+ method_of_water_treatment_stand_settle= paste0(method_of_water_treatment_stand_settle,
+          " (", round(percentage, 1), "%)"),
+
+ percentage= round(method_of_water_treatment_use_chlorine/total*100, 2),
+
+ method_of_water_treatment_use_chlorine= paste0(method_of_water_treatment_use_chlorine,
+          " (", round(percentage, 1), "%)"),
+
+
+ percentage=round(method_of_water_treatment_use_water_from_tap/total*100, 2),
+
+ method_of_water_treatment_use_water_from_tap= paste0(method_of_water_treatment_use_water_from_tap,
+          " (", round(percentage, 1), "%)")
+
+    )
+ 
+ 
+ 
+ table10 %>% 
+   select(-total, -percentage) %>% 
+   rename_with(~ str_replace_all(., 
+       "method_of_water_treatment_", " ")) %>% 
+    rename_with(~ str_replace_all(., "_", " ")) %>% 
+    as_flextable() %>% 
+ flextable::rotate(j = c(2:9), part = "header",
+         rotation = "btlr") %>%  # Rotate header text 90°
+flextable:: align(align = "center", part = "header") %>% 
+  autofit() %>%  # Fit column content first
+ flextable:: width(j = NULL, width = 1.2)
+
+ 
 ```
 
 
@@ -538,12 +673,17 @@ save_as_docx(table8, path = here("output/table8.docx"))
 methods_water_district <- cholera_data %>% 
                select(
                  district, 
+                 residence,
                  c(34:41)
                )
 
 
 
-tabel11<- methods_water_district %>% 
+tabel11_district<- methods_water_district %>% 
+  select(
+    district,
+    where(is.numeric)
+  ) %>%
   pivot_longer(
     cols = (2:9)
   ) %>% 
@@ -560,46 +700,112 @@ tabel11<- methods_water_district %>%
     district
   ) %>% 
   rowwise() %>% 
-  mutate(total=sum(across(where(is.numeric))))
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+  rename("variable"=district)
 
 
+table11_residence<- methods_water_district%>% 
+  select(
+    residence,
+    where(is.numeric)
+  ) %>%
+  pivot_longer(
+    cols = (2:9)
+  ) %>% 
+  drop_na(value) %>% 
+  group_by(
+    residence, 
+    name) %>% 
+  summarise(value=sum(value)) %>% 
+  pivot_wider(
+    names_from = name, 
+  values_from = value, 
+  ) %>% 
+  group_by(
+    residence
+  ) %>% 
+  rowwise() %>% 
+  mutate(total=sum(across(where(is.numeric)))) %>% 
+  rename("variable"=residence)
+
+
+tabel11<- bind_rows(tabel11_district,
+                     table11_residence)
 
 tabel11<- tabel11 %>% 
 mutate(
- method_of_water_treatment_boiling= round(method_of_water_treatment_boiling/total*100, 2) ,         
- method_of_water_treatment_ceramic_filter= round(method_of_water_treatment_ceramic_filter/total*100, 2),   
- method_of_water_treatment_filter_with_cloth= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
- method_of_water_treatment_others_methods=round(method_of_water_treatment_others_methods/total*100, 2),    
- method_of_water_treatment_solar_disinfection=round(method_of_water_treatment_solar_disinfection/total*100, 2), 
- method_of_water_treatment_stand_settle=round(method_of_water_treatment_stand_settle/total*100, 2),     
- method_of_water_treatment_use_chlorine= round(method_of_water_treatment_use_chlorine/total*100, 2),
- method_of_water_treatment_use_water_from_tap=round(method_of_water_treatment_use_water_from_tap/total*100, 2) 
-    )
+ percentage= round(method_of_water_treatment_boiling/total*100, 2) ,
+ 
+ method_of_water_treatment_boiling= paste0(method_of_water_treatment_boiling,
+          " (", round(percentage, 1), "%)"),
+ 
+ percentage= round(method_of_water_treatment_ceramic_filter/total*100, 2),
+ 
+ method_of_water_treatment_ceramic_filter= paste0(method_of_water_treatment_ceramic_filter,
+          " (", round(percentage, 1), "%)"), 
+ 
+ 
+ percentage= round(method_of_water_treatment_filter_with_cloth/total*100, 2),
+ 
+ 
+ method_of_water_treatment_filter_with_cloth= paste0(method_of_water_treatment_filter_with_cloth,
+          " (", round(percentage, 1), "%)"),
+ 
+percentage=round(method_of_water_treatment_others_methods/total*100, 2),
+ 
+ 
+ method_of_water_treatment_others_methods= paste0(method_of_water_treatment_others_methods,
+          " (", round(percentage, 1), "%)"),
+ 
+ 
+ percentage=round(method_of_water_treatment_solar_disinfection/total*100, 2),
 
+
+ method_of_water_treatment_solar_disinfection= paste0(method_of_water_treatment_solar_disinfection,
+          " (", round(percentage, 1), "%)"),
+
+
+percentage=round(method_of_water_treatment_stand_settle/total*100, 2),
+
+ method_of_water_treatment_stand_settle= paste0(method_of_water_treatment_stand_settle,
+          " (", round(percentage, 1), "%)"),
+
+ percentage= round(method_of_water_treatment_use_chlorine/total*100, 2),
+
+ method_of_water_treatment_use_chlorine= paste0(method_of_water_treatment_use_chlorine,
+          " (", round(percentage, 1), "%)"),
+
+
+ percentage=round(method_of_water_treatment_use_water_from_tap/total*100, 2),
+
+ method_of_water_treatment_use_water_from_tap= paste0(method_of_water_treatment_use_water_from_tap,
+          " (", round(percentage, 1), "%)")
+
+    ) %>% 
+  select(-total, -percentage)
 
 
 
 tabel11<- tabel11 %>%
   rename_with(~ str_replace_all(., "method_of_water_treatment_", " "))
 
-
 tabel11<- tabel11 %>%
   rename_with(~ str_replace_all(., "_", " "))
 
+tabel11 %>% 
+as_flextable() %>% 
+ flextable::rotate(j = c(2:9), part = "header",
+         rotation = "btlr") %>%  # Rotate header text 90°
+flextable:: align(align = "center", part = "header") %>% 
+  autofit() %>%  # Fit column content first
+ flextable:: width(j = NULL, width = 1.2)
 
-tabel11<- tabel11%>% 
-  as_flextable()
-
-
-save_as_docx(tabel11, path = here("output/table11.docx"))
 
 ```
 
 
 
-
 ##2.5.4 Properly chlorination process by district.
-
 
 ```{r echo=TRUE}
 properly_chro_district <- cholera_data %>% 
@@ -925,6 +1131,539 @@ freq_water_treatment_district %>%
 ```{r}
 
 ```
+
+
+
+
+
+# 4. 0 . Availability and use of sanitary services and infrastructure for cholera prevention
+
+
+
+# Percentage of households that have toilets
+
+## 1.	Do you have toilet?
+
+```{r}
+
+knitr::opts_chunk$set(tidy = TRUE, collapse = TRUE, rows.print = 12)
+
+available_toilet<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   toilet_facility_avaiable)
+
+              
+toilet_dis_table<- available_toilet %>% 
+  group_by(district) %>%
+  count(toilet_facility_avaiable) %>% 
+  drop_na(toilet_facility_avaiable) %>% 
+  pivot_wider(names_from = toilet_facility_avaiable,
+              values_from = n) %>% 
+  # adorn_totals("row") %>%
+  mutate(total=available+not_available, 
+         available= round( available/total*100,2), 
+         not_available=round( not_available/total*100,2)) %>% 
+  rename("Background_charateristic" = district)
+
+
+
+toilet_res_table<- available_toilet %>% 
+  group_by(residence) %>%
+  count(toilet_facility_avaiable) %>% 
+  drop_na(toilet_facility_avaiable) %>% 
+  pivot_wider(names_from = toilet_facility_avaiable,
+              values_from = n) %>% 
+  adorn_totals("row") %>%
+  mutate(total=available+not_available, 
+         available= round( available/total*100,2), 
+         not_available=round( not_available/total*100,2)) %>% 
+  rename("Background_charateristic" = residence)
+
+
+
+table20<-rbind(toilet_dis_table, toilet_res_table) 
+
+empty_row1 <- data.frame(Background_charateristic= "District",
+                        available = NA,
+                        not_available = NA, 
+                        total = NA)
+  
+empty_row2 <- data.frame(Background_charateristic= "Residence",
+                        available = NA,
+                        not_available = NA, 
+                        total = NA)
+
+
+table20<- rbind(empty_row1, table20[1:7, ],
+      empty_row2, table20[8:nrow(table20), ])
+
+table20<- table20 %>%
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(table20, path= here("output/table20.docx"))
+  
+
+
+
+```
+
+
+
+## District from the toilets
+
+
+```{r}
+
+available_toilet_demo<- cholera_data %>% 
+            select(sex, 
+                   level_education,
+                   ethnicity,
+                   toilet_facility_avaiable)
+
+
+sex_table<- create_summary_table(available_toilet_demo, "sex", 
+                     "toilet_facility_avaiable")
+leduction_table<- create_summary_table(available_toilet_demo, "level_education",
+                     "toilet_facility_avaiable")
+ethincity_table<- create_summary_table(available_toilet_demo,
+                                       "ethnicity",
+                     "toilet_facility_avaiable", 
+                      sum = T)
+
+toilet_table_demo<-rbind(sex_table, leduction_table, ethincity_table)
+
+
+toilet_table<-toilet_table_demo %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+save_as_docx(toilet_table, path = here("output/toilet_table.docx"))
+
+
+```
+
+
+
+## 2.	What type of toilet facility do members of your     household usually use? 
+
+
+```{r}
+
+
+
+
+
+```
+
+
+
+
+## 3.	Do you have Refuse pit?
+
+
+```{r}
+
+refuse_pit<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   soild_waste_disposal,
+                   bath_shelter_bathroom)
+
+
+refuse_pit_dis_table<- refuse_pit %>%
+             create_summary_table("district", "soild_waste_disposal")
+
+refuse_pit_res_table <- refuse_pit %>% 
+         create_summary_table("residence",
+                              "soild_waste_disposal",
+                              sum = T)
+
+
+refuse_pit_table<-rbind(refuse_pit_dis_table,
+                        refuse_pit_res_table)
+
+
+bath_shelter_dis_table<- refuse_pit %>%
+             create_summary_table("district", "bath_shelter_bathroom")
+
+bath_shelter_res_table <- refuse_pit %>%
+    create_summary_table("residence",
+                              "bath_shelter_bathroom",
+                              sum = T)
+
+
+bath_shelter_table<-rbind(bath_shelter_dis_table,
+                          bath_shelter_res_table)
+
+bath_shelter_table <- bath_shelter_table %>% 
+  rename("Bath_available"=available_percent, 
+         "Bath_not_available"=not_available_percent)
+
+
+
+refuse_pit_table <- refuse_pit_table %>%
+  rename("Refuse_pit_available"=available_percent, 
+         "Refuse_pit_not_available"=not_available_percent)
+
+merge(refuse_pit_table, bath_shelter_table,
+      by.x = "Background_charateristic")
+  # flextable() %>%
+  # autofit()
+  # set_table_properties(layout = "autofit") %>%
+  # height_all(height =  0.5, unit = "in" ) %>%
+  # save_as_docx(path = here("output/refuse_pit_table.docx"))
+
+
+refuse_pit_table1<-merge.data.frame(refuse_pit_table,
+                                    bath_shelter_table) %>% 
+   select(Background_characteristic,
+         Refuse_pit_available, Refuse_pit_not_available,
+         Bath_available, Bath_not_available, total)
+
+Refuse_pit_table1<- refuse_pit_table1 %>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(Refuse_pit_table1, path = here("output/Refuse_pit_table1.docx"))
+  
+  
+```
+
+## 4.	Do you have Bath Shelter with good drainage?
+
+
+```{r}
+
+```
+
+
+
+## 5.	the pit latrine Condtion by District?
+
+
+
+
+```{r}
+
+Pit_condition <- cholera_data %>% 
+                   select(district,
+                          residence, 
+                          pit_condition)
+
+
+stack_bar_pit_conition<- Pit_condition %>% 
+  group_by(district, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(district, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+   mutate(Pit_condition = factor(Pit_condition, 
+                                 levels = c("properly_maintained",
+                                            "overflowing",
+                                            "not_pit"))) %>% 
+  ggplot(aes(x=district, y=Percentage, fill=Pit_condition))+
+  geom_col()+
+  coord_flip()+
+  scale_fill_manual(values = c( "properly_maintained" = "green",
+                                "overflowing" = "yellow",
+                                "not_pit" = "red" )) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"), 
+        axis.title.y = element_text(size = 14, colour = "black"), 
+        axis.title.x = element_text(size = 14, colour = "black"))+
+  labs(y = "Percentage") +
+  ggtitle("Pit Condition by District")+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust = 0.5))
+
+
+ggsave("output/stack_bar_pit_conition.png", 
+       plot = stack_bar_pit_conition,
+       width = 10, height = 10, units = "in", dpi = 300, 
+       bg="white")
+
+
+
+
+
+```
+
+
+## 6.	Pit condition by residence 
+
+
+```{r}
+
+ stack_bar_residence<- Pit_condition %>% 
+  mutate(residence = recode(residence,
+                        "in_land"="in land", 
+                        "lake_share" = "Lake Shore")) %>%
+  group_by(residence, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+       properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(residence, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+   mutate(Pit_condition = factor(Pit_condition, 
+                                 levels = c("properly_maintained",
+                                            "overflowing",
+                                            "not_pit"))) %>% 
+  ggplot(aes(x=residence, y=Percentage, fill=Pit_condition))+
+  geom_col()+
+  coord_flip()+
+  scale_fill_manual(values = c( "properly_maintained" = "green",
+                                "overflowing" = "yellow",
+                                "not_pit" = "red" )) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12, colour = "black"), 
+        axis.text.y = element_text(size = 12, colour = "black"), 
+        axis.title.y = element_text(size = 14, colour = "black"), 
+        axis.title.x = element_text(size = 14, colour = "black"))+
+  labs(y = "Percentage", 
+       x="Residence") +
+  ggtitle("Pit Condition by Residence")+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust = 0.5))
+
+
+ggsave("output/stack_bar_residenc.png", 
+       plot = stack_bar_residence,
+       width = 10, height = 10, units = "in", dpi = 300, 
+       bg="white")
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+
+```
+
+
+
+
+
+## 7.	How often do you wash hands with soap after using the toilet or handling food?
+
+
+```{r}
+
+Pit_condition %>% 
+  group_by(district, pit_condition) %>%
+  summarise(n=n()) %>% 
+  drop_na(pit_condition) %>%
+  pivot_wider(names_from = pit_condition,
+              values_from = n) %>% 
+  mutate(total=not_pit+overflowing+properly_maintained, 
+         not_pit= round(not_pit/total*100, 2), 
+         overflowing=round(overflowing/total*100, 2), 
+         properly_maintained=round(properly_maintained/total*100, 2)) %>% 
+  select(district, not_pit, overflowing, properly_maintained) %>% 
+  pivot_longer(cols = c(not_pit, overflowing, properly_maintained),
+               names_to = "Pit_condition",
+               values_to = "Percentage") %>% 
+
+ggplot(aes(x = district, y = Percentage, color = Pit_condition)) +
+  geom_point(size = 5) +
+  geom_line(aes(group = district), size = 1) +
+  coord_flip() +
+  theme_minimal() +
+  scale_color_manual(values = c("not_pit" = "red",
+                                "overflowing" = "yellow",
+                                "properly_maintained" = "green")) +
+  labs(y = "Percentage", title = "Pit Condition by District")
+
+
+
+
+```
+
+## 8.	Hand washing facility by district and residence
+
+
+```{r}
+
+Household_handwashing<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   household_handwashing_facility)
+
+grouding_vars<- c("district", "residence")
+
+
+ Household_handwashing_tab<- Household_handwashing %>% 
+  create_summary_table3(grouding_vars, "household_handwashing_facility",                         sum = T)
+
+
+
+Household_handwashing_tab<- Household_handwashing_tab%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(Household_handwashing_tab, path = here("output/Household_handwashing_tab.docx"))
+
+
+table(cholera_data$san_facility_unavailable)
+
+
+
+
+
+```
+
+
+## 9.	if san facilities is not available. how people manage by district
+
+```{r}
+
+san_facility_unavailable<- cholera_data %>% 
+            select(district, 
+                   residence, 
+                   san_facility_unavailable)
+
+
+grouping_vars<- c("district", "residence")
+
+
+san_table<- san_facility_unavailable %>% 
+  create_summary_table3(grouping_vars, 
+                        "san_facility_unavailable", sum = T)
+
+san_table<-san_table%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+
+save_as_docx(san_table, path = here("output/san_table.docx"))
+
+
+```
+
+
+
+
+```{r}
+
+san_facility_unavailable_demo<- cholera_data %>% 
+            select(sex,
+                   age_group, 
+                   level_education, 
+                   ethnicity,
+                   san_facility_unavailable)
+
+grouding_vars <- c("sex", "age_group", "level_education", "ethnicity")
+
+
+
+san_demo_table<- san_facility_unavailable_demo %>% 
+  create_summary_table3(grouding_vars,
+                        "san_facility_unavailable",
+                        sum = T)
+
+
+san_demo_table<-san_demo_table%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" )
+
+save_as_docx(san_demo_table, 
+             path = here("output/san_demo_table.docx"))
+
+
+```
+
+
+
+
+
+## 10.	What are the common reasons for not using available sanitary facilities? 
+
+
+```{r}
+
+common_reason<- cholera_data %>% 
+            select(district, 
+                   residence, 
+    common_reasons_not_using_san_facilities_poor_maintenance_unhygienic, common_reasons_not_using_san_facilities_cost,
+    common_reasons_not_using_san_facilities_distance)
+
+
+
+common_reason <- common_reason %>%
+   rename_with(~ str_replace_all(.,
+                    "common_reasons_not_using_san_facilities_",
+                    ""))
+
+common_reason<- common_reason %>% 
+  pivot_longer(cols = c(poor_maintenance_unhygienic, cost, distance),
+               names_to = "Reason",
+               values_to = "Percentage") %>% 
+  filter(Percentage == 1) %>%
+  select(district, residence, Reason)
+
+
+grouding_vars<- c("district", "residence")
+
+
+
+common_reason<- common_reason %>% 
+create_summary_table3(grouding_vars, "Reason",
+                      sum = T)
+
+common_reason_table<-common_reason%>% 
+  flextable() %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  height_all(height =  0.5, unit = "in" ) 
+
+
+save_as_docx(common_reason_table,
+             path = here("output/common_reason_table.docx"))
+
+
+```
+
+
 
 
 
