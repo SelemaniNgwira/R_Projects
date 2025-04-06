@@ -474,11 +474,15 @@ table9
 ```
 
 
-### yes, Methods of water treatment by District
+### 2.5.1 yes, Methods of water treatment by District
+for methods of water treatment, will filter out those who do  not treat water. n(496)
 
 ```{r echo=FALSE, fig.height=7, fig.width=14}
 
-methods_water <- cholera_data %>%
+
+
+methods_water <- cholera_data %>% 
+              filter(treat_drinking_water=="yes") %>%
                select(
                   sex,
                   age_group,
@@ -596,8 +600,6 @@ religion_table<-methods_water %>%
                          age_group_table,
                          education_table,
                          religion_table)
-# 
-# 
 
  table10<- table10 %>%
   mutate(
@@ -653,6 +655,7 @@ percentage=round(method_of_water_treatment_stand_settle/total*100, 2),
  
  
  table10 %>% 
+   rename("Characterists"=variable) %>%
    select(-total, -percentage) %>% 
    rename_with(~ str_replace_all(., 
        "method_of_water_treatment_", " ")) %>% 
@@ -668,16 +671,18 @@ flextable:: align(align = "center", part = "header") %>%
 ```
 
 
+### 2.5.3 Methods of water treatment by District and Residence
+for methods of water treatment, will filter out those who do  not treat water. n(496)
+
 ```{r include=FALSE}
 
 methods_water_district <- cholera_data %>% 
+       filter(treat_drinking_water=="yes") %>%
                select(
                  district, 
                  residence,
                  c(34:41)
                )
-
-
 
 tabel11_district<- methods_water_district %>% 
   select(
@@ -804,36 +809,15 @@ flextable:: align(align = "center", part = "header") %>%
 ```
 
 
-
-##2.5.4 Properly chlorination process by district.
+### 2.5.4 Chlorination process by demographic variables.
+We will filter out those who do not treat water, and who do not use for water treatment chlorination. (n=376)
 
 ```{r echo=TRUE}
-properly_chro_district <- cholera_data %>% 
-            select(district, 
-                   chlorination_process_done_correctly)
-
-
-table12<- properly_chro_district %>% 
-  tbl_summary(chlorination_process_done_correctly, 
-              percent = "row", 
-              digits = list(
-                district~c(0,2)
-              ))
-
-
-table12<- table12 %>% 
-  as_flex_table()
-
-
-save_as_docx(table12, path = here("output/table12.docx"))
-
-
-
-
 ## by Sex, Age and Education 
 
-
 properly_chro_demo<- cholera_data %>% 
+  filter(treat_drinking_water=="yes") %>%
+  filter(method_of_water_treatment_use_chlorine==1)%>% 
             select(sex,
                    age_group, 
                    level_education, 
@@ -841,30 +825,55 @@ properly_chro_demo<- cholera_data %>%
                    chlorination_process_done_correctly)
 
 
-table13<- properly_chro_demo %>% 
+properly_chro_demo %>% 
   tbl_summary(chlorination_process_done_correctly, 
               percent = "row", 
               digits = list(
-              sex~c(0,2), 
-                 age_group~c(0,2), 
-                 level_education~c(0,2), 
-                 religion~c(0,2)
+              sex~c(0,1), 
+                 age_group~c(0,1), 
+                 level_education~c(0,1), 
+                 religion~c(0,1)
               ))
 
 
-table13<- table13 %>% 
-  as_flex_table()
+
+```
 
 
-save_as_docx(table13, path = here("output/table13.docx"))
+
+### 2.5.4 Chlorination process by district.
+
+We will filter out those who do not treat water, and who do not use for water treatment chlorination. (n=376)
+
+```{r echo=TRUE}
+properly_chro_district <- cholera_data %>% 
+   filter(treat_drinking_water=="yes") %>%
+  filter(method_of_water_treatment_use_chlorine==1)%>% 
+            select(district, 
+                   residence,
+                   chlorination_process_done_correctly)
+
+
+properly_chro_district %>% 
+  tbl_summary(chlorination_process_done_correctly, 
+              percent = "row", 
+              digits = list(
+                district~c(0,1), 
+                residence~c(0,1)
+              )) %>% 
+  modify_caption("**Cross tabulation of District and residence by chlorination**")
+
 
 
 ```
+
+
 
 ## 2.5. 5 Frequency of water treatment by Sex, Level of Education, Religion 
 
 ```{r include=FALSE}
 freq_water_treatment <- cholera_data %>% 
+   filter(treat_drinking_water=="yes") %>%
                         select(
                           sex, 
                           age_group, 
@@ -875,37 +884,39 @@ freq_water_treatment <- cholera_data %>%
 
 
 
-table14<- freq_water_treatment %>% 
+freq_water_treatment %>% 
   tbl_summary(often_treat_water, 
               digits = list(
-                sex~c(0,2), 
-                age_group~c(0,2), 
-                level_education~c(0,2), 
-                religion~c(0,2)
-              ))
-
-
-table14<- table14 %>% 
-  as_flex_table()
-
-
-save_as_docx(table14, path = here("output/table14.docx"))
+                sex~c(0,1), 
+                age_group~c(0,1), 
+                level_education~c(0,1), 
+                religion~c(0,1)
+              ))%>% 
+  modify_caption("**Frequncy of water treatment by demographic variables**") 
 
 
 
+```
+
+
+## 2.5. 5 Frequency of water treatment by Place of Residence, and District
+
+```{r include=FALSE}
 freq_water_treatment_district <- cholera_data %>% 
+   filter(treat_drinking_water=="yes") %>%
                                 select(
                                   district,
-                                  zone,
+                                  residence,
                                   often_treat_water
                                 )
 
 
 freq_water_treatment_district %>% 
+      filter(often_treat_water!="Never") %>%
           tbl_summary(often_treat_water, 
                       digits = list(
                         district~c(0,2), 
-                        zone~c
+                        residence~c(0,2)
                       ))
 
 
@@ -1139,10 +1150,9 @@ freq_water_treatment_district %>%
 # 4. 0 . Availability and use of sanitary services and infrastructure for cholera prevention
 
 
-
 # Percentage of households that have toilets
 
-## 1.	Do you have toilet?
+### 1.	Do you have toilet?
 
 ```{r}
 
