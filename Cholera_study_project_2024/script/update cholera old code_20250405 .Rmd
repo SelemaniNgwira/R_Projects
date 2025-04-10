@@ -917,26 +917,113 @@ freq_water_treatment_district %>%
                       digits = list(
                         district~c(0,2), 
                         residence~c(0,2)
-                      ))
+                      )) %>% 
+  modify_caption("**Frequncy of water treatment by District and Residence**")
 
 
 
 ```
 
+
+
+
+
+
+
+
+
+
+
+## 2.5.6 Access to water treatment by demographic variables
+Analysis of the water treatment products access by demographic variables. n(496), This has filtered out those who do not treat water.
+
+```{r}
+Access_to_water_treatment_pt<-cholera_data %>% 
+            select(sex,
+                   age_group,
+                   level_education,
+                   religion,
+                   difficulties_accessing_water_treatment_products)
+
+Access_to_water_treatment_pt %>% 
+  tbl_summary(difficulties_accessing_water_treatment_products, 
+              percent = "row", 
+              digits = list(
+               sex~c(0,1), 
+                age_group~c(0,1), 
+                level_education~c(0,1),
+                religion~c(0,1)               
+              )) %>% 
+  modify_caption("**Access to water treatment products by demographics**")
+
+
+```
+
+
+
+
+
 ## 2. 5.6 Access to water treatment by district 
+on access to water treatment, we will filter out those who do not treat water. (n=496) this has filter out those do not treat water.
 
 ```{r include=FALSE}
 
+Access_to_water_treatment_pt<-cholera_data %>% 
+            select(district, 
+                   residence, 
+                   difficulties_accessing_water_treatment_products)
+
+Access_to_water_treatment_pt %>% 
+  tbl_summary(difficulties_accessing_water_treatment_products, 
+              percent = "row", 
+              digits = list(
+                district~c(0,2), 
+                residence~c(0,2)
+              )) %>% 
+  modify_caption("**Access to water treatment products by District and Residence**")
 
 
 
 ```
+
+
+
 
 ## 2. 6.0 Knowledge of cholera calendar year.  By Sex, Level of Education, Religion 
 
 ```{r}
 
+knowledge_on_cholera_calender<-cholera_data %>% 
+                       select(
+                         sex, 
+                         age_group, 
+                         level_education, 
+                         religion, 
+                         c(48:51)
+                       )
 
+
+
+knowledge_on_cholera_calender<- knowledge_on_cholera_calender %>% 
+  pivot_longer(
+    cols = (5:8), 
+    names_to = "knowledge_on_cholera_season"
+  ) %>% 
+  filter(value==1) %>% 
+select(-value)
+
+
+
+knowledge_on_cholera_calender %>% 
+  tbl_summary(knowledge_on_cholera_season, 
+              percent = "row", 
+              digits = list(
+                sex~c(0,1), 
+                age_group~c(0,1), 
+                level_education~c(0,1), 
+                religion~c(0,1)
+              )) %>% 
+  modify_caption("**Knowledge of cholera calendar year by demographic variables**")
 
 
 ```

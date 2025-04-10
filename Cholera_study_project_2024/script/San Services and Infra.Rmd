@@ -58,7 +58,7 @@ cholera_data<-import(here("data/cholera_data_.csv")) %>%
       "Blantyre_City"="Blantyre"
     )) %>% 
    mutate(residence = case_when(
-    district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
+district %in% c("Lilongwe", "Blantyre", "Dedza", "Bakala") ~ "in_land",
     TRUE ~ "lake_shore" )) 
 
 # changing the data.frame into tibble object for easy handling 
