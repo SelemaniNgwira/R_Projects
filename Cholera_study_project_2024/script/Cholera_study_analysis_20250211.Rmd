@@ -906,7 +906,10 @@ Prevention_of_cholera %>%
 
 ```{r}
 table3.1.0 <- cholera_data |> 
-            select(vaccined_with_ocv,age_group,sex,level_education)
+            select(vaccined_with_ocv,
+                   age_group,
+                   sex,
+                   level_education)
 
 
 grouping_vars <- c("age_group","sex","level_education")
@@ -957,7 +960,8 @@ table3.2.0 <- cholera_data |>
 grouping_vars <- c("age_group","sex","level_education")
 
 
-table3.2.0 <-  create_summary_table2(table3.2.0,grouping_vars,"ocv_prevent_cholera") |> 
+table3.2.0 <-  create_summary_table2(table3.2.0,
+                                     grouping_vars,"ocv_prevent_cholera") |> 
                     as_flextable() |>
                     autofit() |>
                     set_table_properties(layout = "autofit")
@@ -1429,7 +1433,8 @@ save_as_docx( table3.7.1, path = here("output/table3_7_1.docx"))
 ## 3. 8. 0 Family Members vaccinated by District and Zone 
 ```{r}
 table3.8.0 <- cholera_data |> 
-            select(family_members_vaccinated,district,residence)
+            select(family_members_vaccinated,
+                   district,residence)
 
 
 grouping_vars <- c("district","residence")
@@ -1558,7 +1563,11 @@ save_as_docx(table3.5.0 , path = here("output/table3_5_0.docx"))
 
 ```{r}
 table3.9.1 <- cholera_data |> 
-            select(will_to_get_vaccinated,age_group,sex,level_education,religion)
+            select(will_to_get_vaccinated,
+                   sex,
+                   age_group,
+                   level_education,
+                   religion)
 
 
 grouping_vars <- c("age_group","sex","level_education","religion")

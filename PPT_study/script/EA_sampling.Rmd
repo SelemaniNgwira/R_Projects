@@ -1,0 +1,67 @@
+---
+title: "EA_sampling"
+output: html_document
+---
+
+```{r}
+library(here)
+library(tidyverse)
+library(rio)
+library(janitor)
+
+
+```
+
+```{r}
+
+sam_data<-import(here(  "data", "framepreliminaryPHS2018.xls" )) |> 
+  clean_names()
+
+# filtering out urban EA's 
+
+sam_data<- sam_data |> 
+  mutate(dist_name=recode(dist_name, 
+                           
+   "Lilongwe City" ="Lilongwe", 
+   "Blantyre City" = "Blantyre"
+  )) |> 
+  filter(
+         dist_name=="Lilongwe"|
+         dist_name=="Blantyre"|
+         dist_name=="Mzimba"|
+         dist_name=="Chitipa"|
+         dist_name=="Balaka"|
+         dist_name=="Chikwawa"|
+         dist_name=="Salima"|
+         dist_name=="Thyolo"|
+         dist_name=="Kasungu"|
+         dist_name=="Phalombe"
+         ) 
+
+
+
+
+# sampling 12 EA's from each district and weighted by hh. the seed was set at 250531. check the helf fun R script. 
+
+# dropping NA within the HH column which will be used to weight 
+sam_data<- sam_data |> drop_na(hh)
+
+sample_df<-sample_ea_by_district(sam_data)
+
+# following is the calculation of an nth term to bed used to select a hh within an EA. using the formula of total households in the EA divided by 1275. 
+
+sum(sample_df$hh)/1275
+
+# the nth term to be used  is 22
+
+# exporting the sample data frame to an excel file.
+export(sample_df, here("data", "sample_df.xlsx"))
+
+
+```
+
+
+```{r}
+tabyl(sample_df$residence)
+```
+

@@ -379,8 +379,31 @@ addition_question<- tama_data %>%
 addition_question$what_additional_features_would_you_like_to_see_in_the_covid_19_chatbot
 
 ## experience using the chatbot 
+dt<- tama_data |> 
+  filter(is_it_pre_or_post_survey=="Pre Survey")
 
 
+
+  tapply(dt$how_long_have_you_used_the_covid_19_chatbot, 
+       dt$general_public_or_mo_h, 
+       mean,na.r=T)
+mean(dt$how_long_have_you_used_the_covid_19_chatbot, 
+     na.r=T)
+
+  tapply(dt$how_long_have_you_used_the_covid_19_chatbot, 
+       dt$general_public_or_mo_h, 
+       mean,na.r=T)
+mean(tama_data$how_long_have_you_used_the_covid_19_chatbot, 
+     na.r=T)
+
+
+tapply(dt$how_long_have_you_used_the_covid_19_chatbot, 
+       dt$general_public_or_mo_h, 
+       sd,na.r=T)
+mean(dt$how_long_have_you_used_the_covid_19_chatbot, 
+     na.rm = TRUE)
+
+sd(dt$how_long_have_you_used_the_covid_19_chatbot, na.rm = TRUE)
 
 ```
 

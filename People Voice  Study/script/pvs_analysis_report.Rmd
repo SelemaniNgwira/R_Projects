@@ -1,0 +1,563 @@
+---
+title: "pvs_analysis_report"
+output: html_document
+---
+
+```{r echo=FALSE}
+
+# loading packages
+
+if(!require(pacman)) install.packages("pacman")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit, 
+  gt
+)
+
+
+# loading data
+
+
+ pvs_data<- import(
+  here(
+    "data/Malawi_PVS_data_.dta"
+  )) |> 
+   mutate(
+    across(where(is.character), as.factor)
+  )  |>as_tibble()
+ 
+
+  
+
+
+
+```
+
+# Descriptive 
+
+## Demographic by person
+
+under this section the demographic variable will be analyzed by mode of data collection. face to face or via phone interviews.
+
+Format 1 
+
+```{r echo=FALSE}
+
+demo_df1 <-  pvs_data |> 
+  select(
+    mode, 
+    ageband, 
+    q3,
+    q8, 
+    q8a, 
+    q8b
+  )
+
+demo_df1 |> 
+  tbl_summary(
+    by = mode, 
+    missing = "no", 
+    digits = list(
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      ageband ~ "Age Band",
+      q3 ~ "Sex",
+      q8 ~ "Education",
+      q8a ~ "Ethincity",
+      q8b ~ "Income Level"
+    )
+  )
+
+
+```
+
+Format 2
+
+
+```{r echo=FALSE}
+
+demo_df1 |> 
+  tbl_summary(
+    missing = "no", 
+    digits = list(
+      
+      mode~ c(0, 2),
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      
+      mode~ "Mode of Data Collection",
+      ageband ~ "Age Band",
+      q3 ~ "Sex",
+      q8 ~ "Education",
+      q8a ~ "Ethincity",
+      q8b ~ "Income Level"
+    )
+  )
+
+
+```
+
+
+# Demographic by place
+
+under this section the demographic variable will be analyzed by mode of data collection. face to face or via phone interviews. focus on district, region and residence.
+
+format 1
+
+```{r echo=FALSE}
+
+demo_df2 <- pvs_data |> 
+  select(
+    mode, 
+    q4,
+    q4_1,
+    q5
+  )
+
+demo_df2 |>
+  tbl_summary(
+    by = mode, 
+    missing = "no", 
+    digits = list(
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ),
+    label = list(
+      q4 ~ "Region",
+      q4_1 ~ "District",
+      q5 ~ "Residence"
+    )
+  )
+
+```
+
+format 2
+
+```{r echo=FALSE}
+
+demo_df2 |>
+  tbl_summary(
+   missing = "no", 
+    digits = list(
+      mode ~ c(0, 2),
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ),
+    label = list(
+      mode ~ "Mode of Data Collection",
+      q4 ~ "Region",
+      q4_1 ~ "District",
+      q5 ~ "Residence"
+    )
+  )
+
+```
+
+# crosstabs of demographic variables and type of health facility: 
+was this a public or private health facility? Q32 by demographic of person. 
+
+```{r echo=FALSE}
+
+
+q32_df<- pvs_data |> 
+  select(
+    mode, 
+    q32, 
+    ageband, 
+    q3, 
+    q8, 
+    q8a, 
+    q8b
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+q32_df |>
+  tbl_summary(
+    by=q32, 
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ), 
+    label = list(
+      mode~ "Mode of data collection",
+      ageband ~ "Age Band",
+      q3~ "Sex", 
+      q8~ "Education",
+      q8a~"Ethinicity",
+      q8b~ "Income Level"
+    )
+  ) 
+  
+  
+```
+
+
+was this a public or private health facility? Q32 by demographic of district, residence and region.
+
+```{r echo=FALSE}
+
+q32_df2<- pvs_data |> 
+  select(
+    mode, 
+    q32, 
+    q4, 
+    q4_1, 
+    q5
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+q32_df2 |>
+  tbl_summary(
+    by=q32, 
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ), 
+    label = list(
+      mode~ "Mode of data collection",
+      q4~ "Region",
+      q4_1~ "District",
+      q5~ "Residence"
+    )
+  )
+
+
+```
+
+# crosstabs of demographic variables and staying overnight at health facility:
+
+in the past 12 month did you stay overnight? q26 by demographic of person.
+
+```{r echo=FALSE}
+q26_df<- pvs_data |> 
+  select(
+    mode, 
+    q26, 
+    ageband, 
+    q3, 
+    q8, 
+    q8a, 
+    q8b
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+q26_df |>
+  tbl_summary(
+    by= q26,
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      mode~ "Mode of data collection",
+      ageband ~ "Age Band",
+      q3~"Sex", 
+      q8~ "Education",
+      q8a~ "Ethinicity", 
+      q8b~ "Income Level"
+    )
+      )
+
+
+```
+
+# in the past 12 month did you stay overnight? q26 by demographic of district, residence and region.
+
+```{r echo=FALSE}
+
+q26_df2<- pvs_data |> 
+  select(
+    q26, 
+    q4, 
+    q4_1, 
+    q5
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+q26_df2 |>
+  tbl_summary(
+    by= q26,
+    missing = "no",
+    digits = list(
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ),
+    label = list(
+      q4~ "Region",
+      q4_1~ "District",
+      q5~ "Residence"
+    )
+  )
+
+
+
+```
+
+# crosstabs of demographic variable number 3
+
+## q27a demographic variabel of person
+
+```{r echo=FALSE}
+q27a_df<- pvs_data |> 
+  select(
+    mode, 
+    q27a, 
+    ageband, 
+    q3, 
+    q8, 
+    q8a, 
+    q8b
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+q27a_df |>
+  tbl_summary(
+    by= q27a,
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      mode~ "Mode of data collection",
+      ageband ~ "Age Band",
+      q3~"Sex",
+      q8~ "Education",
+      q8a~ "Ethinicity",
+      q8b~ "Income Level"
+    )
+  ) |> 
+  modify_caption(
+    "Have you had your blood pressure measured from any healthcare provider"
+  )
+
+```
+
+## q27a demographic variabel of district, residence and region
+
+```{r echo=FALSE}
+q27a_df2<- pvs_data |> 
+  select(
+    q27a, 
+    q4, 
+    q4_1, 
+    q5
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+q27a_df2 |>
+  tbl_summary(
+    by= q27a,
+    missing = "no",
+    digits = list(
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ),
+    label = list(
+      q4~ "Region",
+      q4_1~ "District",
+      q5~ "Residence"
+    )
+  ) |> 
+  modify_caption(
+    "Have you had your blood pressure measured from any healthcare provider"
+  )
+
+```
+
+## q27b demographic variabel of person
+
+```{r echo=FALSE}
+q27b_df<- pvs_data |> 
+  select(
+    mode, 
+    q27b, 
+    ageband, 
+    q3, 
+    q8, 
+    q8a, 
+    q8b
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+
+q27b_df |>
+  tbl_summary(
+    by= q27b,
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      ageband ~ c(0, 2),
+      q3 ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      mode~ "Mode of data collection",
+      ageband ~ "Age Band",
+      q3~"Sex", 
+      q8~ "Education",
+      q8a~ "Ethinicity",
+      q8b~ "Income Level"
+    )
+  ) |> 
+  modify_caption(
+    "Have you received a mammogram from any healthcare provider"
+  )
+
+```
+
+
+## q27b demographic variabel of district, residence and region
+
+```{r}
+q27b_df2<- pvs_data |> 
+  select(
+    q27b, 
+    q4, 
+    q4_1, 
+    q5
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+
+q27b_df2 |>
+  tbl_summary(
+    by= q27b,
+    missing = "no",
+    digits = list(
+      q4 ~ c(0, 2),
+      q4_1 ~ c(0, 2),
+      q5 ~ c(0, 2)
+    ),
+    label = list(
+      q4~ "Region",
+      q4_1~ "District",
+      q5~ "Residence"
+    )
+  ) |> 
+  modify_caption(
+    "Have you received a mammogram from any healthcare provider"
+  )
+  
+  
+  
+  
+```
+
+## q27c demographic variabel of person
+
+
+```{r echo=FALSE}
+
+q27c_df<- pvs_data |> 
+  select(
+    mode, 
+    q27c, 
+    ageband, 
+    q3, 
+    q8, 
+    q8a, 
+    q8b
+  ) |> 
+  mutate(
+    across(where(is.character), as.factor)
+  )
+
+
+
+
+q27c_df|>
+  filter(q3=="Female")|> 
+  select(-q3) |>
+  tbl_summary(
+    by= q27c,
+    missing = "no",
+    digits = list(
+      mode ~ c(0, 2),
+      ageband ~ c(0, 2),
+      q8 ~ c(0, 2), 
+      q8a ~ c(0, 2), 
+      q8b ~ c(0, 2)
+    ),
+    label = list(
+      mode ~ "Mode of data collection",
+      ageband ~ "Age Band",
+      q8~ "Education",
+      q8a~ "Ethinicity",
+      q8b~ "Income Level"
+    )
+  )
+  
+  
+  
+  
+  
+  
+  
+
+```
+

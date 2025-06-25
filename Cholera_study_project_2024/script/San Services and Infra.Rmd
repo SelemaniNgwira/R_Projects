@@ -664,6 +664,8 @@ san_df<- cholera_data %>%
 
 
 
+
+
 # Avaialabilit_toilet<-san_df %>% 
 #   
 #   select(
@@ -1318,6 +1320,571 @@ common_reason_table<- common_reason_table %>%
 
 save_as_docx(common_reason_table, 
              path =here("output/common_reason_table.docx"))
+
+```
+
+# Regresion table of the availability of san facility
+
+###  Toilet avaialbility
+
+```{r}
+
+model_toilet<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+    
+    toilet_facility_avaiable
+          ) |> 
+  mutate(
+    toilet_facility_avaiable = recode(
+      toilet_facility_avaiable,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_toilet |> 
+  dplyr::filter(
+    level_education!="tertiary", 
+    marital_status!="widower"
+  ) |> 
+  
+  tbl_uvregression(method = glm,
+               y = toilet_facility_avaiable,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+```
+
+
+## soild Waste avaialbility
+```{r}
+
+model_soild_waste<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    soild_waste_disposal = recode(
+      soild_waste_disposal,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_soild_waste |> 
+  tbl_uvregression(method = glm,
+               y = soild_waste_disposal,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+
+```
+
+## Bath and Shelter avaialbility
+```{r}
+
+model_bath_shelter<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    bath_shelter_bathroom = recode(
+      bath_shelter_bathroom,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_bath_shelter |> 
+  dplyr::filter(
+    district!="Nkhatabay", 
+    ethnicity!="tonga", 
+    marital_status!="widower", 
+    marital_status!="separated"
+  ) |>
+  tbl_uvregression(method = glm,
+               y = bath_shelter_bathroom,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+
+
+```
+
+### Hand washing facility avaialbility
+
+
+```{r}
+
+model_handwash<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    household_handwashing_facility= recode(
+     household_handwashing_facility,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_handwash |> 
+  # dplyr::filter(
+  #   district!="Nkhatabay", 
+  #   ethnicity!="tonga", 
+  #   marital_status!="widower", 
+  #   marital_status!="separated"
+  # ) |>
+  tbl_uvregression(method = glm,
+               y = household_handwashing_facility,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+```
+
+### Soap and detegent avaialbility
+
+```{r}
+
+model_soap_or_detergent<-san_df|> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     # household_handwashing_facility,
+    soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    soap_or_detergent_available= recode(
+     soap_or_detergent_available,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_soap_or_detergent |> 
+  # dplyr::filter(
+  #   district!="Nkhatabay", 
+  #   ethnicity!="tonga", 
+  #   marital_status!="widower", 
+  #   marital_status!="separated"
+  # ) |>
+  tbl_uvregression(method = glm,
+               y = soap_or_detergent_available,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+```
+
+### Designated kitchen area avaialbility
+
+```{r}
+
+
+model_designate_kitchen<-san_df|> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     # household_handwashing_facility,
+    # soap_or_detergent_available,
+     designated_kitchen_area
+          ) |> 
+  mutate(
+    designated_kitchen_area= recode(
+     designated_kitchen_area,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+model_designate_kitchen |> 
+  # dplyr::filter(
+  #   district!="Nkhatabay", 
+  #   ethnicity!="tonga", 
+  #   marital_status!="widower", 
+  #   marital_status!="separated"
+  # ) |>
+  tbl_uvregression(method = glm,
+               y = designated_kitchen_area,
+               method.args = list(family = binomial(link="logit")),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)
+
+
+```
+
+# Adjust ORs for the availability of sanitary facilities
+
+###  Toilet avaialbility
+
+```{r}
+
+
+model_toilet_adjust<-san_df_clean |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+    
+    toilet_facility_avaiable
+          ) |> 
+  mutate(
+    toilet_facility_avaiable = recode(
+      toilet_facility_avaiable,
+      "available" = 1,
+      "not available" = 0
+    )
+  ) |> 
+  dplyr::filter(
+    level_education!="tertiary", 
+    marital_status!="widower"
+  )
+
+
+glm(data = model_toilet_adjust,
+    toilet_facility_avaiable ~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+
+```
+
+## soild Waste avaialbility
+
+```{r}
+
+model_soild_waste_adj<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     soild_waste_disposal,
+    # bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    soild_waste_disposal = recode(
+      soild_waste_disposal,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+glm(data = model_soild_waste_adj,
+    soild_waste_disposal ~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+```
+
+## Bath and Shelter avaialbility
+
+```{r}
+model_bath_shelter_adj<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    bath_shelter_bathroom,
+    # household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    bath_shelter_bathroom = recode(
+      bath_shelter_bathroom,
+      "available" = 1,
+      "not available" = 0
+    )
+  ) |> 
+  dplyr::filter(
+    ethnicity!="tonga",
+    district!="Nkhatabay", 
+    marital_status!="widower", 
+    marital_status!="separated"
+  )
+
+glm(data = model_bath_shelter_adj,
+    bath_shelter_bathroom ~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+
+```
+
+## Hand washing facility avaialbility
+
+```{r}
+
+
+model_handwash_adj<-san_df |> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     household_handwashing_facility,
+    # soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    household_handwashing_facility= recode(
+     household_handwashing_facility,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+
+
+glm(data = model_handwash_adj,
+    household_handwashing_facility ~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+```
+
+## Soap and detegent avaialbility
+```{r}
+
+model_soap_or_detergent_adj<-san_df|> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     # household_handwashing_facility,
+    soap_or_detergent_available,
+    # designated_kitchen_area, 
+    
+   
+          ) |> 
+  mutate(
+    soap_or_detergent_available= recode(
+     soap_or_detergent_available,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+glm(data = model_soap_or_detergent_adj,
+    soap_or_detergent_available~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
+
+
+```
+
+## Designated kitchen area avaialbility
+
+```{r}
+
+model_designate_kitchen_adj<-san_df|> 
+ select(
+    sex,
+    age_group,
+    level_education,
+    religion,
+    marital_status,
+    ethnicity,
+    district,
+     residence,
+     
+     # soild_waste_disposal,
+    # bath_shelter_bathroom,
+     # household_handwashing_facility,
+    # soap_or_detergent_available,
+     designated_kitchen_area
+          ) |> 
+  mutate(
+    designated_kitchen_area= recode(
+     designated_kitchen_area,
+      "available" = 1,
+      "not available" = 0
+    )
+  )
+
+
+
+
+
+glm(data=model_designate_kitchen_adj,
+    designated_kitchen_area~ 
+    sex + 
+    age_group + 
+    level_education + 
+    religion + 
+    marital_status + 
+    ethnicity + 
+    residence,
+    family = binomial(link = "logit")) |> 
+  gtsummary::tbl_regression(exponentiate = TRUE)
 
 ```
 
