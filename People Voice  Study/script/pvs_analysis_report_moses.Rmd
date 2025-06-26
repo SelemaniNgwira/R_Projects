@@ -33,33 +33,19 @@ p_load(
     "data/Malawi_PVS_data_.dta"
   )) |> 
    mutate(
-    across(where(is.character), ~na_if(.x, "")),
     across(where(is.character), as.factor)
   )  |>as_tibble()
- 
- 
- 
- 
- 
-# loading data for maps
-psv_map<-  st_read(
-   here(
-     "data/malawi_district_boundaries.shp"
-   )
- ) |> 
-  clean_names() |> 
-  select(district)
  
 
 ```
 
-# Descriptive
+# Descriptive 
 
 ## Demographic by person
 
 under this section the demographic variable will be analyzed by mode of data collection. face to face or via phone interviews.
 
-Format 1
+Format 1 
 
 ```{r echo=FALSE}
 
@@ -96,128 +82,8 @@ demo_df1 |>
 
 ```
 
-# maps: distribution of mode of data collection
-
-```{r}
-
-mode_dis<- pvs_data|> 
-  select(mode, 
-         q4_1) |> 
-  rename(
-    district = q4_1
-  ) |>
-  group_by(district, mode) |>
-  count(mode) |> 
-  pivot_wider(
-    names_from = mode, 
-    values_from = n
-  )
-
-
-
-
-mode_dis[is.na(mode_dis)]<-0
-
-
-mode_dis<- mode_dis |> 
-  mutate(
-    district= recode(
-      district, 
-      "Mzuzu City" = "Mzimba",
-      "Nkhotakota" = "Nkhota kota",
-    )
-  ) |> 
-  clean_names()
-
-
-mode_dis<- mode_dis |> 
-  group_by(district) |> 
-summarise(face_to_face=sum(face_to_face), 
-          phone=sum(phone))
-
-
-mode_dis_sf<- merge(mode_dis, 
-      psv_map, 
-      by = "district") |> 
-  st_as_sf()
-
-
-map_face <- tm_shape(mode_dis_sf)+
-   tm_borders()+
-   tm_fill(
-    col = "district"  )+
-  tm_shape(mode_dis_sf)+
-  tm_text("face_to_face",
-          size = 0.4, 
-          col = "red", 
-          ymod = -0.3,
-          xmod = 0.25) +
-  tm_shape(mode_dis_sf)+
-  tm_text("district",
-          size = 0.2, 
-          col = "black")+
-  tm_compass( 
-    type = "rose",
-    position = c("right", "top"), 
-    size = 2)+
-   tm_layout(
-    legend.show = FALSE,
-    main.title = "Mode data collection: Face to Face ",
-    main.title.size = 1,
-    main.title.position = "center"
-  )
-  
-
-
-map_phone<- tm_shape(mode_dis_sf)+
-  tm_borders()+
-   tm_fill(
-    col = "district"  )+
-  
-tm_shape(mode_dis_sf)+
-  tm_text("phone",
-          size = 0.4, 
-          col = "red", 
-          ymod = -0.3,
-          xmod = 0.2) +
-  tm_shape(mode_dis_sf)+
-  tm_text("district", 
-          size = 0.25,
-          col = "black")+
-  tm_compass( 
-    type = "rose",
-    position = c("right", "top"), 
-    size = 2)+
-   tm_layout(
-    legend.show = FALSE,
-    main.title = "Mode data collection:Phone ",
-    main.title.size = 1,
-    main.title.position = "center"
-  )
-
-
-
-map_mode<- tmap_arrange(
-  map_face, 
-  map_phone, 
-  ncol = 2, 
-  nrow = 1
-)
-
-tmap_save(map_mode, 
-  filename = here("maps/mode_of_data_collection_map.png"),
-  width = 20, 
-  height = 10, 
-  dpi = 300,
-  units = "cm"
-)
-
-
-```
-
-![](images/mode_of_data_collection_map.png)
-
 Format 2
+
 
 ```{r echo=FALSE}
 
@@ -246,6 +112,7 @@ demo_df1 |>
 
 
 ```
+
 
 # Demographic by place
 
@@ -304,9 +171,8 @@ demo_df2 |>
 
 ```
 
-# crosstabs of demographic variables and type of health facility:
-
-was this a public or private health facility? Q32 by demographic of person.
+# crosstabs of demographic variables and type of health facility: 
+was this a public or private health facility? Q32 by demographic of person. 
 
 ```{r echo=FALSE}
 
@@ -350,6 +216,7 @@ q32_df |>
   
   
 ```
+
 
 was this a public or private health facility? Q32 by demographic of district, residence and region.
 
@@ -596,9 +463,10 @@ q27b_df |>
 
 ```
 
+
 ## q27b demographic variabel of district, residence and region
 
-```{r echo=FALSE}
+```{r}
 q27b_df2<- pvs_data |> 
   select(
     q27b, 
@@ -636,7 +504,7 @@ q27b_df2 |>
   
 ```
 
-## q27c demographic variabel of person: Receive Cervical Cancer Screening
+## q27c demographic variabel of person
 
 ```{r echo=FALSE}
 
@@ -683,9 +551,9 @@ q27c_df|>
 
 ```
 
-## q27c demographic variabel of district, residence and region cervical cancer screening
+## q27c demographic variabel of district, residence and region
 
-```{r echo=FALSE}
+```{r}
 
 q27c_df2<- pvs_data |> 
   select(
@@ -724,566 +592,14 @@ q27c_df2 |>
   
 ```
 
-## q27d Q27d. Have you had your eyes or vision checked from any healthcare provide.
+## q27d Q27d. Have you had your eyes or vision checked from any healthcare provide. 
 
-```{r echo=FALSE}
-q27d_df <-pvs_data |> 
-  select(
-    q27d, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-q27d_df |>
-  tbl_summary(
-    by=q27d, 
-    digits = list(
-      
-       ageband ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    label = list(
-      ageband ~ "Age Band",
-      q3~"Sex",
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-    )
-      ) |> 
-  modify_caption(
-    "Have you had your eyes or vision checked from any healthcare provider"
-  )
-  
-
+```{r}
+q27d_df 
 
 ```
 
-## q27d Q27d. Have you had your eyes or vision checked from any healthcare provide.by district, region, residence and health facility.
-
-```{r echo=FALSE}
-
-q27d_df2 <-pvs_data |> 
-  select(
-    q27d, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-
-q27d_df2|> 
-  tbl_summary(
-    
-    by= q27d,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ), 
-    label = list(
-      
-       q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-      )  )
-
-
-```
-
-## Q27e. Have you had your teeth or mouth checked from any healthcare provider demograpchic of person
-
-```{r echo=FALSE}
-q27e_df <-pvs_data |> 
-  select(
-    q27e, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-
-q27e_df |>
-  tbl_summary(
-    by= q27e,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    label = list(
-      ageband~ "Age Bdand",
-      q3~ "Sex",
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-    )
-    
-  ) |> 
-  modify_caption(
-    "Have you had your teeth or mouth checked from any healthcare provider"
-  )
-  
-
-  
-```
-
-## Q27e. Have you had your teeth or mouth checked from any healthcare provider demograpchic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-
-
-q27e_df2 <-pvs_data |> 
-  select(
-    q27e, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-
-q27e_df2|>
-  tbl_summary(
-    by= q27e,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ), 
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |> 
-  modify_caption(
-    "Have you had your teeth or mouth checked from any healthcare provider"
-  )
-
-
-```
-
-## Q27f. Have you had a blood sugar test from any healthcare provider
-
-```{r echo=FALSE}
-q27f_df <-pvs_data |> 
-  select(
-    q27f, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-q27f_df |>
-  tbl_summary(
-    by= q27f,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    
-    label = list(
-      
-      ageband~ "Age Band", 
-      q3~ "Sex", 
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-
-    )
-  ) |> 
-  modify_caption(
-    "Have you had a blood sugar test from any healthcare provider"
-  )
-
-```
-
-## Q27f. Have you had a blood sugar test from any healthcare provider demograpchic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-q27f_df2 <-pvs_data |> 
-  select(
-    q27f, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-
-q27f_df2|>
-  tbl_summary(
-    
-    by= q27f,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ),
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |> 
-  modify_caption(
-    "Have you had a blood sugar test from any healthcare provider-Place of Residence, District, Region and Health Facility Type"
-  )
-
-```
-
-## Q27g. Have you had a blood cholesterol test from any healthcare provider - demographic of person
-
-```{r echo=FALSE}
-q27g_df <-pvs_data |> 
-  select(
-    q27g, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-
-q27g_df |>
-  tbl_summary(
-    by= q27g,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    
-    label = list(
-      ageband~ "Age Band",
-      q3~ "Sex", 
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-    )
-  ) |> 
-  modify_caption(
-    "Have you had a blood cholesterol test from any healthcare provider"
-  )
-
-```
-
-## Q27g. Have you had a blood cholesterol test from any healthcare provider - demographic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-q27g_df2 <-pvs_data |> 
-  select(
-    q27g, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-q27g_df2|>
-  tbl_summary(
-    by= q27g,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ),
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |> 
-  modify_caption(
-    "Have you had a blood cholesterol test from any healthcare provider-Place of Residence, District, Region and Health Facility Type"
-  )
-
-```
-
-## Q27h. Have you received care for depression anxiety or another mental health condition - demographic of person
-
-```{r echo=FALSE}
-
-q27h_df <-pvs_data |> 
-  select(
-    q27h, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-q27h_df |>
-  tbl_summary(
-    by= q27h,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    label = list(
-      
-      ageband~ "Age Banda", 
-      q3~"Sex", 
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-    )
-    ) |> 
-  modify_caption(
-    "Have you received care for depression anxiety or another mental health condition"
-  )
-
-```
-
-## Q27h. Have you received care for depression anxiety or another mental health condition - demographic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-q27h_df2 <-pvs_data |> 
-  select(
-    q27h, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-q27h_df2|>
-    tbl_summary(
-    by= q27h,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ),
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |> 
-  modify_caption(
-    "Have you received care for depression anxiety or another mental health condition-Place of Residence, District, Region and Health Facility Type"
-  )
-
-
-
-```
-
-# Objective Number 4_1
-
-## Q38a. How would you rate the overall quality of care you received?
-
-```{r echo=FALSE}
-q38a_df <- pvs_data |> 
-  select(
-    q38a, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-
-q38a_df |>
-  tbl_summary(
-    by= q38a,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    
-    label = list(
-      ageband~"Age Band", 
-      q3~ "Sex", 
-      q8~ "Education",
-      q8a~ "Ethinicity",
-      q8b~ "Income Level"
-          ) ) |> 
-  modify_caption(
-    "How would you rate the overall quality of care you received?"
-  )
-  
-  
-
-```
-
-## Q38a. How would you rate the overall quality of care you received? - demographic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-q38a_df2 <- pvs_data |> 
-  select(
-    q38a, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-
-q38a_df2|>
-  tbl_summary(
-    by= q38a,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ),
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |>
-  modify_caption(
-    "How would you rate the overall quality of care you received? - Place of Residence, District, Region and Health Facility Type"
-  )
-
-
-```
-
-## Q37. At this most recent visit, once you arrived at the facility, approximately: by demographic of person
-
-```{r echo=FALSE}
-
-
-q37_df <- pvs_data |> 
-  select(
-    q37, 
-    ageband, 
-    q3, 
-    q8, 
-    q8a, 
-    q8b
-  )
-
-
-q37_df |>
-  tbl_summary(
-    by= q37,
-    missing = "no",
-    digits = list(
-      ageband ~ c(0, 2),
-      q3 ~ c(0, 2),
-      q8 ~ c(0, 2), 
-      q8a ~ c(0, 2), 
-      q8b ~ c(0, 2)
-    ),
-    
-    
-    label = list(
-      ageband~"Age Band", 
-      q3~"Sex", 
-      q8~"Education",
-      q8a~"Ethinicity",
-      q8b~"Income Level"
-    )
-  ) |> 
-  modify_caption(
-    "At this most recent visit, once you arrived at the facility, approximately how long did you wait to be seen by a healthcare provider?"
-  )
-
-
-```
-
-## Q37. At this most recent visit, once you arrived at the facility, approximately: by demographic of district, region, residence and health facility.
-
-```{r echo=FALSE}
-q37_df2 <- pvs_data |> 
-  select(
-    q37, 
-    q4, 
-    q4_1, 
-    q5,
-    q14
-  )
-
-
-q37_df2|>
-  tbl_summary(
-    by= q37,
-    missing = "no",
-    digits = list(
-      q4 ~ c(0, 2),
-      q4_1 ~ c(0, 2),
-      q5 ~ c(0, 2),
-      q14 ~ c(0, 2)
-    ),
-    label = list(
-      q4~ "Region",
-      q4_1~ "District",
-      q5~ "Residence",
-      q14~ "Health Facility Type"
-    )
-  ) |> 
-  modify_caption(
-    "At this most recent visit, once you arrived at the facility, approximately how long did you wait to be seen by a healthcare provider? - Place of Residence, District, Region and Health Facility Type"
-  )
-
-
-```
-
-
-`##Objective 4
+##Objective 4
 ## Q42. Overall, how would you rate the quality of the government or public healthcare system in Malawi? Please answer even if you have not used these services.
 ## q42 demographic variabel of person
 
@@ -1308,7 +624,6 @@ q42_df |>
   tbl_summary(
     by= q42,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1353,7 +668,6 @@ q42_df2 |>
   tbl_summary(
     by= q42,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1393,7 +707,6 @@ q43_df |>
   tbl_summary(
     by= q43,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1438,7 +751,6 @@ q43_df2 |>
   tbl_summary(
     by= q43,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1479,7 +791,6 @@ q44_df |>
   tbl_summary(
     by= q44,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1523,7 +834,6 @@ q44_df2 |>
   tbl_summary(
     by= q44,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1538,20 +848,12 @@ q44_df2 |>
   modify_caption(
     "Quality of  faith-based or NGO healthcare system in Malawi"
   )
-
-
-```
- 
- 
- 
-
-
+ ```
 ##Objective 5
 ## Q45. Thinking about the past two years, would you say Malawi’s health system is getting better, staying the same, or getting worse
 ## q45 demographic variabel of person
 
 ```{r echo=FALSE}
-
 q45_df<- pvs_data |> 
   select(
     mode, 
@@ -1572,7 +874,6 @@ q45_df |>
   tbl_summary(
     by= q45,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1616,7 +917,6 @@ q45_df2 |>
   tbl_summary(
     by= q45,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1631,13 +931,12 @@ q45_df2 |>
   modify_caption(
     "Would you say Malawi’s health system is getting better, staying the same, or getting worse"
   )
-```
-
-
+  ```
 ##Objective 5
 ##Q46. Which of the following statements do you agree with most
 ##q46 demographic variabel of person
-```{r}
+
+```{r echo=FALSE}
 q46_df<- pvs_data |> 
   select(
     mode, 
@@ -1658,7 +957,6 @@ q46_df |>
   tbl_summary(
     by= q46,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1702,7 +1000,6 @@ q46_df2 |>
   tbl_summary(
     by= q46,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1742,7 +1039,6 @@ q47_df |>
   tbl_summary(
     by= q47,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1786,7 +1082,6 @@ q47_df2 |>
   tbl_summary(
     by= q47,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1826,7 +1121,6 @@ q48_df |>
   tbl_summary(
     by= q48,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1870,7 +1164,6 @@ q48_df2 |>
   tbl_summary(
     by= q48,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1909,7 +1202,6 @@ q41a_df |>
   tbl_summary(
     by= q41a,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -1952,7 +1244,6 @@ q41a_df2 |>
   tbl_summary(
     by= q41a,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -1967,17 +1258,11 @@ q41a_df2 |>
   modify_caption(
     "How confident are you that you would receive good quality healthcare if you became very sick"
   )
-
-
-```
-
-
+ ```
 ## Q41b. How confident are you that you would be able to afford the healthcare you needed if you became very sick
 ##q41b demographic variabel of person
 
 ```{r echo=FALSE}
-
-
 q41b_df<- pvs_data |> 
   select(
     mode, 
@@ -1997,7 +1282,6 @@ q41b_df |>
   tbl_summary(
     by= q41b,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -2040,7 +1324,6 @@ q41b_df2 |>
   tbl_summary(
     by= q41b,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -2055,11 +1338,7 @@ q41b_df2 |>
   modify_caption(
     "How confident are you that you would be able to afford the healthcare you needed if you became very sick"
   )
- 
-
-
-```
-
+ ```
 ##Q41c. How confident are you that the government considers the public’s opinion when making decisions about the healthcare system
 ##q41c demographic variabel of person
 
@@ -2083,7 +1362,6 @@ q41c_df |>
   tbl_summary(
     by= q41c,
     missing = "no",
-    percent = "row",
     digits = list(
       mode ~ c(0, 2),
       ageband ~ c(0, 2),
@@ -2126,7 +1404,6 @@ q41c_df2 |>
   tbl_summary(
     by= q41c,
     missing = "no",
-    percent = "row",
     digits = list(
       q4 ~ c(0, 2),
       q4_1 ~ c(0, 2),
@@ -2141,5 +1418,4 @@ q41c_df2 |>
   modify_caption(
     "How confident are you that the government considers the public’s opinion when making decisions about the healthcare system"
   )
-
-```
+ ```
