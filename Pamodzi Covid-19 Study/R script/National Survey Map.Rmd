@@ -31,24 +31,21 @@ library(magick)
 
 
 ```{r cars}
-health_facility_coord<-import("health_facility_coord.xlsx")
+study_site<-import(
+  here("data/Study site.xlsx"))
 
 
 # loading Malawi shape file 
 
-Malawi_shapefile<-st_read("gadm36_MWI_1.shp") %>% 
-  select(NAME_1)
+Malawi_shapefile<-st_read(
+  here("data/mwi_admbnda_adm2_nso_hotosm_20230405.shp")) %>% 
+  select(ADM2_EN) |> 
+  rename(district = ADM2_EN)
 
-# checking the names of shape file
-names(Malawi_shapefile)
-
-# checking the names of variables. 
-names(health_facility_coord)
-
-# standarding the variables names to low cases
-health_facility_coord<-clean_names(health_facility_coord)
-
-names(health)
+lakes <- st_read(
+  here("data/Water bodies.shp")) |> 
+  select(name)
+  
 
 
 ```
@@ -61,20 +58,64 @@ health_facility_sf<- health_facility_coord%>%
      sf::st_as_sf(coords = c("longitude", 
                              "latitude"), crs = 4326) 
 
+
+study_site <- merge( Malawi_shapefile, study_site, by = "district", all.x = TRUE)
+
 ```
 
 
 # Ploting Map
 
+
+
 ```{r}
 
-tm_shape(Malawi_shapefile)+
-  tm_borders(col = "black")+
-  tm_shape(health_facility_sf)+
-  tm_dots(size=0.2, col='red', alpha = 0.4)+
-  tm_text("name", size = 1, col = "black")+
-  tmap_mode("view")
 
+# Set tmap to plot mode (not view mode)
+tmap_mode("plot")
+
+# Create the map object
+study_map <- tm_shape(Malawi_shapefile) +
+  tm_borders(col = "black", lwd = 1) +
+
+  tm_shape(lakes) +
+  tm_polygons(col = "lightblue", border.col = "lightblue") +
+
+  tm_shape(study_site) +
+  tm_polygons(
+    col = "study status",
+    palette = c("Study site" = "white", "Not study site" = "lightgreen"),
+    title = "Study Status",
+    border.col = "black",
+    lwd = 0.8
+  ) +
+
+  tm_text("district", 
+          size = 0.6, 
+          col = "black", 
+          fontface = "bold", 
+          shadow = TRUE) 
+
+  # tm_layout(
+  #   title = "Study Sites",
+  #   title.position = c("center", "top"),
+  #   legend.outside = F,
+  #   legend.title.size = 1.2,
+  #   legend.text.size = 0.9,
+  #   frame = FALSE,
+  #   bg.color = "white",
+  #   asp = 0
+  # )
+
+# Save as high-resolution image (e.g., PNG at 300 dpi)
+tmap_save(
+  study_map,
+  filename = "Malawi_Study_Sites_Map.png",
+  width = 10,
+  height = 8,
+  units = "in",
+  dpi = 300
+)
 
 ```
 

@@ -1,0 +1,154 @@
+---
+title: "nkhotakota_FGS_study_site"
+output: html_document
+---
+
+
+
+
+
+```{r}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+if(!require(pacman)) install.packages("pacman")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit
+)
+
+```
+
+
+```{r}
+# Load Malawi shapefile for administrative boundaries
+ta_shp<- st_read(
+  here("data/mw_shp/mwi_admbnda_adm3_nso_hotosm_20230405.shp")
+) |> 
+  select(
+   ADM3_EN,
+   ADM2_EN
+    ) %>%
+  dplyr::rename(
+    "District"=ADM2_EN,
+    "ta"=ADM3_EN
+  )
+
+
+nkhotakota_ta<-ta_shp |> 
+  filter(
+    District=="Nkhotakota"
+   )
+ 
+
+# loading MHF file
+
+nkhotakota_hf<- import(
+  here(
+    "data/MHFR_Facilities.xlsx"
+  )
+) |> 
+  clean_names() |>
+  select(
+    district,
+    name,
+    latitude,
+    longitude,
+    study_status
+  ) |> 
+  filter(
+    district=="Nkhotakota"
+  )
+
+
+nkhotakota_hf<- nkhotakota_hf |> 
+ drop_na() %>% 
+  sf::st_as_sf(coords = c("longitude",  "latitude"), crs = 4326) 
+
+
+
+# Plotting the Nkhotakota TA and health facilities
+
+tm_shape(nkhotakota_ta) +
+  tm_polygons() +
+  tm_shape(nkhotakota_hf |> 
+              drop_na() %>% 
+              sf::st_as_sf(coords = c("longitude",  "latitude"), crs = 4326)) +
+  tm_dots(col = "red", size = 1, shape = 21, border.col = "black") +
+  tm_layout(title = "Nkhotakota TA and Health Facilities") +
+  tm_legend(outside = TRUE)+
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_shape(nkhotakota_ta) +
+  tm_text("ta", size = 0.5, col = "black") +
+  tm_shape(nkhotakota_hf) +
+  tm_text("name", size = 0.5, col = "black") 
+
+```
+
+```{r}
+
+
+
+nkhotakota_ta<- nkhotakota_ta |> 
+  mutate(
+    ta=str_wrap(ta, width = 10)
+  )
+
+
+tmap_mode("plot")  # switch to static plotting mode
+
+# build your map object
+map_nkhotakota <- tm_shape(nkhotakota_ta) +
+  tm_borders() +
+  tm_shape(
+    nkhotakota_hf) +
+    tm_dots(col = "study_status", size = 1.2, shape = 21, border.col = "black") +
+  # health-facility names, nudged right so they don’t sit on top of the dot
+  tm_text(
+    "name", 
+    size  = 0.5, 
+    ymod = 0.2,
+    col = "darkblue") +
+
+  # TA label
+  tm_shape(nkhotakota_ta) +
+    tm_text("ta",
+            size = 0.7,
+            ymod = -0.1,
+            col = "black") +
+
+  # layout tweaks: free aspect (asp=0), more right margin for labels
+  tm_layout(
+    title         = "Nkhotakota-FGS Study Site(2025)",
+    legend.outside= FALSE,
+    asp           = 0,
+    inner.margins = c(0.05, 0.05, 0.05, 0.25)
+  ) +
+  tm_scale_bar(position = c("left","bottom"))
+
+# 1) display in your R session with extra width/height
+print(map_nkhotakota, width = 12, height = 8)
+
+# 2) or save out to file with custom dimensions
+tmap_save(
+  map_nkhotakota,
+  filename = "Nkhotakota_Map.png",
+  width    = 12, #inches
+  height   = 8,
+  units    = "in",
+  dpi      = 300
+)
+
+```
+

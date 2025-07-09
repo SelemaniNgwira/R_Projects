@@ -48,17 +48,16 @@ cholera_data<-cholera_data %>%
   filter(age_group!="<18")
 
 
-ta_shapefile<-st_read(
-  here("data/Admin3-TA.shp")
-) %>% 
+ta_shp<- st_read(
+  here("data/mw_shp/mwi_admbnda_adm3_nso_hotosm_20230405.shp")
+) |> 
   select(
-   NAME_1,
-    NAME_2, 
-    ID_0,
-    ID_1) %>% 
+   ADM3_EN,
+   ADM2_EN
+    ) %>%
   dplyr::rename(
-    "District"= NAME_1, 
-    "ta"=NAME_2
+    "District"=ADM2_EN,
+    "ta"=ADM3_EN
   )
 
 
