@@ -66,10 +66,7 @@ nkhotakota_hf<- import(
     latitude,
     longitude,
     study_status
-  ) |> 
-  filter(
-    district=="Nkhotakota"
-  )
+  ) 
 
 
 nkhotakota_hf<- nkhotakota_hf |> 
@@ -78,21 +75,21 @@ nkhotakota_hf<- nkhotakota_hf |>
 
 
 
-# Plotting the Nkhotakota TA and health facilities
-
-tm_shape(nkhotakota_ta) +
-  tm_polygons() +
-  tm_shape(nkhotakota_hf |> 
-              drop_na() %>% 
-              sf::st_as_sf(coords = c("longitude",  "latitude"), crs = 4326)) +
-  tm_dots(col = "red", size = 1, shape = 21, border.col = "black") +
-  tm_layout(title = "Nkhotakota TA and Health Facilities") +
-  tm_legend(outside = TRUE)+
-  tm_scale_bar(position = c("left", "bottom")) +
-  tm_shape(nkhotakota_ta) +
-  tm_text("ta", size = 0.5, col = "black") +
-  tm_shape(nkhotakota_hf) +
-  tm_text("name", size = 0.5, col = "black") 
+# # Plotting the Nkhotakota TA and health facilities
+# 
+# tm_shape(nkhotakota_ta) +
+#   tm_polygons() +
+#   tm_shape(nkhotakota_hf |> 
+#               drop_na() %>% 
+#               sf::st_as_sf(coords = c("longitude",  "latitude"), crs = 4326)) +
+#   tm_dots(col = "red", size = 1, shape = 21, border.col = "black") +
+#   tm_layout(title = "Nkhotakota TA and Health Facilities") +
+#   tm_legend(outside = TRUE)+
+#   tm_scale_bar(position = c("left", "bottom")) +
+#   tm_shape(nkhotakota_ta) +
+#   tm_text("ta", size = 0.5, col = "black") +
+#   tm_shape(nkhotakota_hf) +
+#   tm_text("name", size = 0.5, col = "black") 
 
 ```
 
@@ -110,45 +107,59 @@ tmap_mode("plot")  # switch to static plotting mode
 
 # build your map object
 map_nkhotakota <- tm_shape(nkhotakota_ta) +
-  tm_borders() +
+  tm_borders(col="grey30", lwd=1) +
   tm_shape(
     nkhotakota_hf) +
-    tm_dots(col = "study_status", size = 1.2, shape = 21, border.col = "black") +
+    tm_dots(col = "study_status", 
+            # palette=c("Study site"="lightgreen", "Not study site"="white"),
+            
+            size = 0.6,
+            shape = 21,
+            border.col = "black"
+) +
   # health-facility names, nudged right so they don’t sit on top of the dot
   tm_text(
     "name", 
-    size  = 0.5, 
+    size  = 0.4, 
     ymod = 0.2,
-    col = "darkblue") +
+    col = "darkblue", 
+    fontface = "bold") +
 
   # TA label
   tm_shape(nkhotakota_ta) +
     tm_text("ta",
-            size = 0.7,
+            size = 0.4,
             ymod = -0.1,
-            col = "black") +
+            col = "black", 
+            fontface = "italic") +
 
   # layout tweaks: free aspect (asp=0), more right margin for labels
   tm_layout(
     title         = "Nkhotakota-FGS Study Site(2025)",
-    legend.outside= FALSE,
+    title.size = 1,
+    legend.outside= F,
+    legend.title.size = 1.1,
+    legend.text.size = 0.9,
+    frame = F,
     asp           = 0,
-    inner.margins = c(0.05, 0.05, 0.05, 0.25)
+    # inner.margins = c(0.04, 0.04, 0.04, 0.25)
+    title.position =   c( " center" , " top")
   ) +
   tm_scale_bar(position = c("left","bottom"))
 
 # 1) display in your R session with extra width/height
-print(map_nkhotakota, width = 12, height = 8)
+print(map_nkhotakota, width = 10, height = 7)
 
 # 2) or save out to file with custom dimensions
 tmap_save(
   map_nkhotakota,
   filename = "Nkhotakota_Map.png",
-  width    = 12, #inches
-  height   = 8,
+  width    = 7, #inches
+  height   = 5,
   units    = "in",
-  dpi      = 300
+  dpi      = 600
 )
+
 
 ```
 
