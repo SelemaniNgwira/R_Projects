@@ -1,0 +1,128 @@
+---
+title: "PPT_study_dataset_20250601_draft1-cleanning"
+author: "Ming-Lun Tsai( Jordan)"
+date: "2025-08-14"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+## 1. Convert Factor Columns to Character
+
+When data is imported, character columns may be automatically converted to factors.
+Since factors can interfere with string manipulation, we convert them back to characters before further processing.
+
+```         
+data[] <- lapply(data, function(col) {
+  if (is.factor(col)) {
+    col <- as.character(col)
+  }
+  return(col)
+})
+```
+
+## 2. Standardize Character Columns
+
+After ensuring that factor columns are converted to characters, we process all character columns to enforce a consistent format.
+Specifically, we convert all text to lowercase and replace hyphens (`-`) with underscores (`_`).
+
+```         
+data[] <- lapply(data, function(col) {
+  if (is.character(col)) {
+    col <- tolower(col)
+    col <- gsub("-", "_", col)
+  }
+  return(col)
+})
+```
+
+## 3. Clean Character Columns
+
+We first convert empty strings in character columns to NA to ensure proper missing value representation.
+
+```         
+data[] <- lapply(data, function(col) {
+  if (is.character(col)) {
+    col[col == ""] <- NA
+  }
+  return(col)
+})
+```
+
+## 4. Standardize Character Format
+
+Next, we trim leading/trailing white spaces and convert all character values to lowercase.
+
+```         
+data[] <- lapply(data, function(col) {
+  if (is.character(col)) {
+    col <- trimws(col)
+    col <- tolower(col)
+  }
+  return(col)
+})
+```
+
+## 5.Convert Multi-select Columns to Numeric
+
+Multi-select variables are stored as character but should be treated numerically.
+We identify those columns using a regular expression and convert them to numeric.
+
+```         
+multi_select_cols <- grep("where_healthsur_|receive_via_|motivate_healthsur_|stop_healthsur_", names(data), value = TRUE)
+
+data[multi_select_cols] <- lapply(data[multi_select_cols], function(col) {
+  as.numeric(col)
+})
+```
+
+## 6. Top 20 Variables with the Highest Missing Data Percentage
+
+To identify variables with significant missing data, we computed the percentage of missing values for each column in the dataset.
+Instead of visualizing all variables—which would make the chart too crowded—we focused on the top 20 variables with the highest proportion of missing values.
+
+This approach allows us to quickly identify which parts of the data may require further cleaning, imputation, or exclusion from analysis.
+
+```         
+miss_df <- miss_var_summary(data)
+
+top_miss <- head(miss_df[order(-miss_df$pct_miss), ], 20)
+
+ggplot(top_miss, aes(x = reorder(variable, pct_miss), y = pct_miss)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Top 20 Variables with Highest Missing Percentage",
+       x = "Variable",
+       y = "Missing Percentage") +
+  theme_minimal()
+```
+
+## 7. PCA on Motivation for Health Surveillance
+
+We conducted a Principal Component Analysis (PCA) on a subset of variables related to motivations for participating in health surveillance.
+Specifically, we selected variables whose names begin with motivate_healthsur\_.
+
+To ensure meaningful results, we first excluded variables that had all missing values or showed no variation (i.e., constant values).
+We then removed rows with any missing values and standardized the data (centering and scaling) before running the PCA.
+
+This approach helps reduce the dimensionality of the data while preserving as much variation as possible.
+The scree plot below shows the proportion of variance explained by each principal component, and the summary output provides details about the component loadings.
+
+```         
+pca_vars <- grep("^motivate_healthsur_", names(data), value = TRUE)
+pca_data_raw <- data[pca_vars]
+
+pca_data <- pca_data_raw[, sapply(pca_data_raw, function(x) {
+  !all(is.na(x)) && length(unique(x[!is.na(x)])) > 1
+})]
+
+ncol(pca_data)
+
+pca_data <- na.omit(pca_data)
+
+pca_result <- prcomp(pca_data, center = TRUE, scale. = TRUE)
+
+plot(pca_result, type = "l", main = "Scree Plot of PCA")
+summary(pca_result)
+```

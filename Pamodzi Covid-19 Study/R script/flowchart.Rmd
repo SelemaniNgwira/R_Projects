@@ -3,3 +3,79 @@ title: "flowchart"
 output: html_document
 ---
 
+
+
+
+```{r}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(DiagrammeR, dplyr, ggplot2, DiagrammeRsvg, rsvg, here)
+```
+
+
+
+```{r}
+
+# Define the flowchart
+graph <- grViz("
+digraph flowchart {
+
+  graph [layout = dot, rankdir = TB]
+  node [shape = box, style = filled, color = lightgrey, fontname = Helvetica]
+  edge [fontname = Helvetica]
+
+  # Inclusion/Exclusion (Separate group)
+  subgraph cluster_inclusion {
+    label = 'Inclusion Criteria'
+    style = dashed
+    color = grey
+    B1 [label = 'Inclusion:\\nHW, CBO, >18 years', shape = diamond, color = lightblue]
+    B2 [label = 'Experience:\\nChatbot & COVID-19 Response', shape = diamond, color = lightblue]
+  }
+
+  # Preparation Activities
+  subgraph cluster_preparation {
+    label = 'Preparation Activities'
+    style = dashed
+    color = lightgrey
+    A1 [label = 'Participant Invitation\\n(20 from MoH, 20 from CBO)\\nStratified by Health Zone, Districts, CBO']
+    A2 [label = 'Pre-Survey\\n(Participants complete TAM pre-survey)']
+  }
+
+  # Workshop Activities
+  subgraph cluster_workshop {
+    label = 'Workshop Activities'
+    style = dashed
+    color = darkgrey
+    A3 [label = 'National Work']
+    A4 [label = 'Day 1']
+    A5 [label = 'Day 2 (Half Day)']
+    A6 [label = 'Discuss the future Role of Chatbot']
+
+    C1 [label = 'Morning:\\n- Retrospective & Pre-survey Presentation\\n- MARS Toolkit Presentation']
+    C2 [label = 'Afternoon:\\n- MARS Tool Practice\\n- Group Discussion\\n- Presentations']
+    C3 [label = 'TAM Post-Survey']
+  }
+
+  # Connections
+  B1 -> B2
+  B2 -> A1
+  A1 -> A2
+  A2 -> A3
+  A3 -> A4
+  A4 -> C1
+  A4 -> C2
+  A3 -> A5
+  A5 -> C3
+  A5 -> A6
+}
+")
+
+# Convert to SVG
+svg_graph <- export_svg(graph)
+
+# Save as PNG with 300 DPI
+rsvg_png(charToRaw(svg_graph),  file ="workshop_flowchart.png", width = 6400, height = 4500)
+
+
+```
+

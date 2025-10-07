@@ -53,11 +53,6 @@ lakes <- st_read(
 ## Changing Lon and Atti col into geometry
 ```{r pressure, echo=FALSE}
 
-# changing the coords system of lon and lat col
-health_facility_sf<- health_facility_coord%>%
-     sf::st_as_sf(coords = c("longitude", 
-                             "latitude"), crs = 4326) 
-
 
 study_site <- merge( Malawi_shapefile, study_site, by = "district", all.x = TRUE)
 
@@ -117,5 +112,53 @@ tmap_save(
   dpi = 300
 )
 
+```
+
+
+
+```{r}
+
+study_site<-import(
+  here("data/Study site.xlsx"))
+
+
+study_site <- merge( Malawi_shapefile, study_site, by = "district", all.x = TRUE)
+
+# Set tmap to plot mode (not view mode)
+tmap_mode("plot")
+
+# Create the map object
+study_map <- tm_shape(Malawi_shapefile) +
+  tm_borders(col = "black", lwd = 1) +
+
+  tm_shape(lakes) +
+  tm_polygons(col = "lightblue", border.col = "lightblue") +
+
+  tm_shape(study_site) +
+  tm_polygons(
+    col = "study status",
+    palette = c("Study site" = "white", "Not study site" = "lightgreen"),
+    title = "Study Status",
+    border.col = "black",
+    lwd = 0.8
+  ) +
+
+  tm_text("district", 
+          size = 0.6, 
+          col = "black", 
+          fontface = "bold", 
+          shadow = TRUE) 
+
+ 
+
+# Save as high-resolution image (e.g., PNG at 300 dpi)
+tmap_save(
+  study_map,
+  filename = "Malawi_Study_Sites_FS_Map.png",
+  width = 10,
+  height = 8,
+  units = "in",
+  dpi = 300
+)
 ```
 

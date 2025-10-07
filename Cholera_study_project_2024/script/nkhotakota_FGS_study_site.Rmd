@@ -96,6 +96,8 @@ tm_shape(nkhotakota_ta) +
 
 ```
 
+
+
 ```{r}
 
 

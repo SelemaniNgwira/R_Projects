@@ -1,0 +1,75 @@
+---
+title: "health facility Map"
+output: html_document
+---
+
+```{r}
+
+
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+if(!require(pacman)) install.packages("pacman")
+
+p_load(
+  tidyverse,
+  here,
+  summarytools,
+  janitor,
+  sf, 
+  tmap,
+  OpenStreetMap,
+  flextable,
+  rio, 
+  gtsummary, 
+  epikit
+)
+```
+
+
+```{r}
+# health facilit
+
+hf_map<-import(here(
+  "data",
+  "MHFR_Facilities.xlsx"
+)) |> 
+  clean_names() |> 
+  filter(status=="Functional") |> 
+  select(
+    common_name, 
+    latitude,
+    longitude
+     ) |> 
+   drop_na() %>% 
+  sf::st_as_sf(coords = c("longitude",  "latitude"), crs = 4326) 
+
+
+```
+
+
+```{r}
+
+tmap_mode("view")
+
+
+tm_shape(hf_map) + 
+  tm_dots(
+    col = "common_name", 
+    size = 0.1, 
+    palette = "Set1", 
+    title = "Health Facility",
+    id = "common_name"
+  ) +
+  tm_basemap(server = "OpenStreetMap") +
+  tm_layout(
+    title = "Health Facilities in Malawi",
+    title.position = c("left", "top"),
+    legend.outside = TRUE
+  )
+
+
+
+```
+

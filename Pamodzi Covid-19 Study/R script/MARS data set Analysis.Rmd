@@ -122,7 +122,8 @@ covid_19_whats_app_chatbot_provide_retain_all_necessary_preferences_features=rec
 
 
 # replacing NA with 0
-engag_score_2[is.na(engag_score_2)]<-0
+engag_score_2 <- engag_score_2 %>%
+  mutate(across(where(is.numeric), ~replace(., is.na(.), 0)))
 
 # Calculating the total score of engagement. 
 
@@ -906,6 +907,7 @@ tapply(
    Mars_data_long$affiliations,
    sd, na.rm=T )
  
+clean_names(Mars_data_long)
 
 ```
 
@@ -914,7 +916,7 @@ tapply(
 ```{r}
 
 #Creating the boxplot with mean and median lines
-Mars_data_long %>%
+plots_score<- Mars_data_long %>%
   ggplot(aes(x = Variable, y = Score, fill = Variable)) +
   geom_boxplot(alpha = 0.6) + # Boxplots with variable-specific colors
   stat_summary(
@@ -941,7 +943,7 @@ Mars_data_long %>%
     width = 0.75
   ) + # Median as solid blue lines
   scale_fill_brewer(palette = "Set3") + # Color palette for variable-specific colors
-   facet_wrap(~affilications, scales = "free_y")+
+   # facet_wrap(~affilications, scales = "free_y")+
   theme_minimal() +
   labs(
     title = "Malawi COVID-19 Chatbot scores",
@@ -959,10 +961,21 @@ Mars_data_long %>%
   )
 
 
-# 
-# ggsave(plot = plots_score, "Plot_sscores.png", bg = "white", dpi = 300)
-# 
-# plots_score
+
+ggsave(plot = plots_score, "Plot_sscores.png", bg = "white", dpi = 190)
+
+
+ggsave(
+  filename = "Plot_sscores.png",
+  plot = plots_score,
+  width = 1200,
+  height = 1200,
+  units = "px",
+  dpi = 250,
+  bg = "white"
+)
+
+plots_score
 
 
 ```
