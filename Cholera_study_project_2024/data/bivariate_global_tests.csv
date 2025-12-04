@@ -1,0 +1,45 @@
+"variable","type","test","p_global","n"
+"belief_ocv_prevents_cholera","categorical","Chi-squared",1.74549137916416e-33,797
+"decision_about_getting_vaccinated_None_2","categorical","Fisher's exact (2x2)",0.449177157336345,222
+"decision_about_getting_vaccinated_cultural_traditional","categorical","Fisher's exact (2x2)",0.734159628936317,222
+"decision_about_getting_vaccinated_family_pressure","categorical","Fisher's exact (2x2)",0.481257277878811,222
+"decision_about_getting_vaccinated_other_decision","categorical","Fisher's exact (2x2)",0.48631203994382,222
+"decision_about_getting_vaccinated_religious","categorical","Fisher's exact (2x2)",0.0618702206618549,222
+"doses_ocv_received","categorical","Chi-squared (simulated p)",0.265173482651735,330
+"ethnicity","categorical","Chi-squared (simulated p)",0.0118988101189881,797
+"family_members_vaccinated","categorical","Fisher's exact (2x2)",1.32703499940975e-21,797
+"individual_has_ocv_card","categorical","Fisher's exact (2x2)",0.287380702570913,330
+"information_about_ocv_Internet","categorical","Fisher's exact (2x2)",0.123228013292305,797
+"information_about_ocv_communication_campaign","categorical","Fisher's exact (2x2)",2.98197810803473e-05,797
+"information_about_ocv_community_leaders","categorical","Fisher's exact (2x2)",0.000650626921355804,797
+"information_about_ocv_friends_family","categorical","Fisher's exact (2x2)",0.128624386691793,797
+"information_about_ocv_government","categorical","Fisher's exact (2x2)",0.178757416502958,797
+"information_about_ocv_healthcare_providers","categorical","Fisher's exact (2x2)",6.94707159359548e-12,797
+"information_about_ocv_print_media","categorical","Fisher's exact (2x2)",0.681019617537764,797
+"information_about_ocv_radio","categorical","Fisher's exact (2x2)",2.18081174821947e-05,797
+"information_about_ocv_religious_leaders","categorical","Fisher's exact (2x2)",0.275832132776299,797
+"information_about_ocv_social_media","categorical","Fisher's exact (2x2)",0.113825466586976,797
+"information_about_ocv_tv","categorical","Fisher's exact (2x2)",0.075652258327704,797
+"level_education","categorical","Chi-squared (simulated p)",0.0001999800019998,797
+"marital_status","categorical","Chi-squared (simulated p)",0.08999100089991,797
+"occupation","categorical","Chi-squared (simulated p)",0.0370962903709629,797
+"ocv_card_family","categorical","Fisher's exact (2x2)",1.01117457621564e-09,797
+"ocv_information_Internet","categorical","Fisher's exact (2x2)",0.108614066749013,797
+"ocv_information_community_leaders","categorical","Fisher's exact (2x2)",0.609094485039103,797
+"ocv_information_friends_family","categorical","Fisher's exact (2x2)",0.639955634145862,797
+"ocv_information_government","categorical","Fisher's exact (2x2)",0.343209917600761,797
+"ocv_information_healthcare_providers","categorical","Fisher's exact (2x2)",0.00607155506271976,797
+"ocv_information_print_media","categorical","Fisher's exact (2x2)",0.00972085583981556,797
+"ocv_information_radio","categorical","Fisher's exact (2x2)",0.618249088455956,797
+"ocv_information_religious_leaders","categorical","Fisher's exact (2x2)",0.758576533923107,797
+"ocv_information_social_media","categorical","Fisher's exact (2x2)",0.746358795001661,797
+"ocv_information_tv","categorical","Fisher's exact (2x2)",0.062177930487814,797
+"perceived_ocv_accessibility","categorical","Chi-squared",3.93951528328515e-11,797
+"perceived_ocv_safety","categorical","Chi-squared",2.80336174368273e-08,797
+"recommend_ocv_to_family","categorical","Chi-squared (simulated p)",0.0153984601539846,797
+"religion","categorical","Chi-squared",0.00524003135192614,797
+"sex","categorical","Fisher's exact (2x2)",0.925278084781429,797
+"think_family_member_get_vaccinated","categorical","Chi-squared (simulated p)",0.0130986901309869,797
+"think_most_people_get_vaccinated","categorical","Chi-squared (simulated p)",0.0194980501949805,797
+"will_to_get_vaccinated","categorical","Chi-squared",0.181855648475754,797
+"age","continuous","t-test (no vs yes)",NA,797

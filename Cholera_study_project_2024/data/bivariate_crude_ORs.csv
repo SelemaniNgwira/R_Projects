@@ -1,0 +1,83 @@
+variable,level,COR,95 % CI,p -  Value
+age,(per 1-unit increase),1.00,1 - 1.01,0.617
+sex,male(female),1.03,0.72 - 1.51,0.858
+belief_ocv_prevents_cholera,Don't know(No),0.27,0.12 - 0.57,0.001
+belief_ocv_prevents_cholera,Yes(No),5.28,3.1 - 9.01,0
+belief_ocv_prevents_cholera,not_sure_ocv(No),1.17,0.62 - 2.21,0.634
+decision_about_getting_vaccinated_None_2,Yes(No),0.62,0.17 - 2.94,0.5
+decision_about_getting_vaccinated_cultural_traditional,Yes(No),0.84,0.43 - 1.65,0.618
+decision_about_getting_vaccinated_family_pressure,Yes(No),0.58,0.18 - 2.19,0.373
+decision_about_getting_vaccinated_other_decision,Yes(No),0.74,0.32 - 1.88,0.506
+decision_about_getting_vaccinated_religious,Yes(No),1.97,1 - 4.03,0.054
+doses_ocv_received,2 doses(1 dose),1.12,0.46 - 2.92,0.801
+doses_ocv_received,Don't know(1 dose),0.38,0.11 - 1.78,0.161
+ethnicity,lomwe(chewa),0.47,0.27 - 0.81,0.006
+ethnicity,ngonde(chewa),1784921.99,#VALUE!,0.984
+ethnicity,ngoni(chewa),0.85,0.52 - 1.42,0.522
+ethnicity,nyanja(chewa),1.14,0.35 - 5.1,0.847
+ethnicity,other_enthni(chewa),1.09,0.26 - 7.37,0.92
+ethnicity,sena(chewa),1784921.99,#VALUE!,0.986
+ethnicity,tonga(chewa),3.41,0.98 - 21.53,0.101
+ethnicity,tumbuka(chewa),1.40,0.35 - 9.26,0.674
+ethnicity,yao(chewa),0.57,0.39 - 0.84,0.005
+family_members_vaccinated,yes(no),6.03,4.04 - 9.26,0
+individual_has_ocv_card,Yes(No),1.75,0.75 - 4.44,0.209
+information_about_ocv_Internet,Yes(No),2174278.98,#VALUE!,0.976
+information_about_ocv_communication_campaign,Yes(No),2.95,1.75 - 5.3,0
+information_about_ocv_community_leaders,Yes(No),2.29,1.43 - 3.85,0.001
+information_about_ocv_friends_family,Yes(No),1.63,0.92 - 3.1,0.113
+information_about_ocv_government,Yes(No),3.03,0.85 - 19.27,0.142
+information_about_ocv_healthcare_providers,Yes(No),3.12,2.26 - 4.33,0
+information_about_ocv_print_media,Yes(No),2.24,0.38 - 42.5,0.456
+information_about_ocv_radio,Yes(No),2.18,1.52 - 3.16,0
+information_about_ocv_religious_leaders,Yes(No),1.41,0.81 - 2.59,0.24
+information_about_ocv_social_media,Yes(No),1.97,0.92 - 4.9,0.107
+information_about_ocv_tv,Yes(No),3.06,1.06 - 12.97,0.07
+level_education,primary(none),1.58,1.02 - 2.42,0.039
+level_education,secondary(none),3.37,1.93 - 5.98,0
+level_education,tertiary(none),3.18,0.98 - 14.33,0.081
+marital_status,divorced(single),1.04,0.5 - 2.16,0.918
+marital_status,married(single),1.70,0.98 - 2.87,0.051
+marital_status,separated(single),0.89,0.37 - 2.24,0.805
+marital_status,widow(single),1.42,0.66 - 3.13,0.377
+marital_status,widower(single),0.78,0.26 - 2.39,0.653
+occupation,fisherman(farmer),0.29,0.03 - 2.48,0.225
+occupation,fishsellar(farmer),0.59,0.06 - 12.75,0.666
+occupation,housewife(farmer),0.55,0.35 - 0.86,0.008
+occupation,other_business(farmer),0.82,0.55 - 1.23,0.328
+occupation,other_occupation(farmer),0.54,0.32 - 0.94,0.025
+occupation,professionalworker(farmer),1.57,0.51 - 6.86,0.483
+occupation,retired(farmer),0.24,0.06 - 0.91,0.034
+occupation,student(farmer),0.49,0.12 - 2.43,0.336
+ocv_card_family,yes(no),4.91,2.82 - 9.3,0
+ocv_information_Internet,Yes(No),2.79,0.96 - 11.89,0.098
+ocv_information_community_leaders,Yes(No),0.91,0.65 - 1.27,0.568
+ocv_information_friends_family,Yes(No),0.84,0.47 - 1.56,0.57
+ocv_information_government,Yes(No),1.63,0.74 - 4.08,0.256
+ocv_information_healthcare_providers,Yes(No),1.57,1.14 - 2.17,0.005
+ocv_information_print_media,Yes(No),5994138.17,#VALUE!,0.979
+ocv_information_radio,Yes(No),1.10,0.8 - 1.53,0.56
+ocv_information_religious_leaders,Yes(No),1.09,0.73 - 1.66,0.665
+ocv_information_social_media,Yes(No),0.92,0.61 - 1.41,0.703
+ocv_information_tv,Yes(No),2.15,1.01 - 5.32,0.068
+perceived_ocv_accessibility,Don't know(Not accessible),0.54,0.25 - 1.14,0.108
+perceived_ocv_accessibility,Easily accessible(Not accessible),2.69,1.41 - 5.05,0.002
+perceived_ocv_accessibility,Not easily accessible(Not accessible),1.35,0.67 - 2.65,0.393
+perceived_ocv_safety,Don't know(Not safe at all),0.65,0.26 - 1.53,0.326
+perceived_ocv_safety,Moderately safe(Not safe at all),0.90,0.28 - 2.91,0.863
+perceived_ocv_safety,Slightly safe(Not safe at all),1.56,0.5 - 5,0.442
+perceived_ocv_safety,Very safe(Not safe at all),2.24,0.96 - 4.99,0.052
+recommend_ocv_to_family,no_ocv(do_not_know_ocv),4.00,0.85 - 22.7,0.09
+recommend_ocv_to_family,not_sure_ocv(do_not_know_ocv),3.00,0.64 - 16.98,0.178
+recommend_ocv_to_family,yes_ocv(do_not_know_ocv),5.71,1.49 - 27.25,0.014
+religion,muslim(Christianity),0.58,0.4 - 0.83,0.003
+religion,others_regligion(Christianity),0.53,0.23 - 1.28,0.142
+think_family_member_get_vaccinated,no_ocv(do_not_know_ocv),2.40,0.58 - 10.54,0.231
+think_family_member_get_vaccinated,not_sure_ocv(do_not_know_ocv),1.91,0.53 - 7.22,0.322
+think_family_member_get_vaccinated,yes_ocv(do_not_know_ocv),3.55,1.06 - 12.46,0.038
+think_most_people_get_vaccinated,no_ocv(do_not_know_ocv),2.50,0.72 - 9.15,0.154
+think_most_people_get_vaccinated,not_sure_ocv(do_not_know_ocv),2.70,0.97 - 7.69,0.057
+think_most_people_get_vaccinated,yes_ocv(do_not_know_ocv),3.67,1.43 - 9.77,0.007
+will_to_get_vaccinated,not_sure_to_get(no_will),0.98,0.36 - 2.69,0.969
+will_to_get_vaccinated,yes_but_wait_later(no_will),1.44,0.51 - 4.2,0.49
+will_to_get_vaccinated,yes_would_get_it(no_will),1.77,0.85 - 3.56,0.116
